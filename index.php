@@ -9,14 +9,7 @@ if ($mes_actual == 12) {
     $imagen_temporada = "hero-verano.jpg";
 }
 
-// Datos de autos (3 destacados)
-$autos = [
-    ["marca" => "BMW", "modelo" => "Serie 3", "precio" => "549,000", "año" => 2021, "km" => "35,000 km", "img" => "https://images.unsplash.com/photo-1555215695-3004980ad54e?q=80&w=400"],
-    ["marca" => "Audi", "modelo" => "Q5", "precio" => "720,000", "año" => 2022, "km" => "12,000 km", "img" => "https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?q=80&w=400"],
-    ["marca" => "Mazda", "modelo" => "CX-5", "precio" => "415,000", "año" => 2019, "km" => "58,000 km", "img" => "https://images.unsplash.com/photo-1532581133564-9ca19d086050?q=80&w=400"],
-];
-
-// Datos de Reseñas
+// Datos de Reseñas (Por ahora se mantienen estáticos hasta crear su propia tabla/servicio)
 $reseñas = [
     ["nombre" => "Pablo Ojeda", "fecha" => "02 enero 2025", "comentario" => "La atención es amable y eficiente. Sin duda volvería a CARPRIX.", "avatar" => "https://i.pravatar.cc/150?u=pablo"],
     ["nombre" => "Karla Moreno", "fecha" => "13 febrero 2023", "comentario" => "Lugar ideal para comprar mi primer auto. Mil opciones y todo transparente.", "avatar" => "https://i.pravatar.cc/150?u=karla"],
@@ -30,6 +23,10 @@ $reseñas = [
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CARPRIX | Confianza que te mueve</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
+    
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
@@ -69,6 +66,9 @@ $reseñas = [
                         <option value="">Marca</option>
                         <option value="bmw">BMW</option>
                         <option value="audi">Audi</option>
+                        <option value="mg">MG</option>
+                        <option value="nissan">Nissan</option>
+                        <option value="volkswagen">Volkswagen</option>
                     </select>
                     <input type="number" placeholder="Presupuesto máx.">
                     <button type="submit" class="btn-search">BUSCAR</button>
@@ -79,21 +79,11 @@ $reseñas = [
 
     <section class="container section-padding">
         <h2 class="section-title">Autos destacados</h2>
-        <div class="car-grid">
-            <?php foreach($autos as $auto): ?>
-            <div class="car-card">
-                <div class="car-img"><img src="<?php echo $auto['img']; ?>" alt="Auto"><span class="year-badge"><?php echo $auto['año']; ?></span></div>
-                <div class="car-info">
-                    <h3><?php echo $auto['marca'] . " " . $auto['modelo']; ?></h3>
-                    <p class="km"><?php echo $auto['km']; ?></p>
-                    <p class="price">$<?php echo $auto['precio']; ?></p>
-                    <a href="#" class="btn-details">Ver detalles</a>
-                </div>
-            </div>
-            <?php endforeach; ?>
+        <div class="car-grid" id="car-grid">
+            <p style="text-align: center; grid-column: 1 / -1; color: var(--gray-text);">Cargando inventario...</p>
         </div>
         <div class="view-all-container">
-            <a href="#" class="btn-view-all">Ver catálogo completo <i class="fas fa-arrow-right"></i></a>
+            <a href="catalogo.php" class="btn-view-all">Ver catálogo completo <i class="fas fa-arrow-right"></i></a>
         </div>
     </section>
 
