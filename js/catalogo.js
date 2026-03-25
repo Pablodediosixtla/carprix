@@ -1,4 +1,15 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // ---- INICIO FIX MENÚ MÓVIL ----
+    const mobileMenu = document.getElementById('mobile-menu');
+    const navMenu = document.getElementById('nav-menu');
+    
+    if (mobileMenu && navMenu) {
+        mobileMenu.addEventListener('click', () => {
+            navMenu.classList.toggle('active');
+        });
+    }
+    // ---- FIN FIX MENÚ MÓVIL ----
+
     // ESTADO GLOBAL
     let allAutos = [];
     let filteredAutos = [];

@@ -1,4 +1,15 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // ---- INICIO FIX MENÚ MÓVIL ----
+    const mobileMenu = document.getElementById('mobile-menu');
+    const navMenu = document.getElementById('nav-menu');
+    
+    if (mobileMenu && navMenu) {
+        mobileMenu.addEventListener('click', () => {
+            navMenu.classList.toggle('active');
+        });
+    }
+    // ---- FIN FIX MENÚ MÓVIL ----
+
     const loadingState = document.getElementById('loading-state');
     const detailContent = document.getElementById('detail-content');
     
