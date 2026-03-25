@@ -1,0 +1,67 @@
+/* LAYOUT CATÁLOGO */
+.catalogo-layout {
+    display: flex;
+    gap: 40px;
+    margin-top: 100px;
+    padding-bottom: 80px;
+    align-items: flex-start;
+}
+
+/* SIDEBAR FILTROS */
+.filtros-sidebar {
+    width: 280px;
+    background: var(--card-bg);
+    padding: 25px;
+    border-radius: 15px;
+    border: 1px solid #333;
+    flex-shrink: 0;
+    position: sticky;
+    top: 100px;
+}
+
+.filtro-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; border-bottom: 1px solid #444; padding-bottom: 10px; }
+.filtro-header h3 { font-weight: 900; font-size: 1.2rem; }
+.btn-clear { background: none; border: none; color: var(--green-accent); cursor: pointer; font-size: 14px; font-weight: 700; }
+.btn-clear:hover { text-decoration: underline; }
+
+.filtro-grupo { margin-bottom: 20px; }
+.filtro-grupo label { display: block; font-size: 14px; color: var(--gray-text); margin-bottom: 8px; font-weight: 500; }
+.filter-input { width: 100%; padding: 12px; background: #111; border: 1px solid #444; border-radius: 8px; color: white; font-family: 'Roboto', sans-serif; }
+.filter-input:focus { outline: 1px solid var(--green-accent); }
+
+/* BARRA SUPERIOR CATÁLOGO */
+.catalogo-main { flex-grow: 1; min-width: 0; }
+.catalogo-top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; background: var(--card-bg); padding: 15px 25px; border-radius: 10px; border: 1px solid #333; }
+.font-bold { font-weight: 900; }
+
+.view-toggles { display: flex; gap: 10px; }
+.btn-view { background: transparent; border: 1px solid #555; color: #888; width: 40px; height: 40px; border-radius: 8px; cursor: pointer; font-size: 18px; transition: 0.3s; }
+.btn-view:hover, .btn-view.active { background: var(--green-accent); color: #000; border-color: var(--green-accent); }
+
+/* VISTA GRID (MOSAICOS) - Por defecto */
+.layout-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px; }
+
+/* VISTA LISTA */
+.layout-list { display: flex; flex-direction: column; gap: 20px; }
+.layout-list .car-card { display: flex; flex-direction: row; align-items: center; }
+.layout-list .car-img { width: 300px; height: 200px; flex-shrink: 0; }
+.layout-list .car-info { flex-grow: 1; display: flex; flex-direction: column; justify-content: center; padding: 30px; }
+.layout-list .btn-details { width: 200px; margin-top: auto; }
+
+/* PAGINACIÓN */
+.pagination-container { display: flex; justify-content: center; gap: 10px; margin-top: 50px; }
+.btn-page { background: var(--card-bg); border: 1px solid #444; color: white; width: 40px; height: 40px; border-radius: 8px; cursor: pointer; font-weight: 700; transition: 0.3s; }
+.btn-page:hover, .btn-page.active { background: var(--green-accent); color: #000; border-color: var(--green-accent); }
+
+/* MÓVIL */
+.btn-mobile-filters { display: none; width: 100%; padding: 15px; background: var(--card-bg); color: white; border: 1px solid #444; border-radius: 10px; font-weight: 700; margin-bottom: 20px; cursor: pointer; }
+
+@media (max-width: 992px) {
+    .catalogo-layout { flex-direction: column; }
+    .btn-mobile-filters { display: block; }
+    .filtros-sidebar { width: 100%; position: static; display: none; } /* Oculto por defecto en móvil */
+    .filtros-sidebar.show { display: block; }
+    .layout-list .car-card { flex-direction: column; }
+    .layout-list .car-img { width: 100%; height: 250px; }
+    .layout-list .btn-details { width: 100%; margin-top: 15px; }
+}

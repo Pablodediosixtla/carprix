@@ -9,12 +9,12 @@ if ($mes_actual == 12) {
     $imagen_temporada = "hero-verano.jpg";
 }
 
-// Datos de Reseñas (Por ahora se mantienen estáticos hasta crear su propia tabla/servicio)
+// Datos de Reseñas (Por ahora se mantienen estáticos hasta crear su propio servicio)
 $reseñas = [
-    ["nombre" => "Pablo Ojeda", "fecha" => "02 enero 2025", "comentario" => "La atención es amable y eficiente. Sin duda volvería a CARPRIX.", "avatar" => "https://i.pravatar.cc/150?u=pablo"],
-    ["nombre" => "Karla Moreno", "fecha" => "13 febrero 2023", "comentario" => "Lugar ideal para comprar mi primer auto. Mil opciones y todo transparente.", "avatar" => "https://i.pravatar.cc/150?u=karla"],
-    ["nombre" => "Román Montero", "fecha" => "22 noviembre 2022", "comentario" => "Te atienden bien, me pagaron excelente por mi auto usado.", "avatar" => "https://i.pravatar.cc/150?u=roman"],
-    ["nombre" => "Diego Flores", "fecha" => "22 abril 2024", "comentario" => "Gestión impecable. El financiamiento fue mucho más rápido de lo esperado.", "avatar" => "https://i.pravatar.cc/150?u=diego"]
+    ["nombre" => "Pablo Ojeda", "fecha" => "02 enero 2026", "comentario" => "La atención es amable y eficiente. Sin duda volvería a CARPRIX.", "avatar" => "https://i.pravatar.cc/150?u=pablo"],
+    ["nombre" => "Karla Moreno", "fecha" => "13 febrero 2026", "comentario" => "Lugar ideal para comprar mi primer auto. Mil opciones y todo transparente.", "avatar" => "https://i.pravatar.cc/150?u=karla"],
+    ["nombre" => "Román Montero", "fecha" => "22 noviembre 2025", "comentario" => "Te atienden bien, me pagaron excelente por mi auto usado.", "avatar" => "https://i.pravatar.cc/150?u=roman"],
+    ["nombre" => "Diego Flores", "fecha" => "22 abril 2025", "comentario" => "Gestión impecable. El financiamiento fue mucho más rápido de lo esperado.", "avatar" => "https://i.pravatar.cc/150?u=diego"]
 ];
 ?>
 <!DOCTYPE html>
@@ -23,6 +23,7 @@ $reseñas = [
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CARPRIX | Confianza que te mueve</title>
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
@@ -33,10 +34,10 @@ $reseñas = [
 <body>
     <header class="main-header">
         <nav class="container nav-flex">
-            <div class="logo"><span class="white-text">CAR</span><span class="green-text">PRIX</span></div>
+            <div class="logo"><a href="index.php" style="text-decoration:none;"><span class="white-text">CAR</span><span class="green-text">PRIX</span></a></div>
             
             <ul class="nav-menu" id="nav-menu">
-                <li><a href="#">Compra</a></li>
+                <li><a href="views/catalogo.php">Compra</a></li>
                 <li><a href="#">Vende</a></li>
                 <li><a href="#">Nosotros</a></li>
                 <li><a href="#">Contacto</a></li>
@@ -61,16 +62,23 @@ $reseñas = [
             <p class="brand-accent">CONFIANZA QUE TE MUEVE</p>
             
             <div class="search-box">
-                <form action="#" class="search-form">
-                    <select name="marca">
+                <form action="views/catalogo.php" method="GET" class="search-form">
+                    <select name="marca" id="index-marca">
                         <option value="">Marca</option>
-                        <option value="bmw">BMW</option>
-                        <option value="audi">Audi</option>
-                        <option value="mg">MG</option>
-                        <option value="nissan">Nissan</option>
-                        <option value="volkswagen">Volkswagen</option>
+                        <option value="Audi">Audi</option>
+                        <option value="BMW">BMW</option>
+                        <option value="Chevrolet">Chevrolet</option>
+                        <option value="Ford">Ford</option>
+                        <option value="Honda">Honda</option>
+                        <option value="Hyundai">Hyundai</option>
+                        <option value="Kia">Kia</option>
+                        <option value="Mazda">Mazda</option>
+                        <option value="MG">MG</option>
+                        <option value="Nissan">Nissan</option>
+                        <option value="Toyota">Toyota</option>
+                        <option value="Volkswagen">Volkswagen</option>
                     </select>
-                    <input type="number" placeholder="Presupuesto máx.">
+                    <input type="number" name="presupuesto" placeholder="Presupuesto máx.">
                     <button type="submit" class="btn-search">BUSCAR</button>
                 </form>
             </div>
@@ -83,7 +91,7 @@ $reseñas = [
             <p style="text-align: center; grid-column: 1 / -1; color: var(--gray-text);">Cargando inventario...</p>
         </div>
         <div class="view-all-container">
-            <a href="catalogo.php" class="btn-view-all">Ver catálogo completo <i class="fas fa-arrow-right"></i></a>
+            <a href="views/catalogo.php" class="btn-view-all">Ver catálogo completo <i class="fas fa-arrow-right"></i></a>
         </div>
     </section>
 
