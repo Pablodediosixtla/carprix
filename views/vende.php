@@ -108,7 +108,7 @@
                 <ul>
                     <li><a href="#">¿Quiénes Somos?</a></li>
                     <li><a href="vende.php">Vende tu auto</a></li>
-                    <li><a href="#">Sucursales</a></li>
+                    <li><a href="ubicaciones.php">Sucursales</a></li>
                 </ul>
             </div>
             <div class="footer-col">
@@ -125,7 +125,7 @@
                 </ul>
             </div>
             <div class="footer-col footer-right">
-                <a href="../index.php" class="back-to-home">Regresa al inicio <i class="fas fa-chevron-up"></i></a>
+                <a href="#" class="back-to-home">Regresa al inicio <i class="fas fa-chevron-up"></i></a>
             </div>
         </div>
         <div class="footer-bottom container">
