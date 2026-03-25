@@ -36,49 +36,52 @@
                 <button id="btn-limpiar" class="btn-clear">Limpiar</button>
             </div>
             
-            <div class="filtro-grupo">
-                <label>Marca</label>
-                <select id="filter-marca" class="filter-input"><option value="">Todas las marcas</option></select>
+            <div class="filtro-section active">
+                <button class="btn-accordion">Búsqueda Principal <i class="fas fa-chevron-down"></i></button>
+                <div class="accordion-content">
+                    <div class="filtro-grupo">
+                        <label>Marca</label>
+                        <select id="filter-marca" class="filter-input"><option value="">Todas las marcas</option></select>
+                    </div>
+                    <div class="filtro-grupo">
+                        <label>Presupuesto Máximo ($)</label>
+                        <input type="number" id="filter-precio" class="filter-input" placeholder="Ej. 500000">
+                    </div>
+                    <div class="filtro-grupo">
+                        <label>Ubicación</label>
+                        <select id="filter-ubicacion" class="filter-input"><option value="">Cualquier ubicación</option></select>
+                    </div>
+                </div>
             </div>
 
-            <div class="filtro-grupo">
-                <label>Presupuesto Máximo ($)</label>
-                <input type="number" id="filter-precio" class="filter-input" placeholder="Ej. 500000">
-            </div>
-
-            <div class="filtro-grupo">
-                <label>Año</label>
-                <select id="filter-anio" class="filter-input"><option value="">Todos los años</option></select>
-            </div>
-
-            <div class="filtro-grupo">
-                <label>Ubicación</label>
-                <select id="filter-ubicacion" class="filter-input"><option value="">Cualquier ubicación</option></select>
-            </div>
-
-            <div class="filtro-grupo">
-                <label>Transmisión</label>
-                <select id="filter-transmision" class="filter-input"><option value="">Cualquier transmisión</option></select>
-            </div>
-
-            <div class="filtro-grupo">
-                <label>Combustible</label>
-                <select id="filter-combustible" class="filter-input"><option value="">Cualquier combustible</option></select>
-            </div>
-
-            <div class="filtro-grupo">
-                <label>Color</label>
-                <select id="filter-color" class="filter-input"><option value="">Cualquier color</option></select>
-            </div>
-
-            <div class="filtro-grupo">
-                <label>Tracción</label>
-                <select id="filter-traccion" class="filter-input"><option value="">Cualquier tracción</option></select>
-            </div>
-
-            <div class="filtro-grupo">
-                <label>Pasajeros</label>
-                <select id="filter-pasajeros" class="filter-input"><option value="">Cualquier capacidad</option></select>
+            <div class="filtro-section active">
+                <button class="btn-accordion">Especificaciones Técnicas <i class="fas fa-chevron-down"></i></button>
+                <div class="accordion-content">
+                    <div class="filtro-grupo">
+                        <label>Año</label>
+                        <select id="filter-anio" class="filter-input"><option value="">Todos los años</option></select>
+                    </div>
+                    <div class="filtro-grupo">
+                        <label>Transmisión</label>
+                        <select id="filter-transmision" class="filter-input"><option value="">Cualquier transmisión</option></select>
+                    </div>
+                    <div class="filtro-grupo">
+                        <label>Combustible</label>
+                        <select id="filter-combustible" class="filter-input"><option value="">Cualquier combustible</option></select>
+                    </div>
+                    <div class="filtro-grupo">
+                        <label>Color</label>
+                        <select id="filter-color" class="filter-input"><option value="">Cualquier color</option></select>
+                    </div>
+                    <div class="filtro-grupo">
+                        <label>Tracción</label>
+                        <select id="filter-traccion" class="filter-input"><option value="">Cualquier tracción</option></select>
+                    </div>
+                    <div class="filtro-grupo">
+                        <label>Pasajeros</label>
+                        <select id="filter-pasajeros" class="filter-input"><option value="">Cualquier capacidad</option></select>
+                    </div>
+                </div>
             </div>
         </aside>
 
@@ -92,7 +95,7 @@
             </div>
 
             <div id="catalogo-container" class="layout-grid">
-                <p style="text-align: center; width: 100%; grid-column: 1/-1;">Cargando inventario...</p>
+                <p style="text-align: center; width: 100%; grid-column: 1/-1; color: var(--gray-text);">Cargando inventario...</p>
             </div>
 
             <div class="pagination-container" id="pagination-controls"></div>

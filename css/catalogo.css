@@ -13,7 +13,16 @@
 .btn-clear { background: none; border: none; color: var(--green-accent); cursor: pointer; font-size: 14px; font-weight: 700; }
 .btn-clear:hover { text-decoration: underline; }
 
-.filtro-grupo { margin-bottom: 20px; }
+/* ESTILOS DE ACORDEONES PARA FILTROS */
+.filtro-section { border-bottom: 1px solid #333; margin-bottom: 15px; }
+.filtro-section:last-child { border-bottom: none; }
+.btn-accordion { width: 100%; background: transparent; border: none; color: var(--white); font-size: 15px; font-weight: 700; text-align: left; padding: 10px 0 15px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+.btn-accordion i { color: var(--green-accent); transition: transform 0.3s ease; }
+.accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.4s ease-in-out; }
+.filtro-section.active .accordion-content { max-height: 1000px; }
+.filtro-section.active .btn-accordion i { transform: rotate(180deg); }
+
+.accordion-content .filtro-grupo { padding: 0 5px 15px; margin-bottom: 0; }
 .filtro-grupo label { display: block; font-size: 14px; color: var(--gray-text); margin-bottom: 8px; font-weight: 500; }
 .filter-input { width: 100%; padding: 12px; background: #111; border: 1px solid #444; border-radius: 8px; color: white; font-family: 'Roboto', sans-serif; }
 .filter-input:focus { outline: 1px solid var(--green-accent); }
