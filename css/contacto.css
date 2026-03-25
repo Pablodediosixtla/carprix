@@ -1,0 +1,62 @@
+.contacto-main { margin-top: 120px; padding-bottom: 80px; }
+.contacto-header { text-align: center; margin-bottom: 60px; }
+.contacto-header h1 { font-size: 3rem; font-weight: 900; }
+.contacto-header p { color: var(--gray-text); font-size: 1.1rem; }
+
+.contacto-grid { display: grid; grid-template-columns: 1fr 1.5fr; gap: 50px; }
+
+/* TARJETAS IZQUIERDA */
+.contacto-info { display: flex; flex-direction: column; gap: 20px; }
+.info-item-card { 
+    background: var(--card-bg); 
+    padding: 25px; 
+    border-radius: 15px; 
+    border: 1px solid #333; 
+    display: flex; 
+    align-items: center; 
+    gap: 20px; 
+}
+.info-item-card i { 
+    font-size: 24px; 
+    color: var(--green-accent); 
+    background: #111; 
+    padding: 15px; 
+    border-radius: 12px; 
+}
+.info-item-card h4 { font-size: 14px; color: var(--gray-text); text-transform: uppercase; letter-spacing: 1px; }
+.link-info { color: white; text-decoration: none; font-size: 18px; font-weight: 700; transition: 0.3s; }
+.link-info:hover { color: var(--green-accent); }
+
+.map-placeholder { width: 100%; height: 200px; border-radius: 15px; overflow: hidden; border: 1px solid #333; margin-top: 10px; }
+.map-placeholder img { width: 100%; height: 100%; object-fit: cover; opacity: 0.6; }
+
+/* FORMULARIO DERECHA */
+.contacto-card { background: var(--card-bg); padding: 40px; border-radius: 20px; border: 1px solid #333; }
+.contacto-card h3 { margin-bottom: 30px; font-size: 1.5rem; font-weight: 800; }
+
+.form-group { margin-bottom: 25px; }
+.form-group label { display: block; color: var(--gray-text); font-size: 14px; margin-bottom: 10px; font-weight: 500; }
+
+.contacto-card input, .contacto-card select, .contacto-card textarea {
+    width: 100%; padding: 15px; background: #111; border: 1px solid #444; 
+    border-radius: 10px; color: white; font-size: 16px; font-family: 'Roboto', sans-serif;
+}
+.contacto-card input:focus, .contacto-card textarea:focus { outline: 1px solid var(--green-accent); }
+
+.input-select-dark { appearance: none; cursor: pointer; }
+
+.btn-submit-contacto {
+    width: 100%; padding: 18px; background: var(--green-accent); color: #000;
+    border: none; border-radius: 10px; font-weight: 900; font-size: 16px;
+    cursor: pointer; transition: 0.3s;
+}
+.btn-submit-contacto:hover { background: #2f963d; transform: scale(1.02); }
+
+.form-status { margin-top: 20px; text-align: center; font-weight: 700; }
+
+/* RESPONSIVO */
+@media (max-width: 992px) {
+    .contacto-grid { grid-template-columns: 1fr; }
+    .contacto-info { order: 2; }
+    .contacto-form-container { order: 1; }
+}
