@@ -22,7 +22,7 @@
                 <li><a href="catalogo.php">Compra</a></li>
                 <li><a href="vende.php" class="green-text">Vende</a></li>
                 <li><a href="#">Nosotros</a></li>
-                <li><a href="#">Contacto</a></li>
+                <li><a href="contacto.php">Contacto</a></li>
                 <li><a href="#" class="btn-outline">Iniciar Sesión</a></li>
             </ul>
 
