@@ -19,7 +19,7 @@
             <ul class="nav-menu" id="nav-menu">
                 <li><a href="catalogo.php">Compra</a></li>
                 <li><a href="vende.php">Vende</a></li>
-                <li><a href="#">Nosotros</a></li>
+                <li><a href="nosotros.php">Nosotros</a></li>
                 <li><a href="contacto.php">Contacto</a></li>
                 <li><a href="#" class="btn-outline">Iniciar Sesión</a></li>
             </ul>

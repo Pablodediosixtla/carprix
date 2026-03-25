@@ -31,7 +31,7 @@
         <section class="about-hero">
             <div class="container">
                 <div class="about-hero-content">
-                    <h1>Más que autos, <span class="green-text">soluciones de movilidad</span></h1>
+                    <h1>Más que autos, <span class="green-text">somes soluciones de movilidad</span></h1>
                     <p>Somos un equipo especializado en brindarte el financiamiento ideal para que estrenes el auto que siempre has querido.</p>
                 </div>
             </div>
