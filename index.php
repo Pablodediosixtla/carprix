@@ -36,7 +36,7 @@ $reseñas = [
             
             <ul class="nav-menu" id="nav-menu">
                 <li><a href="views/catalogo.php">Compra</a></li>
-                <li><a href="#">Vende</a></li>
+                <li><a href="views/vende.php">Vende</a></li>
                 <li><a href="#">Nosotros</a></li>
                 <li><a href="#">Contacto</a></li>
                 <li><a href="#" class="btn-outline">Iniciar Sesión</a></li>

@@ -18,7 +18,7 @@
             <div class="logo"><a href="../index.php" style="text-decoration:none;"><span class="white-text">CAR</span><span class="green-text">PRIX</span></a></div>
             <ul class="nav-menu" id="nav-menu">
                 <li><a href="catalogo.php">Compra</a></li>
-                <li><a href="#">Vende</a></li>
+                <li><a href="vende.php">Vende</a></li>
                 <li><a href="#">Nosotros</a></li>
                 <li><a href="#">Contacto</a></li>
                 <li><a href="#" class="btn-outline">Iniciar Sesión</a></li>
