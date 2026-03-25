@@ -118,7 +118,7 @@ $reseñas = [
         <div class="container footer-grid">
             <div class="footer-col">
                 <h4 class="footer-title title-green">Conoce más</h4>
-                <ul><li><a href="#">¿Quiénes Somos?</a></li><li><a href="#">Vende tu auto</a></li><li><a href="ubicaciones.php">Sucursales</a></li></ul>
+                <ul><li><a href="#">¿Quiénes Somos?</a></li><li><a href="#">Vende tu auto</a></li><li><a href="views/ubicaciones.php">Sucursales</a></li></ul>
             </div>
             <div class="footer-col">
                 <h4 class="footer-title title-white">Legales</h4>
