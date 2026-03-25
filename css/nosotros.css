@@ -1,0 +1,53 @@
+/* HERO ESPECÍFICO */
+.about-hero {
+    height: 50vh;
+    background: linear-gradient(rgba(26, 26, 26, 0.8), rgba(26, 26, 26, 0.8)), 
+                url('https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?q=80&w=1500');
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.about-hero-content h1 { font-size: 3.5rem; font-weight: 900; }
+.about-hero-content p { font-size: 1.2rem; color: var(--gray-text); max-width: 700px; margin: 20px auto 0; }
+
+/* GRID DE TEXTO E IMAGEN */
+.about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; }
+.title-accent { font-size: 2.5rem; font-weight: 900; margin-bottom: 25px; border-left: 5px solid var(--green-accent); padding-left: 20px; }
+.about-text p { font-size: 1.1rem; line-height: 1.8; color: var(--gray-text); margin-bottom: 30px; }
+
+.values-list { display: flex; flex-direction: column; gap: 15px; }
+.value-item { display: flex; align-items: center; gap: 15px; font-weight: 700; font-size: 1.1rem; }
+.value-item i { color: var(--green-accent); font-size: 1.4rem; }
+
+.about-image img { width: 100%; border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
+
+/* SECCIÓN FAQ (ACORDEÓN) */
+.faq-section { background-color: #111; padding: 100px 0; }
+.faq-accordion { max-width: 800px; margin: 0 auto; }
+
+.faq-item { background: var(--card-bg); border: 1px solid #333; border-radius: 12px; margin-bottom: 15px; overflow: hidden; transition: 0.3s; }
+.faq-item:hover { border-color: var(--green-accent); }
+
+.faq-question {
+    width: 100%; padding: 25px; background: none; border: none; color: white;
+    font-size: 1.1rem; font-weight: 700; text-align: left; cursor: pointer;
+    display: flex; justify-content: space-between; align-items: center;
+}
+.faq-question i { color: var(--green-accent); transition: transform 0.3s; }
+
+.faq-answer { max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out; background: #222; }
+.faq-answer p { padding: 25px; color: var(--gray-text); line-height: 1.6; font-size: 1rem; }
+
+/* Estado activo */
+.faq-item.active .faq-answer { max-height: 300px; }
+.faq-item.active .faq-question i { transform: rotate(45deg); color: #ff5252; }
+
+/* RESPONSIVO */
+@media (max-width: 992px) {
+    .about-grid { grid-template-columns: 1fr; gap: 40px; }
+    .about-hero-content h1 { font-size: 2.5rem; }
+}
