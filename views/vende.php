@@ -7,6 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
+    
     <link rel="stylesheet" href="../css/styles.css">
     <link rel="stylesheet" href="../css/vende.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -16,6 +17,7 @@
     <header class="main-header">
         <nav class="container nav-flex">
             <div class="logo"><a href="../index.php" style="text-decoration:none;"><span class="white-text">CAR</span><span class="green-text">PRIX</span></a></div>
+            
             <ul class="nav-menu" id="nav-menu">
                 <li><a href="catalogo.php">Compra</a></li>
                 <li><a href="vende.php" class="green-text">Vende</a></li>
@@ -23,14 +25,17 @@
                 <li><a href="#">Contacto</a></li>
                 <li><a href="#" class="btn-outline">Iniciar Sesión</a></li>
             </ul>
-            <div class="menu-toggle" id="mobile-menu"><i class="fas fa-bars"></i></div>
+
+            <div class="menu-toggle" id="mobile-menu">
+                <i class="fas fa-bars"></i>
+            </div>
         </nav>
     </header>
 
     <main class="container vende-main">
         <section class="vende-header">
-            <h1>Vende tu auto en <span class="green-text">minutos</span></h1>
-            <p>Déjanos tus datos y un asesor te contactará con una oferta competitiva.</p>
+            <h1>Vender tu auto <span class="green-text">nunca fue tan fácil</span></h1>
+            <p>Obtén una oferta justa y segura por tu vehículo hoy mismo.</p>
         </section>
 
         <div class="vende-container">
@@ -82,11 +87,11 @@
 
             <aside class="vende-info">
                 <div class="info-card">
-                    <h4>¿Por qué CARPRIX?</h4>
+                    <h4>La experiencia CARPRIX</h4>
                     <ul>
-                        <li><i class="fas fa-bolt green-text"></i> Oferta inmediata</li>
-                        <li><i class="fas fa-shield-alt green-text"></i> Pago seguro y directo</li>
-                        <li><i class="fas fa-file-contract green-text"></i> Nosotros hacemos los trámites</li>
+                        <li><i class="fas fa-bolt green-text"></i> Valuación rápida y profesional</li>
+                        <li><i class="fas fa-shield-alt green-text"></i> Transacción 100% segura</li>
+                        <li><i class="fas fa-file-contract green-text"></i> Sin trámites complicados</li>
                     </ul>
                 </div>
                 <div class="info-img">
@@ -97,8 +102,34 @@
     </main>
 
     <footer class="main-footer">
-        <div class="container footer-bottom">
-            <p>&copy; 2026 <span class="white-text">CAR</span><span class="green-text">PRIX</span>. Todos los derechos reservados.</p>
+        <div class="container footer-grid">
+            <div class="footer-col">
+                <h4 class="footer-title title-green">Conoce más</h4>
+                <ul>
+                    <li><a href="#">¿Quiénes Somos?</a></li>
+                    <li><a href="vende.php">Vende tu auto</a></li>
+                    <li><a href="#">Sucursales</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4 class="footer-title title-white">Legales</h4>
+                <ul>
+                    <li><a href="#">Aviso de privacidad</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4 class="footer-title title-grey">Ayuda</h4>
+                <ul>
+                    <li><a href="#">Contacto</a></li>
+                    <li><a href="#">Preguntas frecuentes</a></li>
+                </ul>
+            </div>
+            <div class="footer-col footer-right">
+                <a href="../index.php" class="back-to-home">Regresa al inicio <i class="fas fa-chevron-up"></i></a>
+            </div>
+        </div>
+        <div class="footer-bottom container">
+            <p>&copy; <?php echo date('Y'); ?> <span class="white-text">CAR</span><span class="green-text">PRIX</span>. Todos los derechos reservados.</p>
         </div>
     </footer>
 
