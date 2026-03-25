@@ -55,7 +55,7 @@
             </div>
 
             <div class="filtro-section active">
-                <button class="btn-accordion">Avanzada <i class="fas fa-chevron-down"></i></button>
+                <button class="btn-accordion">Avanzado <i class="fas fa-chevron-down"></i></button>
                 <div class="accordion-content">
                     <div class="filtro-grupo">
                         <label>Año</label>
