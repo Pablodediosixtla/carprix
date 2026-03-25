@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Efecto de scroll en header (igual al index)
+    // Efecto de scroll en header
     window.addEventListener('scroll', () => {
         const header = document.querySelector('.main-header');
         if (window.scrollY > 50) {
