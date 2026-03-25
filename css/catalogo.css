@@ -1,23 +1,12 @@
 /* LAYOUT CATÁLOGO */
-.catalogo-layout {
-    display: flex;
-    gap: 40px;
-    margin-top: 100px;
-    padding-bottom: 80px;
-    align-items: flex-start;
-}
+.catalogo-layout { display: flex; gap: 40px; margin-top: 100px; padding-bottom: 80px; align-items: flex-start; }
 
-/* SIDEBAR FILTROS */
-.filtros-sidebar {
-    width: 280px;
-    background: var(--card-bg);
-    padding: 25px;
-    border-radius: 15px;
-    border: 1px solid #333;
-    flex-shrink: 0;
-    position: sticky;
-    top: 100px;
-}
+/* SIDEBAR FILTROS (CON SCROLL INTERNO) */
+.filtros-sidebar { width: 280px; background: var(--card-bg); padding: 25px; border-radius: 15px; border: 1px solid #333; flex-shrink: 0; position: sticky; top: 100px; max-height: calc(100vh - 120px); overflow-y: auto; }
+.scroll-custom::-webkit-scrollbar { width: 6px; }
+.scroll-custom::-webkit-scrollbar-track { background: #1a1a1a; border-radius: 10px; }
+.scroll-custom::-webkit-scrollbar-thumb { background: #444; border-radius: 10px; }
+.scroll-custom::-webkit-scrollbar-thumb:hover { background: var(--green-accent); }
 
 .filtro-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; border-bottom: 1px solid #444; padding-bottom: 10px; }
 .filtro-header h3 { font-weight: 900; font-size: 1.2rem; }
@@ -38,10 +27,10 @@
 .btn-view { background: transparent; border: 1px solid #555; color: #888; width: 40px; height: 40px; border-radius: 8px; cursor: pointer; font-size: 18px; transition: 0.3s; }
 .btn-view:hover, .btn-view.active { background: var(--green-accent); color: #000; border-color: var(--green-accent); }
 
-/* VISTA GRID (MOSAICOS) - Por defecto */
+/* VISTA GRID (MOSAICOS) */
 .layout-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px; }
 
-/* VISTA LISTA */
+/* VISTA LISTA ESCRITORIO */
 .layout-list { display: flex; flex-direction: column; gap: 20px; }
 .layout-list .car-card { display: flex; flex-direction: row; align-items: center; }
 .layout-list .car-img { width: 300px; height: 200px; flex-shrink: 0; }
@@ -53,15 +42,26 @@
 .btn-page { background: var(--card-bg); border: 1px solid #444; color: white; width: 40px; height: 40px; border-radius: 8px; cursor: pointer; font-weight: 700; transition: 0.3s; }
 .btn-page:hover, .btn-page.active { background: var(--green-accent); color: #000; border-color: var(--green-accent); }
 
-/* MÓVIL */
+/* MÓVIL Y TABLET */
 .btn-mobile-filters { display: none; width: 100%; padding: 15px; background: var(--card-bg); color: white; border: 1px solid #444; border-radius: 10px; font-weight: 700; margin-bottom: 20px; cursor: pointer; }
 
 @media (max-width: 992px) {
-    .catalogo-layout { flex-direction: column; }
+    .catalogo-layout { flex-direction: column; margin-top: 80px; }
     .btn-mobile-filters { display: block; }
-    .filtros-sidebar { width: 100%; position: static; display: none; } /* Oculto por defecto en móvil */
+    .filtros-sidebar { width: 100%; position: static; display: none; max-height: none; } 
     .filtros-sidebar.show { display: block; }
-    .layout-list .car-card { flex-direction: column; }
-    .layout-list .car-img { width: 100%; height: 250px; }
-    .layout-list .btn-details { width: 100%; margin-top: 15px; }
+}
+
+/* LA MAGIA DE LA VISTA LISTA EN MÓVIL (IMAGEN PEQUEÑA A LA IZQUIERDA) */
+@media (max-width: 768px) {
+    .layout-list .car-card { flex-direction: row; align-items: stretch; padding: 0; }
+    .layout-list .car-img { width: 130px; height: auto; min-height: 120px; flex-shrink: 0; }
+    .layout-list .car-img img { height: 100%; border-radius: 15px 0 0 15px; } /* Solo curva la izquierda */
+    .layout-list .year-badge { font-size: 10px; padding: 3px 8px; bottom: 8px; left: 8px; }
+    
+    .layout-list .car-info { padding: 15px; flex-grow: 1; display: flex; flex-direction: column; justify-content: center; }
+    .layout-list .car-info h3 { font-size: 1.05rem; line-height: 1.2; margin-bottom: 5px; }
+    .layout-list .km { font-size: 0.8rem; }
+    .layout-list .price { font-size: 1.2rem; margin: 8px 0; }
+    .layout-list .btn-details { width: 100%; padding: 10px; font-size: 0.9rem; margin-top: 5px; }
 }

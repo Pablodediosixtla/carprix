@@ -9,7 +9,7 @@ if ($mes_actual == 12) {
     $imagen_temporada = "hero-verano.jpg";
 }
 
-// Datos de Reseñas (Por ahora se mantienen estáticos hasta crear su propio servicio)
+// Datos de Reseñas (Por ahora estáticos)
 $reseñas = [
     ["nombre" => "Pablo Ojeda", "fecha" => "02 enero 2026", "comentario" => "La atención es amable y eficiente. Sin duda volvería a CARPRIX.", "avatar" => "https://i.pravatar.cc/150?u=pablo"],
     ["nombre" => "Karla Moreno", "fecha" => "13 febrero 2026", "comentario" => "Lugar ideal para comprar mi primer auto. Mil opciones y todo transparente.", "avatar" => "https://i.pravatar.cc/150?u=karla"],
@@ -23,11 +23,9 @@ $reseñas = [
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CARPRIX | Confianza que te mueve</title>
-    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
-    
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
@@ -43,10 +41,7 @@ $reseñas = [
                 <li><a href="#">Contacto</a></li>
                 <li><a href="#" class="btn-outline">Iniciar Sesión</a></li>
             </ul>
-
-            <div class="menu-toggle" id="mobile-menu">
-                <i class="fas fa-bars"></i>
-            </div>
+            <div class="menu-toggle" id="mobile-menu"><i class="fas fa-bars"></i></div>
         </nav>
     </header>
 
@@ -123,24 +118,15 @@ $reseñas = [
         <div class="container footer-grid">
             <div class="footer-col">
                 <h4 class="footer-title title-green">Conoce más</h4>
-                <ul>
-                    <li><a href="#">¿Quiénes Somos?</a></li>
-                    <li><a href="#">Vende tu auto</a></li>
-                    <li><a href="#">Sucursales</a></li>
-                </ul>
+                <ul><li><a href="#">¿Quiénes Somos?</a></li><li><a href="#">Vende tu auto</a></li><li><a href="#">Sucursales</a></li></ul>
             </div>
             <div class="footer-col">
                 <h4 class="footer-title title-white">Legales</h4>
-                <ul>
-                    <li><a href="#">Aviso de privacidad</a></li>
-                </ul>
+                <ul><li><a href="#">Aviso de privacidad</a></li></ul>
             </div>
             <div class="footer-col">
                 <h4 class="footer-title title-grey">Ayuda</h4>
-                <ul>
-                    <li><a href="#">Contacto</a></li>
-                    <li><a href="#">Preguntas frecuentes</a></li>
-                </ul>
+                <ul><li><a href="#">Contacto</a></li><li><a href="#">Preguntas frecuentes</a></li></ul>
             </div>
             <div class="footer-col footer-right">
                 <a href="#" class="back-to-home">Regresa al inicio <i class="fas fa-chevron-up"></i></a>

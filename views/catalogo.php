@@ -17,7 +17,7 @@
         <nav class="container nav-flex">
             <div class="logo"><a href="../index.php" style="text-decoration:none;"><span class="white-text">CAR</span><span class="green-text">PRIX</span></a></div>
             <ul class="nav-menu" id="nav-menu">
-                <li><a href="../index.php">Compra</a></li>
+                <li><a href="catalogo.php">Compra</a></li>
                 <li><a href="#">Vende</a></li>
                 <li><a href="#">Nosotros</a></li>
                 <li><a href="#">Contacto</a></li>
@@ -30,7 +30,7 @@
     <main class="container catalogo-layout">
         <button class="btn-mobile-filters" id="btn-toggle-filters"><i class="fas fa-filter"></i> Mostrar Filtros</button>
 
-        <aside class="filtros-sidebar" id="filtros-sidebar">
+        <aside class="filtros-sidebar scroll-custom" id="filtros-sidebar">
             <div class="filtro-header">
                 <h3>Filtros</h3>
                 <button id="btn-limpiar" class="btn-clear">Limpiar</button>
@@ -38,21 +38,7 @@
             
             <div class="filtro-grupo">
                 <label>Marca</label>
-                <select id="filter-marca" class="filter-input">
-                    <option value="">Todas las marcas</option>
-                    <option value="Audi">Audi</option>
-                    <option value="BMW">BMW</option>
-                    <option value="Chevrolet">Chevrolet</option>
-                    <option value="Ford">Ford</option>
-                    <option value="Honda">Honda</option>
-                    <option value="Hyundai">Hyundai</option>
-                    <option value="Kia">Kia</option>
-                    <option value="Mazda">Mazda</option>
-                    <option value="MG">MG</option>
-                    <option value="Nissan">Nissan</option>
-                    <option value="Toyota">Toyota</option>
-                    <option value="Volkswagen">Volkswagen</option>
-                </select>
+                <select id="filter-marca" class="filter-input"><option value="">Todas las marcas</option></select>
             </div>
 
             <div class="filtro-grupo">
@@ -61,12 +47,38 @@
             </div>
 
             <div class="filtro-grupo">
+                <label>Año</label>
+                <select id="filter-anio" class="filter-input"><option value="">Todos los años</option></select>
+            </div>
+
+            <div class="filtro-grupo">
+                <label>Ubicación</label>
+                <select id="filter-ubicacion" class="filter-input"><option value="">Cualquier ubicación</option></select>
+            </div>
+
+            <div class="filtro-grupo">
                 <label>Transmisión</label>
-                <select id="filter-transmision" class="filter-input">
-                    <option value="">Cualquiera</option>
-                    <option value="Automático">Automático</option>
-                    <option value="Manual">Manual</option>
-                </select>
+                <select id="filter-transmision" class="filter-input"><option value="">Cualquier transmisión</option></select>
+            </div>
+
+            <div class="filtro-grupo">
+                <label>Combustible</label>
+                <select id="filter-combustible" class="filter-input"><option value="">Cualquier combustible</option></select>
+            </div>
+
+            <div class="filtro-grupo">
+                <label>Color</label>
+                <select id="filter-color" class="filter-input"><option value="">Cualquier color</option></select>
+            </div>
+
+            <div class="filtro-grupo">
+                <label>Tracción</label>
+                <select id="filter-traccion" class="filter-input"><option value="">Cualquier tracción</option></select>
+            </div>
+
+            <div class="filtro-grupo">
+                <label>Pasajeros</label>
+                <select id="filter-pasajeros" class="filter-input"><option value="">Cualquier capacidad</option></select>
             </div>
         </aside>
 
@@ -83,10 +95,19 @@
                 <p style="text-align: center; width: 100%; grid-column: 1/-1;">Cargando inventario...</p>
             </div>
 
-            <div class="pagination-container" id="pagination-controls">
-                </div>
+            <div class="pagination-container" id="pagination-controls"></div>
         </section>
     </main>
+
+    <footer class="main-footer">
+        <div class="container footer-grid">
+            <div class="footer-col"><h4 class="footer-title title-green">Conoce más</h4><ul><li><a href="#">¿Quiénes Somos?</a></li><li><a href="#">Vende tu auto</a></li></ul></div>
+            <div class="footer-col"><h4 class="footer-title title-white">Legales</h4><ul><li><a href="#">Aviso de privacidad</a></li></ul></div>
+            <div class="footer-col"><h4 class="footer-title title-grey">Ayuda</h4><ul><li><a href="#">Contacto</a></li></ul></div>
+            <div class="footer-col footer-right"><a href="../index.php" class="back-to-home">Regresa al inicio <i class="fas fa-chevron-up"></i></a></div>
+        </div>
+        <div class="footer-bottom container"><p>&copy; <?php echo date('Y'); ?> <span class="white-text">CAR</span><span class="green-text">PRIX</span>. Todos los derechos reservados.</p></div>
+    </footer>
 
     <script src="../js/catalogo.js"></script>
 </body>
