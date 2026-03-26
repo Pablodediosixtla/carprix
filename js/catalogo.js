@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const paginationContainer = document.getElementById('pagination-controls');
     const btnLimpiar = document.getElementById('btn-limpiar');
 
-    // FILTROS DOM (AGREGADO 'tipo')
+    // FILTROS DOM 
     const filterIds = ['marca', 'tipo', 'precio', 'anio', 'ubicacion', 'transmision', 'combustible', 'color', 'traccion', 'pasajeros'];
     const filters = {};
     filterIds.forEach(id => { filters[id] = document.getElementById(`filter-${id}`); });
@@ -137,7 +137,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         filteredAutos = allAutos.filter(auto => {
             let match = true;
-            // Evaluamos iterando sobre los filters, convirtiendo todo a String por seguridad
             for (let id of filterIds) {
                 if (id === 'precio') {
                     if (parseFloat(auto.precio) > precioMax) match = false;
@@ -171,12 +170,16 @@ document.addEventListener('DOMContentLoaded', () => {
         autosToShow.forEach(auto => {
             const priceFmt = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(auto.precio);
             const kmFmt = new Intl.NumberFormat('es-MX').format(auto.kilometraje) + ' km';
+            
+            // INYECCIÓN DE LA ETIQUETA "TIPO" SI EXISTE
+            const tipoBadgeHtml = auto.tipo ? `<span class="type-badge">${auto.tipo}</span>` : '';
 
             const card = `
                 <div class="car-card">
                     <div class="car-img">
                         <img src="${auto.img_principal}" alt="${auto.marca}">
                         <span class="year-badge">${auto.anio}</span>
+                        ${tipoBadgeHtml}
                     </div>
                     <div class="car-info">
                         <h3>${auto.marca} ${auto.modelo}</h3>
