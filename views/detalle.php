@@ -35,7 +35,18 @@
         <div class="detail-wrapper" id="detail-content" style="display: none;">
             <div class="detail-content-left">
                 <div class="gallery-container">
-                    <img id="main-view" src="" alt="Auto Principal">
+                    
+                    <div class="main-img-wrapper">
+                        <div id="status-overlay" class="status-overlay" style="display: none;">
+                            <span id="status-badge" class="status-badge"></span>
+                        </div>
+                        
+                        <img id="main-view" src="" alt="Auto Principal">
+                        
+                        <span id="badge-year" class="year-badge"></span>
+                        <span id="badge-tipo" class="type-badge" style="display:none;"></span>
+                    </div>
+
                     <div class="gallery-thumbs" id="gallery-thumbs">
                         </div>
                 </div>

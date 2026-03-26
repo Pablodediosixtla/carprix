@@ -61,12 +61,36 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('det-name').innerText = `${auto.marca} ${auto.modelo}`;
         document.getElementById('det-price').innerText = priceFmt;
         
+        // ---- CONTROL VISUAL DE ESTATUS EN LA IMAGEN Y BOTÓN ----
+        const btnApartar = document.getElementById('btn-apartar');
+        const statusOverlay = document.getElementById('status-overlay');
+        const statusBadge = document.getElementById('status-badge');
+
         if(auto.estatus !== 'Disponible') {
-            const btnApartar = document.getElementById('btn-apartar');
+            // Deshabilitar botón de compra
             btnApartar.innerText = auto.estatus.toUpperCase();
             btnApartar.disabled = true;
             btnApartar.style.background = '#555';
             btnApartar.style.cursor = 'not-allowed';
+
+            // Mostrar sello gigante sobre la imagen
+            if (auto.estatus === 'Vendido') {
+                statusBadge.innerText = 'Vendido';
+                statusBadge.className = 'status-badge';
+                statusOverlay.style.display = 'flex';
+            } else if (auto.estatus === 'Apartado') {
+                statusBadge.innerText = 'Apartado';
+                statusBadge.className = 'status-badge status-apartado';
+                statusOverlay.style.display = 'flex';
+            }
+        }
+
+        // ---- ETIQUETAS DE AÑO Y TIPO ----
+        document.getElementById('badge-year').innerText = auto.anio;
+        if (auto.tipo) {
+            const badgeTipo = document.getElementById('badge-tipo');
+            badgeTipo.innerText = auto.tipo;
+            badgeTipo.style.display = 'block';
         }
 
         // Llenar Galería
@@ -76,7 +100,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const thumbsContainer = document.getElementById('gallery-thumbs');
         thumbsContainer.innerHTML = `<img class="thumb-item active" src="${auto.img_principal}" alt="thumb">`;
 
-        // Llenar Especificaciones (Las 9 cajas, agregado TIPO y ajustado PASAJEROS)
+        // Llenar Especificaciones (Las 9 cajas)
         const specsGrid = document.getElementById('specs-grid');
         const specsData = [
             { label: "Tipo", val: auto.tipo || 'N/A', icon: "fa-car" },
