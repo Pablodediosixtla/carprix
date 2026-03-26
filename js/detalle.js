@@ -69,23 +69,24 @@ document.addEventListener('DOMContentLoaded', () => {
             btnApartar.style.cursor = 'not-allowed';
         }
 
-        // Llenar Galería (Por ahora repetimos la principal hasta tener la tabla imagenes_autos conectada)
+        // Llenar Galería
         const mainImg = document.getElementById('main-view');
         mainImg.src = auto.img_principal;
         
         const thumbsContainer = document.getElementById('gallery-thumbs');
         thumbsContainer.innerHTML = `<img class="thumb-item active" src="${auto.img_principal}" alt="thumb">`;
 
-        // Llenar Especificaciones (Las 8 cajas)
+        // Llenar Especificaciones (Las 9 cajas, agregado TIPO y ajustado PASAJEROS)
         const specsGrid = document.getElementById('specs-grid');
         const specsData = [
+            { label: "Tipo", val: auto.tipo || 'N/A', icon: "fa-car" },
             { label: "Año", val: auto.anio, icon: "fa-calendar-alt" },
             { label: "Kilometraje", val: kmFmt, icon: "fa-road" },
             { label: "Transmisión", val: auto.transmision, icon: "fa-cogs" },
             { label: "Ubicación", val: auto.ubicacion, icon: "fa-map-marker-alt" },
             { label: "Motor", val: auto.motor || 'N/A', icon: "fa-car-side" },
             { label: "Combustible", val: auto.combustible || 'N/A', icon: "fa-gas-pump" },
-            { label: "Pasajeros", val: auto.pasajeros ? `${auto.pasajeros} Adultos` : 'N/A', icon: "fa-users" },
+            { label: "Pasajeros", val: auto.pasajeros || 'N/A', icon: "fa-users" },
             { label: "Tracción", val: auto.traccion || 'N/A', icon: "fa-dharmachakra" }
         ];
 
@@ -103,9 +104,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Ocultar loader y mostrar contenido
         loadingState.style.display = 'none';
-        detailContent.style.display = 'grid'; // O el layout que usemos
+        detailContent.style.display = 'grid'; 
 
-        // Inicializar Cotizador ahora que tenemos el CAR_PRICE
+        // Inicializar Cotizador
         initCotizador();
     }
 

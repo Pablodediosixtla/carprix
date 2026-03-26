@@ -44,6 +44,10 @@
                         <select id="filter-marca" class="filter-input"><option value="">Todas las marcas</option></select>
                     </div>
                     <div class="filtro-grupo">
+                        <label>Tipo de Auto</label>
+                        <select id="filter-tipo" class="filter-input"><option value="">Cualquier tipo</option></select>
+                    </div>
+                    <div class="filtro-grupo">
                         <label>Presupuesto Máximo ($)</label>
                         <input type="number" id="filter-precio" class="filter-input" placeholder="Ej. 500000">
                     </div>

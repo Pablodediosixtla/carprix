@@ -1,6 +1,5 @@
 <?php
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
-// Dominio oficial agregado
 $allowed = ['http://localhost:3000', 'https://carprix.com.mx', 'https://www.carprix.com.mx'];
 
 if (in_array($origin, $allowed, true)) {
@@ -26,6 +25,7 @@ if (!isset($in['id'])) {
 $id = (int)$in['id'];
 $marca = trim($in['marca']);
 $modelo = trim($in['modelo']);
+$tipo = trim($in['tipo'] ?? ''); // NUEVO CAMPO
 $anio = (int)$in['anio'];
 $precio = (float)$in['precio'];
 $mensualidad = (float)$in['mensualidad'];
@@ -35,16 +35,17 @@ $transmision = trim($in['transmision']);
 $color = trim($in['color']);
 $motor = trim($in['motor']);
 $combustible = trim($in['combustible']);
-$pasajeros = (int)$in['pasajeros'];
+$pasajeros = trim($in['pasajeros'] ?? ''); // CAMBIO A TEXTO
 $traccion = trim($in['traccion']);
 $img_principal = trim($in['img_principal']);
 $estatus = trim($in['estatus']); 
 
 $con = conectar();
-$sql = "UPDATE autos SET marca=?, modelo=?, anio=?, precio=?, mensualidad=?, ubicacion=?, kilometraje=?, transmision=?, color=?, motor=?, combustible=?, pasajeros=?, traccion=?, img_principal=?, estatus=? WHERE id=?";
+$sql = "UPDATE autos SET marca=?, modelo=?, tipo=?, anio=?, precio=?, mensualidad=?, ubicacion=?, kilometraje=?, transmision=?, color=?, motor=?, combustible=?, pasajeros=?, traccion=?, img_principal=?, estatus=? WHERE id=?";
 
 $stmt = $con->prepare($sql);
-$stmt->bind_param("ssiddsisssssissi", $marca, $modelo, $anio, $precio, $mensualidad, $ubicacion, $kilometraje, $transmision, $color, $motor, $combustible, $pasajeros, $traccion, $img_principal, $estatus, $id);
+// sssiddsissssssssi = 17 parámetros
+$stmt->bind_param("sssiddsissssssssi", $marca, $modelo, $tipo, $anio, $precio, $mensualidad, $ubicacion, $kilometraje, $transmision, $color, $motor, $combustible, $pasajeros, $traccion, $img_principal, $estatus, $id);
 
 if ($stmt->execute()) {
     echo json_encode(["ok" => true, "mensaje" => "Auto actualizado correctamente"]);

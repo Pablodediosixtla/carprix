@@ -24,8 +24,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const paginationContainer = document.getElementById('pagination-controls');
     const btnLimpiar = document.getElementById('btn-limpiar');
 
-    // FILTROS DOM
-    const filterIds = ['marca', 'precio', 'anio', 'ubicacion', 'transmision', 'combustible', 'color', 'traccion', 'pasajeros'];
+    // FILTROS DOM (AGREGADO 'tipo')
+    const filterIds = ['marca', 'tipo', 'precio', 'anio', 'ubicacion', 'transmision', 'combustible', 'color', 'traccion', 'pasajeros'];
     const filters = {};
     filterIds.forEach(id => { filters[id] = document.getElementById(`filter-${id}`); });
 
@@ -43,10 +43,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (result.ok) {
                 allAutos = result.data.filter(auto => auto.estatus === 'Disponible');
                 
-                // 1.1 Llenamos todos los selects por primera vez con el inventario completo
                 initAllSelects();
                 
-                // 1.2 Revisamos si venimos del index.php con alguna búsqueda
                 const urlParams = new URLSearchParams(window.location.search);
                 if (urlParams.has('marca') && urlParams.get('marca') !== '') {
                     filters.marca.value = urlParams.get('marca');
@@ -55,7 +53,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     filters.precio.value = urlParams.get('presupuesto');
                 }
                 
-                // 1.3 Aplicamos los filtros (esto actualizará la lista y los selects en cascada)
                 applyFilters(); 
             } else {
                 container.innerHTML = `<p style="text-align:center; grid-column:1/-1;">Error: ${result.error}</p>`;
@@ -86,8 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
-    // 4. LÓGICA REACTIVA DE SELECTS (BÚSQUEDA FACETADA)
-    // Calcula qué opciones existen para un filtro si aplicamos TODOS los demás filtros
+    // 4. LÓGICA REACTIVA DE SELECTS
     const getAvailableOptionsFor = (filterIdToSkip) => {
         const precioMax = parseFloat(filters.precio.value) || Infinity;
         return allAutos.filter(auto => {
@@ -96,14 +92,14 @@ document.addEventListener('DOMContentLoaded', () => {
             for (let id of filterIds) {
                 if (id === 'precio' || id === filterIdToSkip) continue;
                 const val = filters[id].value;
-                if (val !== '' && auto[id] !== null && auto[id].toString() !== val) return false;
+                if (val !== '' && auto[id] !== null && String(auto[id]) !== val) return false;
             }
             return true;
         });
     };
 
     const updateSelectOptions = () => {
-        isFiltering = true; // Pausamos los listeners
+        isFiltering = true; 
 
         filterIds.forEach(id => {
             if (id === 'precio') return;
@@ -111,7 +107,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const select = filters[id];
             const currentSelectedValue = select.value;
             
-            // Ver qué autos quedarían si no tomamos en cuenta este select específico
             const validAutos = getAvailableOptionsFor(id);
             const availableValues = [...new Set(validAutos.map(a => a[id]))].filter(v => v !== null && v !== '').sort();
 
@@ -122,8 +117,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 select.innerHTML += `<option value="${val}">${val}</option>`;
             });
 
-            // Si el valor que tenía antes sigue siendo válido, lo volvemos a seleccionar.
-            // Si ya no es válido (ej. seleccionó un año de un auto que ya no cumple con la nueva marca), se resetea.
             if (availableValues.includes(currentSelectedValue)) {
                 select.value = currentSelectedValue;
             } else {
@@ -138,25 +131,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const applyFilters = () => {
         if (isFiltering) return;
 
-        // 5.1 Actualizamos las opciones disponibles en los combos primero
         updateSelectOptions();
 
-        // 5.2 Ya con los combos corregidos, filtramos el arreglo final
         const precioMax = parseFloat(filters.precio.value) || Infinity;
 
         filteredAutos = allAutos.filter(auto => {
             let match = true;
-            if (filters.marca.value !== '' && auto.marca !== filters.marca.value) match = false;
-            if (filters.anio.value !== '' && auto.anio.toString() !== filters.anio.value) match = false;
-            if (filters.ubicacion.value !== '' && auto.ubicacion !== filters.ubicacion.value) match = false;
-            if (filters.transmision.value !== '' && auto.transmision !== filters.transmision.value) match = false;
-            if (filters.combustible.value !== '' && auto.combustible !== filters.combustible.value) match = false;
-            if (filters.color.value !== '' && auto.color !== filters.color.value) match = false;
-            if (filters.traccion.value !== '' && auto.traccion !== filters.traccion.value) match = false;
-            if (filters.pasajeros.value !== '' && auto.pasajeros.toString() !== filters.pasajeros.value) match = false;
-            
-            if (parseFloat(auto.precio) > precioMax) match = false;
-
+            // Evaluamos iterando sobre los filters, convirtiendo todo a String por seguridad
+            for (let id of filterIds) {
+                if (id === 'precio') {
+                    if (parseFloat(auto.precio) > precioMax) match = false;
+                } else {
+                    const val = filters[id].value;
+                    if (val !== '' && (auto[id] === null || String(auto[id]) !== val)) match = false;
+                }
+            }
             return match;
         });
 
