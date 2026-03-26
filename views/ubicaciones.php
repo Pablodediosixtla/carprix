@@ -38,7 +38,7 @@
             
             <div class="sucursal-card">
                 <div class="sucursal-img">
-                    <img src="https://images.unsplash.com/photo-1582650809081-08630013349a?q=80&w=600" alt="Sucursal Guadalajara">
+                    <img src="https://images.unsplash.com/photo-1605330022464-e6962f3a699c?q=80&w=600" alt="Sucursal Guadalajara">
                 </div>
                 <div class="sucursal-info">
                     <h3>Guadalajara</h3>
@@ -50,7 +50,7 @@
 
             <div class="sucursal-card">
                 <div class="sucursal-img">
-                    <img src="https://images.unsplash.com/photo-1568248590623-2895f87b3281?q=80&w=600" alt="Sucursal Zacatecas">
+                    <img src="https://images.unsplash.com/photo-1586523179299-81347895e7c8?q=80&w=600" alt="Sucursal Zacatecas">
                 </div>
                 <div class="sucursal-info">
                     <h3>Zacatecas</h3>
@@ -62,7 +62,7 @@
 
             <div class="sucursal-card">
                 <div class="sucursal-img">
-                    <img src="https://images.unsplash.com/photo-1494976388531-d1058494cdd8?q=80&w=600" alt="Sucursal Tamaulipas">
+                    <img src="https://images.unsplash.com/photo-1600867727181-432fc2cd1031?q=80&w=600" alt="Sucursal Tamaulipas">
                 </div>
                 <div class="sucursal-info">
                     <h3>Tamaulipas</h3>
@@ -74,7 +74,7 @@
 
             <div class="sucursal-card">
                 <div class="sucursal-img">
-                    <img src="https://images.unsplash.com/photo-1518780664697-55e3ad937233?q=80&w=600" alt="Sucursal CDMX">
+                    <img src="https://images.unsplash.com/photo-1518105779142-d975f22f1b0a?q=80&w=600" alt="Sucursal CDMX">
                 </div>
                 <div class="sucursal-info">
                     <span class="city-tag">Matriz</span>
@@ -87,7 +87,7 @@
 
             <div class="sucursal-card">
                 <div class="sucursal-img">
-                    <img src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=600" alt="Sucursal Querétaro">
+                    <img src="https://images.unsplash.com/photo-1584466977773-e625c37cdd50?q=80&w=600" alt="Sucursal Querétaro">
                 </div>
                 <div class="sucursal-info">
                     <h3>Querétaro</h3>
