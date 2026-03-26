@@ -83,9 +83,9 @@
                     <div class="form-group">
                         <label>Asunto</label>
                         <select id="c-asunto" class="input-select-dark">
-                            <option value="Informes">Informes sobre un auto</option>
+                            <option value="Informes">Informes sobre comprar un auto</option>
                             <option value="Venta">Duda sobre vender mi auto</option>
-                            <option value="Queja">Sugerencia o Queja</option>
+                            <option value="Queja">Sugerencia</option>
                             <option value="Otro">Otro</option>
                         </select>
                     </div>
