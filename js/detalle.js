@@ -67,7 +67,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const statusBadge = document.getElementById('status-badge');
 
         if(auto.estatus !== 'Disponible') {
-            // Deshabilitar botón de compra
+            // Deshabilitar botón de compra y pintarlo gris para Apartado/Vendido
             btnApartar.innerText = auto.estatus.toUpperCase();
             btnApartar.disabled = true;
             btnApartar.style.background = '#555';
@@ -83,6 +83,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 statusBadge.className = 'status-badge status-apartado';
                 statusOverlay.style.display = 'flex';
             }
+        } else {
+            // Si está Disponible, conserva el color verde, se deshabilita y dice DISPONIBLE
+            btnApartar.innerText = 'DISPONIBLE';
+            btnApartar.disabled = true;
+            btnApartar.style.cursor = 'default';
         }
 
         // ---- ETIQUETAS DE AÑO Y TIPO ----

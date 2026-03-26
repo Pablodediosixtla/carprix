@@ -105,10 +105,14 @@
                         <p class="price-tag" id="det-price">$0</p>
                         <small class="price-info">Precio de lista final</small>
                     </div>
-                    <button class="btn-buy" id="btn-apartar">APARTAR AHORA</button>
+                    
+                    <button class="btn-buy" id="btn-apartar" disabled style="cursor: default;">DISPONIBLE</button>
+                    
                     <div class="safety-badges">
-                        <p><i class="fas fa-check-circle green-text"></i> Auto inspeccionado en 240 puntos</p>
-                        <p><i class="fas fa-undo green-text"></i> 7 días o 300 km de prueba</p>
+                        <p><i class="fas fa-check-circle green-text"></i> Auto inspeccionado</p>
+                        <p><i class="fas fa-file-invoice-dollar green-text"></i> Sin adeudos</p>
+                        <p><i class="fas fa-shield-alt green-text"></i> Garantía Mecánica</p>
+                        <p><i class="fas fa-users green-text"></i> Dueños</p>
                     </div>
                 </div>
             </aside>
