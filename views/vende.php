@@ -48,16 +48,52 @@
                             <input type="text" id="v-marca" placeholder="Ej. Toyota" required>
                         </div>
                         <div class="form-group">
-                            <label>Modelo y Versión</label>
-                            <input type="text" id="v-modelo" placeholder="Ej. Camry SE" required>
+                            <label>Modelo</label>
+                            <input type="text" id="v-modelo" placeholder="Ej. Camry" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Versión</label>
+                            <input type="text" id="v-version" placeholder="Ej. SE 4 Cil" required>
                         </div>
                         <div class="form-group">
                             <label>Año</label>
-                            <input type="number" id="v-anio" placeholder="2022" required>
+                            <input type="number" id="v-anio" placeholder="Ej. 2022" required>
                         </div>
                         <div class="form-group">
                             <label>Kilometraje</label>
-                            <input type="number" id="v-km" placeholder="45000" required>
+                            <input type="number" id="v-km" placeholder="Ej. 45000" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Color</label>
+                            <input type="text" id="v-color" placeholder="Ej. Blanco Perla" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Transmisión</label>
+                            <select id="v-transmision" required>
+                                <option value="">Selecciona...</option>
+                                <option value="Automática">Automática</option>
+                                <option value="Manual">Manual</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Tipo de Factura</label>
+                            <select id="v-factura" required>
+                                <option value="">Selecciona...</option>
+                                <option value="Original">Original (Agencia)</option>
+                                <option value="Refacturado">Refacturado (Empresa/Lote)</option>
+                                <option value="Aseguradora">Aseguradora</option>
+                                <option value="Otro">Otro</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Propietarios Anteriores</label>
+                            <select id="v-propietarios" required>
+                                <option value="">Selecciona...</option>
+                                <option value="1 (Único dueño)">1 (Único dueño)</option>
+                                <option value="2">2 dueños</option>
+                                <option value="3">3 dueños</option>
+                                <option value="4 o más">4 o más</option>
+                            </select>
                         </div>
                     </div>
                 </div>
@@ -78,7 +114,7 @@
 
                 <div class="form-group">
                     <label>Comentarios Adicionales (Estado, choques, adeudos)</label>
-                    <textarea id="v-comentarios" rows="4" placeholder="Cuéntanos más sobre el estado de tu auto..."></textarea>
+                    <textarea id="v-comentarios" rows="4" placeholder="Cuéntanos más sobre el estado general..."></textarea>
                 </div>
 
                 <button type="submit" class="btn-submit-vende" id="btn-vende">ENVIAR SOLICITUD</button>
