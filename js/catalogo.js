@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let allAutos = [];
     let filteredAutos = [];
     let currentPage = 1;
-    const itemsPerPage = 8; // <-- AJUSTE A 8 AUTOS POR PÁGINA
+    const itemsPerPage = 8; 
     let currentView = 'grid'; 
     let isFiltering = false; 
 
@@ -41,8 +41,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const result = await response.json();
             
             if (result.ok) {
-                // Filtra solo los autos que se pueden vender
-                allAutos = result.data.filter(auto => auto.estatus === 'Disponible');
+                // AHORA MOSTRAMOS TODOS LOS QUE NO SEAN "Oculto"
+                allAutos = result.data.filter(auto => auto.estatus !== 'Oculto');
                 
                 initAllSelects();
                 
@@ -172,13 +172,21 @@ document.addEventListener('DOMContentLoaded', () => {
             const priceFmt = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(auto.precio);
             const kmFmt = new Intl.NumberFormat('es-MX').format(auto.kilometraje) + ' km';
             
-            // INYECCIÓN DE LA ETIQUETA "TIPO" SI EXISTE
             const tipoBadgeHtml = auto.tipo ? `<span class="type-badge">${auto.tipo}</span>` : '';
+            
+            // LÓGICA DE CAPA OSCURA PARA APARTADOS Y VENDIDOS
+            let statusOverlayHtml = '';
+            if (auto.estatus === 'Vendido') {
+                statusOverlayHtml = `<div class="status-overlay"><span class="status-badge">Vendido</span></div>`;
+            } else if (auto.estatus === 'Apartado') {
+                statusOverlayHtml = `<div class="status-overlay"><span class="status-badge status-apartado">Apartado</span></div>`;
+            }
 
             const card = `
                 <div class="car-card">
                     <div class="car-img">
                         <img src="${auto.img_principal}" alt="${auto.marca}">
+                        ${statusOverlayHtml}
                         <span class="year-badge">${auto.anio}</span>
                         ${tipoBadgeHtml}
                     </div>
