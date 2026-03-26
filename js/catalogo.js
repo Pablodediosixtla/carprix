@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let allAutos = [];
     let filteredAutos = [];
     let currentPage = 1;
-    const itemsPerPage = 9; 
+    const itemsPerPage = 8; // <-- AJUSTE A 8 AUTOS POR PÁGINA
     let currentView = 'grid'; 
     let isFiltering = false; 
 
@@ -41,6 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const result = await response.json();
             
             if (result.ok) {
+                // Filtra solo los autos que se pueden vender
                 allAutos = result.data.filter(auto => auto.estatus === 'Disponible');
                 
                 initAllSelects();
