@@ -50,13 +50,25 @@
 
             <div class="sucursal-card">
                 <div class="sucursal-img">
-                    <img src="https://images.unsplash.com/photo-1568248590623-2895f87b3281?q=80&w=600" alt="Sucursal Morelia">
+                    <img src="https://images.unsplash.com/photo-1568248590623-2895f87b3281?q=80&w=600" alt="Sucursal Zacatecas">
                 </div>
                 <div class="sucursal-info">
-                    <h3>Morelia</h3>
-                    <p><i class="fas fa-map-marker-alt green-text"></i> Perif. Paseo de la República #1500, Morelia, Michoacán.</p>
-                    <p><i class="fas fa-phone-alt green-text"></i> 44 3522 7213</p>
+                    <h3>Zacatecas</h3>
+                    <p><i class="fas fa-map-marker-alt green-text"></i> Blvd. Héroes de Chapultepec #1200, Zacatecas.</p>
+                    <p><i class="fas fa-phone-alt green-text"></i> 49 2333 3333</p>
                     <p><i class="fas fa-clock green-text"></i> Lun - Vie: 9:00 - 18:30 | Sáb: 10:00 - 14:00</p>
+                </div>
+            </div>
+
+            <div class="sucursal-card">
+                <div class="sucursal-img">
+                    <img src="https://images.unsplash.com/photo-1494976388531-d1058494cdd8?q=80&w=600" alt="Sucursal Tamaulipas">
+                </div>
+                <div class="sucursal-info">
+                    <h3>Tamaulipas</h3>
+                    <p><i class="fas fa-map-marker-alt green-text"></i> Av. Hidalgo #450, Tampico, Tamaulipas.</p>
+                    <p><i class="fas fa-phone-alt green-text"></i> 83 3333 3333</p>
+                    <p><i class="fas fa-clock green-text"></i> Lun - Vie: 9:00 - 19:00 | Sáb: 10:00 - 15:00</p>
                 </div>
             </div>
 
