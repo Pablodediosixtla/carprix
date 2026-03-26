@@ -36,6 +36,11 @@
 .btn-view { background: transparent; border: 1px solid #555; color: #888; width: 40px; height: 40px; border-radius: 8px; cursor: pointer; font-size: 18px; transition: 0.3s; }
 .btn-view:hover, .btn-view.active { background: var(--green-accent); color: #000; border-color: var(--green-accent); }
 
+/* ETIQUETAS SOBRE LA IMAGEN (AÑO Y TIPO) */
+.car-img { position: relative; }
+.year-badge { position: absolute; bottom: 10px; left: 10px; background: var(--green-accent); color: #000; padding: 5px 10px; border-radius: 5px; font-weight: 900; font-size: 14px; }
+.type-badge { position: absolute; top: 10px; right: 10px; background: rgba(17, 17, 17, 0.85); color: var(--white); border: 1px solid var(--green-accent); padding: 4px 10px; border-radius: 6px; font-weight: 700; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; backdrop-filter: blur(2px); }
+
 /* VISTA GRID (MOSAICOS) */
 .layout-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px; }
 
@@ -65,8 +70,11 @@
 @media (max-width: 768px) {
     .layout-list .car-card { flex-direction: row; align-items: stretch; padding: 0; }
     .layout-list .car-img { width: 130px; height: auto; min-height: 120px; flex-shrink: 0; }
-    .layout-list .car-img img { height: 100%; border-radius: 15px 0 0 15px; } /* Solo curva la izquierda */
+    .layout-list .car-img img { height: 100%; border-radius: 15px 0 0 15px; } 
+    
+    /* Ajuste de etiquetas en móvil vista lista */
     .layout-list .year-badge { font-size: 10px; padding: 3px 8px; bottom: 8px; left: 8px; }
+    .layout-list .type-badge { font-size: 9px; padding: 2px 6px; top: 8px; right: 8px; }
     
     .layout-list .car-info { padding: 15px; flex-grow: 1; display: flex; flex-direction: column; justify-content: center; }
     .layout-list .car-info h3 { font-size: 1.05rem; line-height: 1.2; margin-bottom: 5px; }
