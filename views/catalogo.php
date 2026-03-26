@@ -85,6 +85,10 @@
                         <label>Pasajeros</label>
                         <select id="filter-pasajeros" class="filter-input"><option value="">Cualquier capacidad</option></select>
                     </div>
+                    <div class="filtro-grupo">
+                        <label>Número de Dueños</label>
+                        <select id="filter-duenos" class="filter-input"><option value="">Cualquier cantidad</option></select>
+                    </div>
                 </div>
             </div>
         </aside>

@@ -1,5 +1,4 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // ---- INICIO FIX MENÚ MÓVIL ----
     const mobileMenu = document.getElementById('mobile-menu');
     const navMenu = document.getElementById('nav-menu');
     
@@ -8,9 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
             navMenu.classList.toggle('active');
         });
     }
-    // ---- FIN FIX MENÚ MÓVIL ----
 
-    // ESTADO GLOBAL
     let allAutos = [];
     let filteredAutos = [];
     let currentPage = 1;
@@ -18,14 +15,13 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentView = 'grid'; 
     let isFiltering = false; 
 
-    // ELEMENTOS DEL DOM
     const container = document.getElementById('catalogo-container');
     const totalResults = document.getElementById('total-results');
     const paginationContainer = document.getElementById('pagination-controls');
     const btnLimpiar = document.getElementById('btn-limpiar');
 
-    // FILTROS DOM 
-    const filterIds = ['marca', 'tipo', 'precio', 'anio', 'ubicacion', 'transmision', 'combustible', 'color', 'traccion', 'pasajeros'];
+    // FILTROS DOM (AGREGADO 'duenos')
+    const filterIds = ['marca', 'tipo', 'precio', 'anio', 'ubicacion', 'transmision', 'combustible', 'color', 'traccion', 'pasajeros', 'duenos'];
     const filters = {};
     filterIds.forEach(id => { filters[id] = document.getElementById(`filter-${id}`); });
 
@@ -34,16 +30,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnMobileFilters = document.getElementById('btn-toggle-filters');
     const sidebar = document.getElementById('filtros-sidebar');
 
-    // 1. INICIALIZACIÓN
     const init = async () => {
         try {
             const response = await fetch('../db/web/get_autos.php');
             const result = await response.json();
             
             if (result.ok) {
-                // AHORA MOSTRAMOS TODOS LOS QUE NO SEAN "Oculto"
                 allAutos = result.data.filter(auto => auto.estatus !== 'Oculto');
-                
                 initAllSelects();
                 
                 const urlParams = new URLSearchParams(window.location.search);
@@ -63,7 +56,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // 2. ACORDEONES
     const accordions = document.querySelectorAll('.btn-accordion');
     accordions.forEach(acc => {
         acc.addEventListener('click', function() {
@@ -71,7 +63,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // 3. LLENADO INICIAL DE SELECTS
     const initAllSelects = () => {
         filterIds.forEach(id => {
             if (id === 'precio') return;
@@ -80,11 +71,15 @@ document.addEventListener('DOMContentLoaded', () => {
             
             const firstOption = select.options[0].outerHTML;
             select.innerHTML = firstOption;
-            uniqueValues.forEach(val => { select.innerHTML += `<option value="${val}">${val}</option>`; });
+            uniqueValues.forEach(val => { 
+                // Si es el de dueños, lo mostramos un poco mejor
+                let displayVal = val;
+                if(id === 'duenos') displayVal = val == 1 ? "1 Dueño" : `${val} Dueños`;
+                select.innerHTML += `<option value="${val}">${displayVal}</option>`; 
+            });
         });
     };
 
-    // 4. LÓGICA REACTIVA DE SELECTS
     const getAvailableOptionsFor = (filterIdToSkip) => {
         const precioMax = parseFloat(filters.precio.value) || Infinity;
         return allAutos.filter(auto => {
@@ -115,7 +110,9 @@ document.addEventListener('DOMContentLoaded', () => {
             select.innerHTML = firstOption;
 
             availableValues.forEach(val => {
-                select.innerHTML += `<option value="${val}">${val}</option>`;
+                let displayVal = val;
+                if(id === 'duenos') displayVal = val == 1 ? "1 Dueño" : `${val} Dueños`;
+                select.innerHTML += `<option value="${val}">${displayVal}</option>`;
             });
 
             if (availableValues.includes(currentSelectedValue)) {
@@ -128,7 +125,6 @@ document.addEventListener('DOMContentLoaded', () => {
         isFiltering = false;
     };
 
-    // 5. APLICAR FILTROS Y RENDERIZAR
     const applyFilters = () => {
         if (isFiltering) return;
 
@@ -154,7 +150,6 @@ document.addEventListener('DOMContentLoaded', () => {
         renderPage();
     };
 
-    // 6. RENDERIZADO DE TARJETAS
     const renderPage = () => {
         container.innerHTML = '';
         container.className = currentView === 'grid' ? 'layout-grid' : 'layout-list';
@@ -174,7 +169,6 @@ document.addEventListener('DOMContentLoaded', () => {
             
             const tipoBadgeHtml = auto.tipo ? `<span class="type-badge">${auto.tipo}</span>` : '';
             
-            // LÓGICA DE CAPA OSCURA PARA APARTADOS Y VENDIDOS
             let statusOverlayHtml = '';
             if (auto.estatus === 'Vendido') {
                 statusOverlayHtml = `<div class="status-overlay"><span class="status-badge">Vendido</span></div>`;
@@ -204,7 +198,6 @@ document.addEventListener('DOMContentLoaded', () => {
         renderPaginationControls();
     };
 
-    // 7. RENDERIZADO DE PAGINACIÓN
     const renderPaginationControls = () => {
         paginationContainer.innerHTML = '';
         const totalPages = Math.ceil(filteredAutos.length / itemsPerPage);
@@ -224,7 +217,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // 8. EVENT LISTENERS
     filterIds.forEach(id => {
         if(filters[id]) {
             filters[id].addEventListener(id === 'precio' ? 'input' : 'change', applyFilters);
@@ -242,6 +234,5 @@ document.addEventListener('DOMContentLoaded', () => {
 
     btnMobileFilters.addEventListener('click', () => { sidebar.classList.toggle('show'); });
 
-    // Arrancar la app
     init();
 });

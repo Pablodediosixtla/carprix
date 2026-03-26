@@ -1,5 +1,4 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // ---- INICIO FIX MENÚ MÓVIL ----
     const mobileMenu = document.getElementById('mobile-menu');
     const navMenu = document.getElementById('nav-menu');
     
@@ -8,15 +7,12 @@ document.addEventListener('DOMContentLoaded', () => {
             navMenu.classList.toggle('active');
         });
     }
-    // ---- FIN FIX MENÚ MÓVIL ----
 
     const loadingState = document.getElementById('loading-state');
     const detailContent = document.getElementById('detail-content');
     
-    // Variables globales para el cotizador
     let CAR_PRICE = 0;
 
-    // 1. Obtener el ID de la URL
     const urlParams = new URLSearchParams(window.location.search);
     const carId = urlParams.get('id');
 
@@ -25,12 +21,10 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    // 2. Consumir la API
     fetchCarDetails(carId);
 
     async function fetchCarDetails(id) {
         try {
-            // Mandamos un POST con el ID en el body (como lo configuramos en get_autos.php)
             const response = await fetch('../db/web/get_autos.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -39,7 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const result = await response.json();
 
             if (result.ok && result.data.length > 0) {
-                const auto = result.data[0]; // El primer auto del array
+                const auto = result.data[0]; 
                 renderCarData(auto);
             } else {
                 loadingState.innerHTML = '<span style="color:#ff5252;">Vehículo no encontrado o no disponible.</span>';
@@ -51,29 +45,24 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderCarData(auto) {
-        // Formateos
         CAR_PRICE = parseFloat(auto.precio);
         const priceFmt = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(CAR_PRICE);
         const kmFmt = new Intl.NumberFormat('es-MX').format(auto.kilometraje) + ' km';
 
-        // Llenar Textos Principales
         document.title = `${auto.marca} ${auto.modelo} | CARPRIX`;
         document.getElementById('det-name').innerText = `${auto.marca} ${auto.modelo}`;
         document.getElementById('det-price').innerText = priceFmt;
         
-        // ---- CONTROL VISUAL DE ESTATUS EN LA IMAGEN Y BOTÓN ----
         const btnApartar = document.getElementById('btn-apartar');
         const statusOverlay = document.getElementById('status-overlay');
         const statusBadge = document.getElementById('status-badge');
 
         if(auto.estatus !== 'Disponible') {
-            // Deshabilitar botón de compra y pintarlo gris para Apartado/Vendido
             btnApartar.innerText = auto.estatus.toUpperCase();
             btnApartar.disabled = true;
             btnApartar.style.background = '#555';
             btnApartar.style.cursor = 'not-allowed';
 
-            // Mostrar sello gigante sobre la imagen
             if (auto.estatus === 'Vendido') {
                 statusBadge.innerText = 'Vendido';
                 statusBadge.className = 'status-badge';
@@ -84,13 +73,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 statusOverlay.style.display = 'flex';
             }
         } else {
-            // Si está Disponible, conserva el color verde, se deshabilita y dice DISPONIBLE
             btnApartar.innerText = 'DISPONIBLE';
             btnApartar.disabled = true;
             btnApartar.style.cursor = 'default';
         }
 
-        // ---- ETIQUETAS DE AÑO Y TIPO ----
+        // TEXTO DINÁMICO DE DUEÑOS
+        const dueñosElement = document.getElementById('det-duenos');
+        if (dueñosElement) {
+            if (auto.duenos) {
+                dueñosElement.innerText = auto.duenos == 1 ? "1 Dueño" : `${auto.duenos} Dueños`;
+            } else {
+                dueñosElement.innerText = "N/A Dueños";
+            }
+        }
+
         document.getElementById('badge-year').innerText = auto.anio;
         if (auto.tipo) {
             const badgeTipo = document.getElementById('badge-tipo');
@@ -98,14 +95,12 @@ document.addEventListener('DOMContentLoaded', () => {
             badgeTipo.style.display = 'block';
         }
 
-        // Llenar Galería
         const mainImg = document.getElementById('main-view');
         mainImg.src = auto.img_principal;
         
         const thumbsContainer = document.getElementById('gallery-thumbs');
         thumbsContainer.innerHTML = `<img class="thumb-item active" src="${auto.img_principal}" alt="thumb">`;
 
-        // Llenar Especificaciones (Las 9 cajas)
         const specsGrid = document.getElementById('specs-grid');
         const specsData = [
             { label: "Tipo", val: auto.tipo || 'N/A', icon: "fa-car" },
@@ -131,15 +126,12 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
         });
 
-        // Ocultar loader y mostrar contenido
         loadingState.style.display = 'none';
         detailContent.style.display = 'grid'; 
 
-        // Inicializar Cotizador
         initCotizador();
     }
 
-    // 3. LÓGICA DEL COTIZADOR
     function initCotizador() {
         const rangeEnganche = document.getElementById('range-enganche');
         const displayPercent = document.getElementById('display-percent');
@@ -159,15 +151,14 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         rangeEnganche.addEventListener('input', updateUI);
-        updateUI(); // Carga inicial
+        updateUI();
 
         btnCalculate.addEventListener('click', () => {
             const enganche = (CAR_PRICE * rangeEnganche.value) / 100;
             const plazo = parseInt(inputPlazo.value);
             const saldoFinanciar = CAR_PRICE - enganche;
             
-            // Formula básica de simulación (Saldo a financiar / meses) + interés ficticio
-            const interesAprox = 1.15; // 15% interés total en el periodo como ejemplo
+            const interesAprox = 1.15; 
             const saldoTotalConInteres = saldoFinanciar * interesAprox;
             const pagoMensual = saldoTotalConInteres / plazo;
 

@@ -24,7 +24,7 @@ if (!isset($in['marca']) || !isset($in['modelo']) || !isset($in['precio'])) {
 
 $marca = trim($in['marca']);
 $modelo = trim($in['modelo']);
-$tipo = trim($in['tipo'] ?? ''); // NUEVO CAMPO
+$tipo = trim($in['tipo'] ?? ''); 
 $anio = (int)$in['anio'];
 $precio = (float)$in['precio'];
 $mensualidad = isset($in['mensualidad']) ? (float)$in['mensualidad'] : 0.00;
@@ -34,16 +34,17 @@ $transmision = trim($in['transmision']);
 $color = trim($in['color'] ?? '');
 $motor = trim($in['motor'] ?? '');
 $combustible = trim($in['combustible'] ?? '');
-$pasajeros = trim($in['pasajeros'] ?? ''); // CAMBIO A TEXTO
+$pasajeros = trim($in['pasajeros'] ?? ''); 
 $traccion = trim($in['traccion'] ?? '');
+$duenos = isset($in['duenos']) ? (int)$in['duenos'] : null; // NUEVO CAMPO
 $img_principal = trim($in['img_principal'] ?? '');
 
 $con = conectar();
-$sql = "INSERT INTO autos (marca, modelo, tipo, anio, precio, mensualidad, ubicacion, kilometraje, transmision, color, motor, combustible, pasajeros, traccion, img_principal) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+$sql = "INSERT INTO autos (marca, modelo, tipo, anio, precio, mensualidad, ubicacion, kilometraje, transmision, color, motor, combustible, pasajeros, traccion, duenos, img_principal) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
 $stmt = $con->prepare($sql);
-// sssiddsisssssss = 15 parámetros (s=string, i=integer, d=double)
-$stmt->bind_param("sssiddsisssssss", $marca, $modelo, $tipo, $anio, $precio, $mensualidad, $ubicacion, $kilometraje, $transmision, $color, $motor, $combustible, $pasajeros, $traccion, $img_principal);
+// sssiddsissssssis = 16 parámetros
+$stmt->bind_param("sssiddsissssssis", $marca, $modelo, $tipo, $anio, $precio, $mensualidad, $ubicacion, $kilometraje, $transmision, $color, $motor, $combustible, $pasajeros, $traccion, $duenos, $img_principal);
 
 if ($stmt->execute()) {
     echo json_encode(["ok" => true, "id_insertado" => $con->insert_id, "mensaje" => "Auto registrado con éxito"]);
