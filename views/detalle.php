@@ -112,7 +112,7 @@
                         <p><i class="fas fa-check-circle green-text"></i> Auto inspeccionado</p>
                         <p><i class="fas fa-file-invoice-dollar green-text"></i> Sin adeudos</p>
                         <p><i class="fas fa-shield-alt green-text"></i> Garantía Mecánica</p>
-                        <p><i class="fas fa-users green-text"></i> Dueños</p>
+                        <p><i class="fas fa-users green-text"></i> <span id="det-duenos">Cargando...</span></p>
                     </div>
                 </div>
             </aside>
