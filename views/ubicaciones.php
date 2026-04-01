@@ -54,7 +54,7 @@
                 </div>
                 <div class="sucursal-info">
                     <h3>Zacatecas</h3>
-                    <p><i class="fas fa-map-marker-alt green-text"></i> Blvd. Héroes de Chapultepec #1200, Zacatecas.</p>
+                    <p><i class="fas fa-map-marker-alt green-text"></i> Blvd. El Bote 202, Colonia Ciudad Argentum, 98040 Zacatecas, Zac.</p>
                     <p><i class="fas fa-phone-alt green-text"></i> 49 2333 3333</p>
                     <p><i class="fas fa-clock green-text"></i> Lun - Vie: 9:00 - 18:30 | Sáb: 10:00 - 14:00</p>
                 </div>
@@ -66,7 +66,7 @@
                 </div>
                 <div class="sucursal-info">
                     <h3>Tamaulipas</h3>
-                    <p><i class="fas fa-map-marker-alt green-text"></i> Av. Hidalgo #450, Tampico, Tamaulipas.</p>
+                    <p><i class="fas fa-map-marker-alt green-text"></i> Av. Ejército Mexicano 706, Colonias Primavera, 89130 Tampico, Tamps.</p>
                     <p><i class="fas fa-phone-alt green-text"></i> 83 3333 3333</p>
                     <p><i class="fas fa-clock green-text"></i> Lun - Vie: 9:00 - 19:00 | Sáb: 10:00 - 15:00</p>
                 </div>
@@ -79,7 +79,7 @@
                 <div class="sucursal-info">
                     <span class="city-tag">Matriz</span>
                     <h3>CDMX</h3>
-                    <p><i class="fas fa-map-marker-alt green-text"></i> Av. Insurgentes Sur #2450, Ciudad de México.</p>
+                    <p><i class="fas fa-map-marker-alt green-text"></i>Vasco de Quiroga 3800, Santa Fe, Contadero, Cuajimalpa de Morelos, 05348 Ciudad de México, CDMX</p>
                     <p><i class="fas fa-phone-alt green-text"></i> 55 3333 3333</p>
                     <p><i class="fas fa-clock green-text"></i> Lun - Vie: 9:00 - 20:00 | Sáb: 10:00 - 16:00</p>
                 </div>
