@@ -37,7 +37,7 @@
 .btn-view:hover, .btn-view.active { background: var(--green-accent); color: #000; border-color: var(--green-accent); }
 
 /* ETIQUETAS SOBRE LA IMAGEN (AÑO, TIPO Y ESTATUS GIGANTE) */
-.car-img { position: relative; overflow: hidden; } /* Overflow hidden para que la capa oscura no se salga */
+.car-img { position: relative; overflow: hidden; }
 .car-img img { width: 100%; display: block; }
 .year-badge { position: absolute; bottom: 10px; left: 10px; background: var(--green-accent); color: #000; padding: 5px 10px; border-radius: 5px; font-weight: 900; font-size: 14px; z-index: 10; }
 .type-badge { position: absolute; top: 10px; right: 10px; background: rgba(17, 17, 17, 0.85); color: var(--white); border: 1px solid var(--green-accent); padding: 4px 10px; border-radius: 6px; font-weight: 700; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; backdrop-filter: blur(2px); z-index: 10; }
@@ -46,27 +46,27 @@
 .status-overlay {
     position: absolute;
     top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0, 0, 0, 0.65); /* Oscurece la imagen */
+    background: rgba(0, 0, 0, 0.65);
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 5; /* Por debajo del año y tipo, pero sobre la imagen */
+    z-index: 5; 
 }
 .status-badge {
-    background: #ff5252; /* Rojo para vendido */
+    background: #ff5252;
     color: white;
     padding: 10px 25px;
     font-size: 1.6rem;
     font-weight: 900;
     text-transform: uppercase;
     border-radius: 8px;
-    transform: rotate(-15deg); /* Inclinación tipo sello */
+    transform: rotate(-15deg);
     letter-spacing: 2px;
     box-shadow: 0 5px 15px rgba(0,0,0,0.5);
     border: 2px solid #fff;
 }
 .status-apartado {
-    background: #ff9800; /* Naranja para apartado */
+    background: #ff9800;
 }
 
 /* VISTA GRID (MOSAICOS) */
@@ -80,10 +80,12 @@
 .layout-list .car-info { flex-grow: 1; display: flex; flex-direction: column; justify-content: center; padding: 30px; }
 .layout-list .btn-details { width: 200px; margin-top: auto; }
 
-/* PAGINACIÓN */
-.pagination-container { display: flex; justify-content: center; gap: 10px; margin-top: 50px; }
-.btn-page { background: var(--card-bg); border: 1px solid #444; color: white; width: 40px; height: 40px; border-radius: 8px; cursor: pointer; font-weight: 700; transition: 0.3s; }
-.btn-page:hover, .btn-page.active { background: var(--green-accent); color: #000; border-color: var(--green-accent); }
+/* PAGINACIÓN (AJUSTADA) */
+.pagination-container { display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 50px; flex-wrap: wrap; }
+.btn-page { background: var(--card-bg); border: 1px solid #444; color: white; min-width: 40px; height: 40px; padding: 0 10px; border-radius: 8px; cursor: pointer; font-weight: 700; transition: 0.3s; display: flex; justify-content: center; align-items: center; }
+.btn-page:hover:not(:disabled), .btn-page.active { background: var(--green-accent); color: #000; border-color: var(--green-accent); }
+.btn-page:disabled { opacity: 0.4; cursor: not-allowed; pointer-events: none; }
+.pagination-dots { color: var(--gray-text); font-weight: 900; padding: 0 5px; }
 
 /* MÓVIL Y TABLET */
 .btn-mobile-filters { display: none; width: 100%; padding: 15px; background: var(--card-bg); color: white; border: 1px solid #444; border-radius: 10px; font-weight: 700; margin-bottom: 20px; cursor: pointer; }
@@ -100,9 +102,8 @@
     .layout-list .car-card { flex-direction: row; align-items: stretch; padding: 0; }
     .layout-list .car-img { width: 130px; height: auto; min-height: 120px; flex-shrink: 0; }
     .layout-list .car-img img { height: 100%; border-radius: 15px 0 0 15px; } 
-    .layout-list .status-overlay { border-radius: 15px 0 0 15px; } /* Ajuste de capa oscura para que respete la curva */
+    .layout-list .status-overlay { border-radius: 15px 0 0 15px; } 
     
-    /* Ajuste de etiquetas en móvil vista lista */
     .layout-list .year-badge { font-size: 10px; padding: 3px 8px; bottom: 8px; left: 8px; }
     .layout-list .type-badge { font-size: 9px; padding: 2px 6px; top: 8px; right: 8px; }
     .layout-list .status-badge { font-size: 0.8rem; padding: 5px 10px; transform: rotate(-10deg); border-width: 1px; }

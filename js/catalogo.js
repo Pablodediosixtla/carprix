@@ -1,5 +1,4 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // ---- INICIO FIX MENÚ MÓVIL ----
     const mobileMenu = document.getElementById('mobile-menu');
     const navMenu = document.getElementById('nav-menu');
     
@@ -8,9 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
             navMenu.classList.toggle('active');
         });
     }
-    // ---- FIN FIX MENÚ MÓVIL ----
 
-    // ESTADO GLOBAL
     let allAutos = [];
     let filteredAutos = [];
     let currentPage = 1;
@@ -18,13 +15,11 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentView = 'grid'; 
     let isFiltering = false; 
 
-    // ELEMENTOS DEL DOM
     const container = document.getElementById('catalogo-container');
     const totalResults = document.getElementById('total-results');
     const paginationContainer = document.getElementById('pagination-controls');
     const btnLimpiar = document.getElementById('btn-limpiar');
 
-    // FILTROS DOM 
     const filterIds = ['marca', 'tipo', 'precio', 'anio', 'ubicacion', 'transmision', 'combustible', 'color', 'traccion', 'pasajeros', 'duenos'];
     const filters = {};
     filterIds.forEach(id => { filters[id] = document.getElementById(`filter-${id}`); });
@@ -34,14 +29,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnMobileFilters = document.getElementById('btn-toggle-filters');
     const sidebar = document.getElementById('filtros-sidebar');
 
-    // 1. INICIALIZACIÓN
     const init = async () => {
         try {
             const response = await fetch('../db/web/get_autos.php');
             const result = await response.json();
             
             if (result.ok) {
-                // MOSTRAMOS TODOS LOS QUE NO SEAN "Oculto"
                 allAutos = result.data.filter(auto => auto.estatus !== 'Oculto');
                 
                 initAllSelects();
@@ -63,7 +56,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // 2. ACORDEONES
     const accordions = document.querySelectorAll('.btn-accordion');
     accordions.forEach(acc => {
         acc.addEventListener('click', function() {
@@ -71,13 +63,11 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // 3. LLENADO INICIAL DE SELECTS (CON FIX DE STRING)
     const initAllSelects = () => {
         filterIds.forEach(id => {
             if (id === 'precio') return;
             const select = filters[id];
             
-            // Convertimos a String para evitar fallos con números (año, dueños)
             const uniqueValues = [...new Set(allAutos.map(a => String(a[id])))].filter(v => v !== 'null' && v !== '').sort();
             
             const firstOption = select.options[0].outerHTML;
@@ -90,7 +80,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
-    // 4. LÓGICA REACTIVA DE SELECTS
     const getAvailableOptionsFor = (filterIdToSkip) => {
         const precioMax = parseFloat(filters.precio.value) || Infinity;
         return allAutos.filter(auto => {
@@ -112,10 +101,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (id === 'precio') return;
             
             const select = filters[id];
-            const currentSelectedValue = String(select.value); // Aseguramos que sea String
+            const currentSelectedValue = String(select.value); 
             
             const validAutos = getAvailableOptionsFor(id);
-            // Convertimos a String
             const availableValues = [...new Set(validAutos.map(a => String(a[id])))].filter(v => v !== 'null' && v !== '').sort();
 
             const firstOption = select.options[0].outerHTML;
@@ -137,7 +125,6 @@ document.addEventListener('DOMContentLoaded', () => {
         isFiltering = false;
     };
 
-    // 5. APLICAR FILTROS Y RENDERIZAR
     const applyFilters = () => {
         if (isFiltering) return;
 
@@ -163,7 +150,6 @@ document.addEventListener('DOMContentLoaded', () => {
         renderPage();
     };
 
-    // 6. RENDERIZADO DE TARJETAS
     const renderPage = () => {
         container.innerHTML = '';
         container.className = currentView === 'grid' ? 'layout-grid' : 'layout-list';
@@ -183,7 +169,6 @@ document.addEventListener('DOMContentLoaded', () => {
             
             const tipoBadgeHtml = auto.tipo ? `<span class="type-badge">${auto.tipo}</span>` : '';
             
-            // LÓGICA DE CAPA OSCURA PARA APARTADOS Y VENDIDOS
             let statusOverlayHtml = '';
             if (auto.estatus === 'Vendido') {
                 statusOverlayHtml = `<div class="status-overlay"><span class="status-badge">Vendido</span></div>`;
@@ -213,24 +198,69 @@ document.addEventListener('DOMContentLoaded', () => {
         renderPaginationControls();
     };
 
-    // 7. RENDERIZADO DE PAGINACIÓN
+    // ---- LÓGICA DE PAGINACIÓN INTELIGENTE ----
     const renderPaginationControls = () => {
         paginationContainer.innerHTML = '';
         const totalPages = Math.ceil(filteredAutos.length / itemsPerPage);
         
         if (totalPages <= 1) return;
 
-        for (let i = 1; i <= totalPages; i++) {
+        // Función auxiliar para crear botones
+        const createBtn = (text, page, isActive = false, isDisabled = false) => {
             const btn = document.createElement('button');
-            btn.className = `btn-page ${i === currentPage ? 'active' : ''}`;
-            btn.innerText = i;
-            btn.addEventListener('click', () => {
-                currentPage = i;
-                renderPage();
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            });
-            paginationContainer.appendChild(btn);
+            btn.className = `btn-page ${isActive ? 'active' : ''}`;
+            btn.innerHTML = text;
+            if (isDisabled) {
+                btn.disabled = true;
+            } else {
+                btn.addEventListener('click', () => {
+                    currentPage = page;
+                    renderPage();
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                });
+            }
+            return btn;
+        };
+
+        // Botón Anterior
+        paginationContainer.appendChild(createBtn('<i class="fas fa-chevron-left"></i>', currentPage - 1, false, currentPage === 1));
+
+        // Calcular la ventana de botones a mostrar
+        let startPage = Math.max(1, currentPage - 2);
+        let endPage = Math.min(totalPages, currentPage + 2);
+
+        if (currentPage <= 3) { endPage = Math.min(totalPages, 5); }
+        if (currentPage >= totalPages - 2) { startPage = Math.max(1, totalPages - 4); }
+
+        // Primera página y Puntos suspensivos izquierdos
+        if (startPage > 1) {
+            paginationContainer.appendChild(createBtn('1', 1));
+            if (startPage > 2) {
+                const dots = document.createElement('span');
+                dots.className = 'pagination-dots';
+                dots.innerText = '...';
+                paginationContainer.appendChild(dots);
+            }
         }
+
+        // Botones numéricos centrales
+        for (let i = startPage; i <= endPage; i++) {
+            paginationContainer.appendChild(createBtn(i, i, i === currentPage));
+        }
+
+        // Puntos suspensivos derechos y Última página
+        if (endPage < totalPages) {
+            if (endPage < totalPages - 1) {
+                const dots = document.createElement('span');
+                dots.className = 'pagination-dots';
+                dots.innerText = '...';
+                paginationContainer.appendChild(dots);
+            }
+            paginationContainer.appendChild(createBtn(totalPages, totalPages));
+        }
+
+        // Botón Siguiente
+        paginationContainer.appendChild(createBtn('<i class="fas fa-chevron-right"></i>', currentPage + 1, false, currentPage === totalPages));
     };
 
     // 8. EVENT LISTENERS
