@@ -1,6 +1,5 @@
 <?php
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
-// Dominio oficial agregado
 $allowed = ['http://localhost:3000', 'https://carprix.com.mx', 'https://www.carprix.com.mx'];
 
 if (in_array($origin, $allowed, true)) {
@@ -22,22 +21,53 @@ $id = isset($in['id']) ? (int)$in['id'] : null;
 $con = conectar();
 
 if ($id) {
+    // Consulta para traer los datos del auto
     $sql = "SELECT * FROM autos WHERE id = ?";
     $stmt = $con->prepare($sql);
     $stmt->bind_param("i", $id);
+    
+    if ($stmt->execute()) {
+        $result = $stmt->get_result();
+        $autos = $result->fetch_all(MYSQLI_ASSOC);
+        
+        // Si el auto existe, vamos por sus imágenes adicionales
+        if (count($autos) > 0) {
+            $sql_img = "SELECT ruta_imagen FROM imagenes_autos WHERE auto_id = ? ORDER BY orden ASC";
+            $stmt_img = $con->prepare($sql_img);
+            $stmt_img->bind_param("i", $id);
+            $stmt_img->execute();
+            $res_img = $stmt_img->get_result();
+            
+            $imagenes_extra = [];
+            while ($row = $res_img->fetch_assoc()) {
+                $imagenes_extra[] = $row['ruta_imagen'];
+            }
+            
+            // Añadimos el array de imágenes al objeto del auto
+            $autos[0]['imagenes'] = $imagenes_extra;
+            $stmt_img->close();
+        }
+        
+        echo json_encode(["ok" => true, "data" => $autos]);
+    } else {
+        echo json_encode(["ok" => false, "error" => $con->error]);
+    }
+    $stmt->close();
+
 } else {
+    // Consulta general para el catálogo
     $sql = "SELECT * FROM autos ORDER BY fecha_carga DESC";
     $stmt = $con->prepare($sql);
+    
+    if ($stmt->execute()) {
+        $result = $stmt->get_result();
+        $autos = $result->fetch_all(MYSQLI_ASSOC);
+        echo json_encode(["ok" => true, "data" => $autos]);
+    } else {
+        echo json_encode(["ok" => false, "error" => $con->error]);
+    }
+    $stmt->close();
 }
 
-if ($stmt->execute()) {
-    $result = $stmt->get_result();
-    $autos = $result->fetch_all(MYSQLI_ASSOC);
-    echo json_encode(["ok" => true, "data" => $autos]);
-} else {
-    echo json_encode(["ok" => false, "error" => $con->error]);
-}
-
-$stmt->close();
 $con->close();
 ?>

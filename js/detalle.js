@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // ---- INICIO FIX MENÚ MÓVIL ----
     const mobileMenu = document.getElementById('mobile-menu');
     const navMenu = document.getElementById('nav-menu');
     
@@ -7,12 +8,15 @@ document.addEventListener('DOMContentLoaded', () => {
             navMenu.classList.toggle('active');
         });
     }
+    // ---- FIN FIX MENÚ MÓVIL ----
 
     const loadingState = document.getElementById('loading-state');
     const detailContent = document.getElementById('detail-content');
     
+    // Variables globales para el cotizador
     let CAR_PRICE = 0;
 
+    // 1. Obtener el ID de la URL
     const urlParams = new URLSearchParams(window.location.search);
     const carId = urlParams.get('id');
 
@@ -21,6 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
+    // 2. Consumir la API
     fetchCarDetails(carId);
 
     async function fetchCarDetails(id) {
@@ -45,14 +50,17 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderCarData(auto) {
+        // Formateos
         CAR_PRICE = parseFloat(auto.precio);
         const priceFmt = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(CAR_PRICE);
         const kmFmt = new Intl.NumberFormat('es-MX').format(auto.kilometraje) + ' km';
 
+        // Llenar Textos Principales
         document.title = `${auto.marca} ${auto.modelo} | CARPRIX`;
         document.getElementById('det-name').innerText = `${auto.marca} ${auto.modelo}`;
         document.getElementById('det-price').innerText = priceFmt;
         
+        // ---- CONTROL VISUAL DE ESTATUS ----
         const btnApartar = document.getElementById('btn-apartar');
         const statusOverlay = document.getElementById('status-overlay');
         const statusBadge = document.getElementById('status-badge');
@@ -78,7 +86,6 @@ document.addEventListener('DOMContentLoaded', () => {
             btnApartar.style.cursor = 'default';
         }
 
-        // TEXTO DINÁMICO DE DUEÑOS
         const dueñosElement = document.getElementById('det-duenos');
         if (dueñosElement) {
             if (auto.duenos) {
@@ -95,12 +102,44 @@ document.addEventListener('DOMContentLoaded', () => {
             badgeTipo.style.display = 'block';
         }
 
+        // ---- LLENAR GALERÍA DINÁMICA ----
         const mainImg = document.getElementById('main-view');
         mainImg.src = auto.img_principal;
         
         const thumbsContainer = document.getElementById('gallery-thumbs');
-        thumbsContainer.innerHTML = `<img class="thumb-item active" src="${auto.img_principal}" alt="thumb">`;
+        thumbsContainer.innerHTML = ''; // Limpiar contenedor
+        
+        // Combinamos la imagen principal con las imágenes secundarias (si existen)
+        let todasLasImagenes = [auto.img_principal];
+        if (auto.imagenes && auto.imagenes.length > 0) {
+            todasLasImagenes = todasLasImagenes.concat(auto.imagenes);
+        }
 
+        // Inyectamos las miniaturas
+        todasLasImagenes.forEach((imgUrl, index) => {
+            const thumb = document.createElement('img');
+            thumb.className = `thumb-item ${index === 0 ? 'active' : ''}`;
+            thumb.src = imgUrl;
+            thumb.alt = `Vista ${index + 1}`;
+
+            // Evento Click para cambiar la imagen principal
+            thumb.addEventListener('click', () => {
+                // Actualizar imagen grande
+                mainImg.style.opacity = 0; // Pequeño efecto fade
+                setTimeout(() => {
+                    mainImg.src = imgUrl;
+                    mainImg.style.opacity = 1;
+                }, 150);
+                
+                // Mover el marco verde (clase active) a la miniatura seleccionada
+                document.querySelectorAll('.thumb-item').forEach(t => t.classList.remove('active'));
+                thumb.classList.add('active');
+            });
+
+            thumbsContainer.appendChild(thumb);
+        });
+
+        // ---- Llenar Especificaciones ----
         const specsGrid = document.getElementById('specs-grid');
         const specsData = [
             { label: "Tipo", val: auto.tipo || 'N/A', icon: "fa-car" },
@@ -114,6 +153,7 @@ document.addEventListener('DOMContentLoaded', () => {
             { label: "Tracción", val: auto.traccion || 'N/A', icon: "fa-dharmachakra" }
         ];
 
+        specsGrid.innerHTML = ''; // Limpiar antes de inyectar
         specsData.forEach(spec => {
             specsGrid.innerHTML += `
                 <div class="spec-card">
