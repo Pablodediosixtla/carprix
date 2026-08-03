@@ -2,30 +2,33 @@
    CARPRIX - ESTILOS GLOBALES Y TEMAS
    ========================================================= */
 
+
 :root,
 html[data-theme="dark"] {
     color-scheme: dark;
+    --brand-black: #1a1a1a;
+    --brand-green: #39b54a;
     --page-bg: #1a1a1a;
     --card-bg: #242424;
     --surface-deep: #111111;
     --surface-soft: #2b2b2b;
     --text-primary: #ffffff;
-    --text-muted: #e6e6e6;
-    --border-color: #333333;
-    --border-strong: #444444;
+    --text-muted: #d6d8d6;
+    --border-color: #363936;
+    --border-strong: #4b4f4c;
     --input-bg: #111111;
     --input-text: #ffffff;
-    --header-bg: rgba(26, 26, 26, 0.92);
-    --header-bg-scrolled: rgba(26, 26, 26, 0.98);
-    --footer-bg: #242424;
-    --reviews-bg: #e6e6e6;
+    --header-bg: rgba(26, 26, 26, 0.94);
+    --header-bg-scrolled: rgba(26, 26, 26, 0.99);
+    --footer-bg: #151515;
+    --reviews-bg: #e7e9e7;
     --review-card-bg: #ffffff;
-    --review-card-text: #333333;
+    --review-card-text: #2f3431;
     --image-stage-bg: #ececec;
     --shadow-color: rgba(0, 0, 0, 0.55);
-    --green-accent: #39b54a;
+    --green-accent: var(--brand-green);
+    --button-text: #101310;
 
-    /* Alias conservados para no romper los CSS existentes */
     --dark-bg: var(--page-bg);
     --white: var(--text-primary);
     --gray-text: var(--text-muted);
@@ -34,31 +37,35 @@ html[data-theme="dark"] {
 
 html[data-theme="light"] {
     color-scheme: light;
-    --page-bg: #f4f6f4;
+    --brand-black: #1a1a1a;
+    --brand-green: #39b54a;
+    --page-bg: #ffffff;
     --card-bg: #ffffff;
-    --surface-deep: #eef1ef;
-    --surface-soft: #e5e9e6;
-    --text-primary: #171a18;
-    --text-muted: #5c635e;
-    --border-color: #d8ded9;
-    --border-strong: #c7d0ca;
+    --surface-deep: #f3f5f3;
+    --surface-soft: #e9edea;
+    --text-primary: #1a1a1a;
+    --text-muted: #5a625c;
+    --border-color: #dce2dd;
+    --border-strong: #c9d2cb;
     --input-bg: #ffffff;
-    --input-text: #171a18;
-    --header-bg: rgba(255, 255, 255, 0.94);
+    --input-text: #1a1a1a;
+    --header-bg: rgba(255, 255, 255, 0.96);
     --header-bg-scrolled: rgba(255, 255, 255, 0.99);
-    --footer-bg: #edf1ee;
-    --reviews-bg: #e3e8e4;
+    --footer-bg: #151515;
+    --reviews-bg: #f0f3f0;
     --review-card-bg: #ffffff;
     --review-card-text: #2f3431;
-    --image-stage-bg: #ecefed;
-    --shadow-color: rgba(15, 23, 18, 0.18);
-    --green-accent: #2ea642;
+    --image-stage-bg: #f0f1f0;
+    --shadow-color: rgba(20, 27, 22, 0.15);
+    --green-accent: var(--brand-green);
+    --button-text: #101310;
 
     --dark-bg: var(--page-bg);
     --white: var(--text-primary);
     --gray-text: var(--text-muted);
     --light-bg: var(--reviews-bg);
 }
+
 
 /* RESET Y GLOBALES */
 * {
@@ -134,14 +141,45 @@ img {
     align-items: center;
 }
 
+
 .logo {
-    font-size: 26px;
-    font-weight: 900;
-    letter-spacing: -1px;
+    flex: 0 0 auto;
+    line-height: 1;
 }
+
+.brand-logo-link {
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none;
+    min-height: 42px;
+}
+
+.brand-logo {
+    display: block;
+    width: auto;
+    object-fit: contain;
+}
+
+.brand-logo-full {
+    width: 190px;
+    height: auto;
+    max-width: 190px;
+}
+
+.brand-logo-mobile {
+    display: none;
+    width: 138px;
+    height: auto;
+    max-width: 138px;
+}
+
+.theme-logo-light { display: none; }
+html[data-theme="light"] .theme-logo-dark { display: none; }
+html[data-theme="light"] .theme-logo-light { display: block; }
 
 .white-text { color: var(--text-primary); }
 .green-text { color: var(--green-accent); }
+
 
 .nav-menu {
     display: flex;
@@ -363,23 +401,50 @@ img {
 .user-meta strong { display: block; font-size: 17px; font-weight: 700; }
 .review-text { font-size: 15px; line-height: 1.6; color: var(--review-card-text); }
 
+
 /* FOOTER */
-.main-footer { background-color: var(--footer-bg); color: var(--text-primary); padding: 60px 0 30px; border-top: 1px solid var(--border-color); }
+.main-footer {
+    background-color: var(--footer-bg);
+    color: #ffffff;
+    padding: 60px 0 30px;
+    border-top: 1px solid #2f332f;
+}
 .footer-grid { display: grid; grid-template-columns: repeat(3, 1fr) auto; gap: 40px; }
 .footer-col h4 { font-size: 18px; margin-bottom: 20px; padding-bottom: 10px; position: relative; font-weight: 700; }
 .footer-col h4::after { content: ""; position: absolute; bottom: 0; left: 0; width: 100%; height: 2px; }
 .title-green::after { background-color: var(--green-accent); }
-.title-white::after { background-color: var(--text-primary); }
-.title-grey::after { background-color: var(--text-muted); }
+.title-white::after { background-color: #ffffff; }
+.title-grey::after { background-color: #a8ada9; }
 .footer-col ul { list-style: none; }
 .footer-col ul li { margin-bottom: 12px; }
-.footer-col ul li a { color: var(--text-muted); text-decoration: none; font-size: 15px; transition: 0.3s; }
+.footer-col ul li a { color: #c7cbc8; text-decoration: none; font-size: 15px; transition: 0.3s; }
 .footer-col ul li a:hover { color: var(--green-accent); padding-left: 5px; }
-.back-to-home { color: var(--text-primary); text-decoration: none; font-weight: 700; font-size: 15px; transition: 0.3s; }
+.back-to-home { color: #ffffff; text-decoration: none; font-weight: 700; font-size: 15px; transition: 0.3s; }
 .back-to-home:hover { color: var(--green-accent); }
-.footer-bottom { margin-top: 50px; padding-top: 20px; border-top: 1px solid var(--border-color); text-align: center; color: var(--text-muted); font-size: 13px; }
+.footer-bottom {
+    margin-top: 50px;
+    padding-top: 24px;
+    border-top: 1px solid #343734;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    text-align: center;
+    color: #aeb3af;
+    font-size: 13px;
+}
+.footer-brand-link { display: inline-flex; text-decoration: none; }
+.footer-brand-logo { width: 190px; height: auto; display: block; }
 
-/* AJUSTES GENERALES PARA TEMA CLARO EN COMPONENTES DE VISTAS */
+
+/* TEMA CLARO: superficies blancas con acentos corporativos verde y negro */
+html[data-theme="light"] body,
+html[data-theme="light"] main,
+html[data-theme="light"] .section-padding {
+    background-color: #ffffff;
+    color: var(--brand-black);
+}
+
 html[data-theme="light"] .filtros-sidebar,
 html[data-theme="light"] .catalogo-top-bar,
 html[data-theme="light"] .contacto-card,
@@ -392,8 +457,12 @@ html[data-theme="light"] .action-card,
 html[data-theme="light"] .spec-card,
 html[data-theme="light"] .cotizador-card,
 html[data-theme="light"] .main-img-wrapper,
+html[data-theme="light"] .car-card,
 html[data-theme="light"] .table-scroll {
+    background: #ffffff !important;
+    color: var(--brand-black) !important;
     border-color: var(--border-color) !important;
+    box-shadow: 0 10px 28px rgba(20, 27, 22, 0.08);
 }
 
 html[data-theme="light"] .filter-input,
@@ -404,8 +473,8 @@ html[data-theme="light"] .vende-card input,
 html[data-theme="light"] .vende-card select,
 html[data-theme="light"] .vende-card textarea,
 html[data-theme="light"] .input-select-dark {
-    background: var(--input-bg) !important;
-    color: var(--input-text) !important;
+    background: #ffffff !important;
+    color: var(--brand-black) !important;
     border-color: var(--border-strong) !important;
 }
 
@@ -414,19 +483,24 @@ html[data-theme="light"] .btn-page,
 html[data-theme="light"] .btn-mobile-filters,
 html[data-theme="light"] .faq-question,
 html[data-theme="light"] .link-info {
-    color: var(--text-primary) !important;
+    color: var(--brand-black) !important;
 }
 
-html[data-theme="light"] .faq-section { background: var(--surface-deep) !important; }
-html[data-theme="light"] .faq-answer { background: var(--surface-soft) !important; }
+html[data-theme="light"] .faq-section { background: #f3f5f3 !important; }
+html[data-theme="light"] .faq-answer { background: #f7f8f7 !important; }
 html[data-theme="light"] .info-item-card i,
-html[data-theme="light"] .city-tag { background: var(--surface-deep) !important; }
-html[data-theme="light"] .info-card { background: var(--card-bg) !important; }
+html[data-theme="light"] .city-tag { background: #f0f3f0 !important; }
+html[data-theme="light"] .info-card { background: #ffffff !important; }
+html[data-theme="light"] .main-header { border-bottom: 1px solid rgba(26, 26, 26, 0.08); }
+html[data-theme="light"] .nav-menu { background: var(--header-bg-scrolled); }
 
 /* RESPONSIVO MÓVIL */
 @media (max-width: 768px) {
     .container { padding-left: 14px; padding-right: 14px; }
-    .nav-flex { position: relative; }
+    .nav-flex { position: relative; min-height: 48px; }
+    .brand-logo-full { display: none !important; }
+    .brand-logo-mobile { display: block; }
+    .brand-logo-link { min-height: 32px; }
     .menu-toggle { display: inline-flex; }
     .nav-actions { margin-left: auto; }
 
@@ -450,5 +524,23 @@ html[data-theme="light"] .info-card { background: var(--card-bg) !important; }
     .btn-search { width: 100%; padding: 18px; font-size: 18px; }
     .hero-content h1 { font-size: 2.2rem; }
     .footer-grid { grid-template-columns: 1fr; text-align: center; }
+    .footer-brand-logo { width: 165px; }
     .footer-col h4::after { left: 50%; transform: translateX(-50%); width: 50%; }
+}
+
+
+/* Transiciones controladas del tema */
+body, .main-header, .nav-menu, .car-card, .action-card, .spec-card,
+.filtros-sidebar, .catalogo-top-bar, .contacto-card, .vende-card,
+.info-card, .sucursal-card, .faq-item, .cotizador-card, input, select, textarea {
+    transition: background-color 0.22s ease, color 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        scroll-behavior: auto !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
 }

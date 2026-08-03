@@ -22,20 +22,28 @@ $reseñas = [
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#1a1a1a">
     <link rel="icon" type="image/x-icon" href="img/favicon.ico">
     <link rel="apple-touch-icon" sizes="180x180" href="img/favicon-180.png">
-    <script src="js/theme.js"></script>
+    <script src="js/theme.js?v=20260803-2"></script>
     <title>CARPRIX | Confianza que te mueve</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/styles.css?v=20260803-2">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
     <header class="main-header">
         <nav class="container nav-flex">
-            <div class="logo"><a href="index.php" style="text-decoration:none;"><span class="white-text">CAR</span><span class="green-text">PRIX</span></a></div>
+            <div class="logo">
+                <a href="index.php" class="brand-logo-link" aria-label="CARPRIX - Inicio">
+                    <img class="brand-logo brand-logo-full theme-logo theme-logo-dark" src="img/brand/logo-carprix-dark.svg" alt="CARPRIX - Confianza que te mueve">
+                    <img class="brand-logo brand-logo-full theme-logo theme-logo-light" src="img/brand/logo-carprix-light.svg" alt="CARPRIX - Confianza que te mueve">
+                    <img class="brand-logo brand-logo-mobile theme-logo theme-logo-dark" src="img/brand/logo-carprix-wordmark-dark.svg" alt="CARPRIX">
+                    <img class="brand-logo brand-logo-mobile theme-logo theme-logo-light" src="img/brand/logo-carprix-wordmark-light.svg" alt="CARPRIX">
+                </a>
+            </div>
             
             <ul class="nav-menu" id="nav-menu">
                 <li><a href="views/catalogo.php">Compra</a></li>
@@ -45,7 +53,7 @@ $reseñas = [
                 <li><a href="#" class="btn-outline">Iniciar Sesión</a></li>
             </ul>
             <div class="nav-actions">
-                <button type="button" class="theme-toggle" id="theme-toggle" aria-label="Cambiar tema" title="Cambiar tema">
+                <button type="button" class="theme-toggle" id="theme-toggle" data-theme-toggle aria-label="Cambiar tema" title="Cambiar tema">
                     <i class="fas fa-sun" aria-hidden="true"></i>
                     <span class="sr-only">Cambiar tema</span>
                 </button>
@@ -130,9 +138,14 @@ $reseñas = [
             <div class="footer-col"><h4 class="footer-title title-grey">Ayuda</h4><ul><li><a href="views/contacto.php">Contacto</a></li><li><a href="views/nosotros.php">Preguntas frecuentes</a></li></ul></div>
             <div class="footer-col footer-right"><a href="#" class="back-to-home">Regresa al inicio <i class="fas fa-chevron-up"></i></a></div>
         </div>
-        <div class="footer-bottom container"><p>&copy; <?php echo date('Y'); ?> <span class="white-text">CAR</span><span class="green-text">PRIX</span>. Todos los derechos reservados.</p></div>
+        <div class="footer-bottom container">
+            <a href="index.php" class="footer-brand-link" aria-label="CARPRIX - Inicio">
+                <img src="img/brand/logo-carprix-dark.svg" alt="CARPRIX - Confianza que te mueve" class="footer-brand-logo">
+            </a>
+            <p>&copy; <?php echo date('Y'); ?> CARPRIX. Todos los derechos reservados.</p>
+        </div>
     </footer>
 
-    <script src="js/scripts.js"></script>
+    <script src="js/scripts.js?v=20260803-2"></script>
 </body>
 </html>

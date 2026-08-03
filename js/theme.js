@@ -1,63 +1,97 @@
 (() => {
+    'use strict';
+
     const STORAGE_KEY = 'carprix-theme';
     const root = document.documentElement;
+    const THEMES = new Set(['dark', 'light']);
 
-    const getSystemTheme = () => (
-        window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches
-            ? 'light'
-            : 'dark'
-    );
-
-    const getInitialTheme = () => {
-        const savedTheme = localStorage.getItem(STORAGE_KEY);
-        return savedTheme === 'light' || savedTheme === 'dark'
-            ? savedTheme
-            : getSystemTheme();
+    const readStoredTheme = () => {
+        try {
+            const value = window.localStorage.getItem(STORAGE_KEY);
+            return THEMES.has(value) ? value : null;
+        } catch (error) {
+            return null;
+        }
     };
 
-    const updateToggle = (theme) => {
-        const button = document.getElementById('theme-toggle');
-        if (!button) return;
-
-        const icon = button.querySelector('i');
-        const nextTheme = theme === 'dark' ? 'light' : 'dark';
-        const nextLabel = nextTheme === 'light' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro';
-
-        button.setAttribute('aria-label', nextLabel);
-        button.setAttribute('title', nextLabel);
-        button.setAttribute('aria-pressed', theme === 'light' ? 'true' : 'false');
-
-        if (icon) {
-            icon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+    const storeTheme = (theme) => {
+        try {
+            window.localStorage.setItem(STORAGE_KEY, theme);
+        } catch (error) {
+            // El cambio sigue funcionando durante la sesión aunque el navegador bloquee localStorage.
         }
+    };
+
+    const getInitialTheme = () => readStoredTheme() || 'dark';
+
+    const updateThemeColor = (theme) => {
+        const themeColor = document.querySelector('meta[name="theme-color"]');
+        if (themeColor) {
+            themeColor.setAttribute('content', theme === 'light' ? '#ffffff' : '#1a1a1a');
+        }
+    };
+
+    const updateButtons = (theme) => {
+        document.querySelectorAll('[data-theme-toggle], #theme-toggle').forEach((button) => {
+            const nextTheme = theme === 'dark' ? 'light' : 'dark';
+            const label = nextTheme === 'light'
+                ? 'Cambiar a tema claro'
+                : 'Cambiar a tema oscuro';
+            const icon = button.querySelector('i');
+            const text = button.querySelector('[data-theme-label]');
+
+            button.setAttribute('aria-label', label);
+            button.setAttribute('title', label);
+            button.setAttribute('aria-pressed', String(theme === 'light'));
+
+            if (icon) {
+                icon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+            }
+            if (text) {
+                text.textContent = label;
+            }
+        });
     };
 
     const applyTheme = (theme, persist = false) => {
-        root.setAttribute('data-theme', theme);
-        root.style.colorScheme = theme;
-        updateToggle(theme);
+        const validTheme = THEMES.has(theme) ? theme : 'dark';
+        root.setAttribute('data-theme', validTheme);
+        root.style.colorScheme = validTheme;
+
+        if (document.body) {
+            document.body.classList.toggle('theme-light', validTheme === 'light');
+            document.body.classList.toggle('theme-dark', validTheme === 'dark');
+        }
+
+        updateThemeColor(validTheme);
+        updateButtons(validTheme);
 
         if (persist) {
-            localStorage.setItem(STORAGE_KEY, theme);
+            storeTheme(validTheme);
         }
+
+        window.dispatchEvent(new CustomEvent('carprix:themechange', {
+            detail: { theme: validTheme }
+        }));
     };
 
+    // Se aplica antes de cargar el CSS para evitar el destello de un tema incorrecto.
     applyTheme(getInitialTheme());
 
-    document.addEventListener('DOMContentLoaded', () => {
-        const button = document.getElementById('theme-toggle');
-        const header = document.querySelector('.main-header');
+    const bindThemeControls = () => {
+        applyTheme(root.getAttribute('data-theme') || getInitialTheme());
 
-        updateToggle(root.getAttribute('data-theme'));
+        document.querySelectorAll('[data-theme-toggle], #theme-toggle').forEach((button) => {
+            if (button.dataset.themeBound === 'true') return;
 
-        if (button) {
+            button.dataset.themeBound = 'true';
             button.addEventListener('click', () => {
                 const currentTheme = root.getAttribute('data-theme') || 'dark';
-                const nextTheme = currentTheme === 'dark' ? 'light' : 'dark';
-                applyTheme(nextTheme, true);
+                applyTheme(currentTheme === 'dark' ? 'light' : 'dark', true);
             });
-        }
+        });
 
+        const header = document.querySelector('.main-header');
         const updateHeaderState = () => {
             if (header) {
                 header.classList.toggle('scrolled', window.scrollY > 40);
@@ -66,11 +100,17 @@
 
         updateHeaderState();
         window.addEventListener('scroll', updateHeaderState, { passive: true });
-    });
+    };
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', bindThemeControls, { once: true });
+    } else {
+        bindThemeControls();
+    }
 
     window.addEventListener('storage', (event) => {
-        if (event.key === STORAGE_KEY && (event.newValue === 'light' || event.newValue === 'dark')) {
-            applyTheme(event.newValue);
+        if (event.key === STORAGE_KEY && THEMES.has(event.newValue)) {
+            applyTheme(event.newValue, false);
         }
     });
 })();

@@ -14,6 +14,8 @@
     gap: 40px;
 }
 
+.mobile-vehicle-card { display: none; }
+
 /* GALERÍA */
 .main-img-wrapper {
     width: 100%;
@@ -24,11 +26,13 @@
     background: var(--card-bg);
 }
 
-.mobile-car-summary { display: none; }
-
 .image-stage {
     position: relative;
     width: 100%;
+    min-height: 520px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     background: var(--image-stage-bg);
     overflow: hidden;
 }
@@ -36,10 +40,39 @@
 .gallery-container img#main-view {
     width: 100%;
     height: 520px;
-    object-fit: cover;
+    object-fit: contain;
+    object-position: center;
     display: block;
     background: var(--image-stage-bg);
+    cursor: zoom-in;
     transition: opacity 0.3s ease;
+}
+
+.gallery-container img#main-view:focus-visible,
+.image-zoom-trigger:focus-visible,
+.lightbox-close:focus-visible,
+.lightbox-nav:focus-visible {
+    outline: 3px solid var(--green-accent);
+    outline-offset: 3px;
+}
+
+.image-zoom-trigger {
+    position: absolute;
+    right: 15px;
+    bottom: 15px;
+    z-index: 12;
+    width: 42px;
+    height: 42px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(255, 255, 255, 0.34);
+    border-radius: 50%;
+    background: rgba(17, 17, 17, 0.8);
+    color: #ffffff;
+    cursor: pointer;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
 }
 
 /* Badges sobre la imagen */
@@ -48,7 +81,7 @@
     bottom: 15px;
     left: 15px;
     background: var(--green-accent);
-    color: #000000;
+    color: #101310;
     padding: 6px 15px;
     border-radius: 6px;
     font-weight: 900;
@@ -60,7 +93,7 @@
     position: absolute;
     top: 15px;
     right: 15px;
-    background: rgba(17, 17, 17, 0.86);
+    background: rgba(17, 17, 17, 0.88);
     color: #ffffff;
     border: 1px solid var(--green-accent);
     padding: 6px 15px;
@@ -110,12 +143,12 @@
     width: calc(12.5% - 10.5px);
     min-width: 85px;
     height: 65px;
-    object-fit: cover;
+    object-fit: contain;
     background: var(--image-stage-bg);
     border-radius: 8px;
     cursor: pointer;
     border: 2px solid transparent;
-    opacity: 0.65;
+    opacity: 0.68;
     transition: 0.3s;
 }
 
@@ -123,13 +156,78 @@
 .thumb-item.active {
     border-color: var(--green-accent);
     opacity: 1;
-    transform: scale(1.05);
+    transform: scale(1.04);
 }
+
+/* VISOR DE PANTALLA COMPLETA */
+.image-lightbox[hidden] { display: none; }
+.image-lightbox {
+    position: fixed;
+    inset: 0;
+    z-index: 4000;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 18px;
+    padding: 70px 24px 28px;
+    background: rgba(10, 10, 10, 0.96);
+}
+
+.lightbox-figure {
+    min-width: 0;
+    height: calc(100vh - 100px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+}
+
+.lightbox-figure img {
+    width: 100%;
+    height: calc(100% - 32px);
+    object-fit: contain;
+    object-position: center;
+}
+
+.lightbox-figure figcaption {
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 14px;
+}
+
+.lightbox-close,
+.lightbox-nav {
+    border: 1px solid rgba(255,255,255,0.3);
+    background: rgba(255,255,255,0.08);
+    color: #ffffff;
+    cursor: pointer;
+    backdrop-filter: blur(8px);
+}
+
+.lightbox-close {
+    position: absolute;
+    top: 18px;
+    right: 18px;
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    font-size: 20px;
+}
+
+.lightbox-nav {
+    width: 52px;
+    height: 72px;
+    border-radius: 12px;
+    font-size: 22px;
+}
+
+body.lightbox-open { overflow: hidden; }
 
 /* SIDEBAR */
 .detail-sidebar { position: sticky; top: 110px; }
 .action-card { background: var(--card-bg); padding: 35px; border-radius: 20px; border: 1px solid var(--border-color); box-shadow: 0 8px 30px var(--shadow-color); }
-.label-new { background: #333333; color: #ffffff; padding: 5px 10px; border-radius: 5px; font-size: 11px; font-weight: 700; letter-spacing: 1px; }
+.label-new { background: var(--surface-soft); color: var(--text-primary); padding: 5px 10px; border-radius: 5px; font-size: 11px; font-weight: 700; letter-spacing: 1px; }
 .car-name { font-size: 2rem; margin: 15px 0 20px; font-weight: 900; line-height: 1.2; }
 .price-tag { font-size: 2.8rem; color: var(--green-accent); font-weight: 900; letter-spacing: -1px; }
 .price-info { font-size: 14px; color: var(--text-muted); display: block; margin-top: -5px; }
@@ -138,7 +236,7 @@
     width: 100%;
     padding: 20px;
     background: var(--green-accent);
-    color: #000000;
+    color: #101310;
     border: none;
     border-radius: 12px;
     font-weight: 900;
@@ -183,7 +281,7 @@ input[type=range]::-webkit-slider-thumb { height: 24px; width: 24px; border-radi
 .input-group label { color: var(--text-muted); font-size: 14px; margin-bottom: 12px; display: block; font-weight: 500; }
 .enganche-info { display: flex; justify-content: space-between; margin-top: 15px; font-weight: 700; }
 .btn-calculate { background: var(--surface-soft); color: var(--text-primary); border: 1px solid var(--border-strong); padding: 16px; border-radius: 10px; font-weight: 900; cursor: pointer; transition: 0.3s; }
-.btn-calculate:hover { background: var(--green-accent); color: #000000; border-color: var(--green-accent); }
+.btn-calculate:hover { background: var(--green-accent); color: #101310; border-color: var(--green-accent); }
 
 .cotizacion-tabla-wrapper { margin-top: 40px; display: none; animation: fadeIn 0.5s ease; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -198,48 +296,74 @@ input[type=range]::-webkit-slider-thumb { height: 24px; width: 24px; border-radi
 @media (max-width: 992px) {
     .detail-wrapper { grid-template-columns: 1fr; }
     .detail-sidebar { position: static; margin-top: 40px; }
+    .image-stage { min-height: 420px; }
     .gallery-container img#main-view { height: 420px; }
     .status-badge { font-size: 2rem; padding: 10px 25px; }
     .cotizador-controls { grid-template-columns: 1fr; gap: 25px; }
     .specs-box-grid { grid-template-columns: 1fr; }
 }
 
-/* MÓVIL: ficha arriba y fotografías completas */
+/* MÓVIL: encabezado de marca solo tipográfico, ficha separada y fotos completas */
 @media (max-width: 768px) {
-    .detail-container-main { margin-top: 82px; padding-left: 8px; padding-right: 8px; }
+    .detail-container-main { margin-top: 84px; padding-left: 8px; padding-right: 8px; }
     .detail-wrapper { gap: 24px; }
     .web-only { display: none !important; }
 
-    .mobile-car-summary {
-        display: grid;
-        grid-template-columns: 42px minmax(0, 1fr) auto;
-        gap: 12px;
-        align-items: center;
-        padding: 14px 14px 13px;
+    .mobile-vehicle-card {
+        display: block;
+        margin-bottom: 14px;
+        padding: 18px;
         background: var(--card-bg);
-        border-bottom: 1px solid var(--border-color);
-    }
-
-    .mobile-summary-icon {
-        width: 42px;
-        height: 42px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: var(--surface-deep);
-        color: var(--green-accent);
-        font-size: 19px;
         border: 1px solid var(--border-color);
+        border-top: 5px solid var(--green-accent);
+        border-radius: 14px;
+        box-shadow: 0 8px 24px var(--shadow-color);
     }
 
-    .mobile-summary-copy { min-width: 0; }
-    .mobile-summary-name { font-size: 1.02rem; line-height: 1.2; font-weight: 900; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .mobile-summary-price { color: var(--text-muted); font-size: 0.83rem; line-height: 1.3; margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .mobile-summary-id { color: #ffb400; font-size: 1.08rem; font-weight: 900; padding-left: 4px; }
+    .mobile-card-eyebrow {
+        color: var(--green-accent);
+        font-size: 0.68rem;
+        font-weight: 900;
+        letter-spacing: 0.16em;
+        margin-bottom: 8px;
+    }
 
+    .mobile-card-heading {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 12px;
+    }
+
+    .mobile-card-name {
+        min-width: 0;
+        color: var(--text-primary);
+        font-size: clamp(1.12rem, 5vw, 1.45rem);
+        line-height: 1.2;
+        font-weight: 900;
+        overflow-wrap: anywhere;
+    }
+
+    .mobile-card-id {
+        flex: 0 0 auto;
+        color: var(--green-accent);
+        font-size: 0.9rem;
+        font-weight: 900;
+        padding-top: 2px;
+    }
+
+    .mobile-card-price {
+        margin-top: 10px;
+        color: var(--text-muted);
+        font-size: 0.9rem;
+        line-height: 1.45;
+        font-weight: 500;
+    }
+
+    .main-img-wrapper { border-radius: 14px; }
     .image-stage {
-        aspect-ratio: 4 / 3;
+        min-height: 0;
+        aspect-ratio: 1 / 1;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -254,8 +378,9 @@ input[type=range]::-webkit-slider-thumb { height: 24px; width: 24px; border-radi
         background: var(--image-stage-bg);
     }
 
-    .type-badge { top: 12px; right: 12px; font-size: 11px; padding: 5px 10px; }
+    .type-badge { top: 12px; right: 12px; font-size: 10px; padding: 5px 9px; max-width: 48%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .year-badge { bottom: 12px; left: 12px; }
+    .image-zoom-trigger { right: 12px; bottom: 12px; width: 38px; height: 38px; }
 
     .gallery-thumbs {
         flex-wrap: nowrap;
@@ -280,4 +405,21 @@ input[type=range]::-webkit-slider-thumb { height: 24px; width: 24px; border-radi
     .action-card .price-section { display: none; }
     .btn-buy { margin-top: 0; }
     .status-badge { font-size: 1.25rem; padding: 8px 18px; border-width: 2px; }
+
+    .image-lightbox {
+        grid-template-columns: 1fr;
+        padding: 64px 8px 18px;
+    }
+
+    .lightbox-figure { height: calc(100vh - 92px); }
+    .lightbox-nav {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 42px;
+        height: 58px;
+        z-index: 2;
+    }
+    .lightbox-prev { left: 8px; }
+    .lightbox-next { right: 8px; }
 }

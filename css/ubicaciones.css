@@ -9,7 +9,7 @@
     background: var(--card-bg); 
     border-radius: 20px; 
     overflow: hidden; 
-    border: 1px solid #333; 
+    border: 1px solid var(--border-color); 
     display: flex; 
     transition: 0.3s;
 }
@@ -19,7 +19,7 @@
 .sucursal-img img { width: 100%; height: 100%; object-fit: cover; }
 
 .sucursal-info { padding: 30px; flex-grow: 1; }
-.city-tag { background: #111; color: var(--green-accent); font-size: 10px; font-weight: 900; padding: 4px 10px; border-radius: 5px; text-transform: uppercase; margin-bottom: 10px; display: inline-block; }
+.city-tag { background: var(--surface-deep); color: var(--green-accent); font-size: 10px; font-weight: 900; padding: 4px 10px; border-radius: 5px; text-transform: uppercase; margin-bottom: 10px; display: inline-block; }
 .sucursal-info h3 { font-size: 1.8rem; font-weight: 900; margin-bottom: 15px; }
 .sucursal-info p { font-size: 14px; color: var(--gray-text); margin-bottom: 10px; display: flex; align-items: flex-start; gap: 10px; line-height: 1.4; }
 .sucursal-info i { width: 15px; margin-top: 3px; }
