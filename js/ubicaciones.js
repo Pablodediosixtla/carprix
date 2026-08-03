@@ -8,14 +8,4 @@ document.addEventListener('DOMContentLoaded', () => {
             navMenu.classList.toggle('active');
         });
     }
-
-    // Efecto de scroll en header
-    window.addEventListener('scroll', () => {
-        const header = document.querySelector('.main-header');
-        if (window.scrollY > 50) {
-            header.style.background = "rgba(26, 26, 26, 0.98)";
-        } else {
-            header.style.background = "rgba(26, 26, 26, 0.9)";
-        }
-    });
 });

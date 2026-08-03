@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="../img/favicon.ico">
+    <link rel="apple-touch-icon" sizes="180x180" href="../img/favicon-180.png">
+    <script src="../js/theme.js"></script>
     <title>Detalle del Auto | CARPRIX</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -23,7 +26,13 @@
                 <li><a href="contacto.php">Contacto</a></li>
                 <li><a href="#" class="btn-outline">Iniciar Sesión</a></li>
             </ul>
-            <div class="menu-toggle" id="mobile-menu"><i class="fas fa-bars"></i></div>
+            <div class="nav-actions">
+                <button type="button" class="theme-toggle" id="theme-toggle" aria-label="Cambiar tema" title="Cambiar tema">
+                    <i class="fas fa-sun" aria-hidden="true"></i>
+                    <span class="sr-only">Cambiar tema</span>
+                </button>
+                <div class="menu-toggle" id="mobile-menu"><i class="fas fa-bars"></i></div>
+            </div>
         </nav>
     </header>
 
@@ -37,14 +46,25 @@
                 <div class="gallery-container">
                     
                     <div class="main-img-wrapper">
-                        <div id="status-overlay" class="status-overlay" style="display: none;">
-                            <span id="status-badge" class="status-badge"></span>
+                        <div class="mobile-car-summary" aria-live="polite">
+                            <div class="mobile-summary-icon" aria-hidden="true"><i class="fas fa-car-side"></i></div>
+                            <div class="mobile-summary-copy">
+                                <h1 class="mobile-summary-name" id="mobile-det-name">Cargando...</h1>
+                                <p class="mobile-summary-price" id="mobile-det-price">Consultando precio...</p>
+                            </div>
+                            <span class="mobile-summary-id" id="mobile-det-id"></span>
                         </div>
-                        
-                        <img id="main-view" src="" alt="Auto Principal">
-                        
-                        <span id="badge-year" class="year-badge"></span>
-                        <span id="badge-tipo" class="type-badge" style="display:none;"></span>
+
+                        <div class="image-stage">
+                            <div id="status-overlay" class="status-overlay" style="display: none;">
+                                <span id="status-badge" class="status-badge"></span>
+                            </div>
+
+                            <img id="main-view" src="" alt="Auto Principal">
+
+                            <span id="badge-year" class="year-badge"></span>
+                            <span id="badge-tipo" class="type-badge" style="display:none;"></span>
+                        </div>
                     </div>
 
                     <div class="gallery-thumbs" id="gallery-thumbs">

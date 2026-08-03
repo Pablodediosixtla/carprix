@@ -57,8 +57,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Llenar Textos Principales
         document.title = `${auto.marca} ${auto.modelo} | CARPRIX`;
-        document.getElementById('det-name').innerText = `${auto.marca} ${auto.modelo}`;
+        const vehicleName = `${auto.marca} ${auto.modelo}`;
+        document.getElementById('det-name').innerText = vehicleName;
         document.getElementById('det-price').innerText = priceFmt;
+
+        // Resumen superior exclusivo de la vista móvil.
+        // Utiliza los mismos datos ya devueltos por el servicio; no cambia la consulta.
+        const mobileName = document.getElementById('mobile-det-name');
+        const mobilePrice = document.getElementById('mobile-det-price');
+        const mobileId = document.getElementById('mobile-det-id');
+
+        if (mobileName) mobileName.innerText = vehicleName;
+        if (mobileId) mobileId.innerText = auto.id ? `#${auto.id}` : '';
+
+        if (mobilePrice) {
+            const monthlyPayment = parseFloat(auto.mensualidad || 0);
+            const monthlyFmt = monthlyPayment > 0
+                ? new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN', maximumFractionDigits: 0 }).format(monthlyPayment)
+                : null;
+
+            mobilePrice.innerText = monthlyFmt
+                ? `DESDE ${monthlyFmt}/mes | ${priceFmt}`
+                : priceFmt;
+        }
         
         // ---- CONTROL VISUAL DE ESTATUS ----
         const btnApartar = document.getElementById('btn-apartar');
