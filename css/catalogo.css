@@ -114,3 +114,32 @@
     .layout-list .price { font-size: 1.2rem; margin: 8px 0; }
     .layout-list .btn-details { width: 100%; padding: 10px; font-size: 0.9rem; margin-top: 5px; }
 }
+
+/* Ajustes de contraste y contención - revisión 20260803-3 */
+html[data-theme="light"] .type-badge {
+    background: #1a1a1a !important;
+    color: #ffffff !important;
+    border-color: var(--green-accent) !important;
+}
+
+@media (max-width: 768px) {
+    .catalogo-layout,
+    .catalogo-main,
+    #catalogo-container,
+    .car-card,
+    .car-img,
+    .car-info {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+    }
+
+    .catalogo-top-bar {
+        gap: 12px;
+        padding: 12px 14px;
+    }
+
+    .layout-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}

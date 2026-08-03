@@ -18,19 +18,19 @@ $reseñas = [
 ];
 ?>
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" data-theme="dark" data-theme-locked="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#1a1a1a">
     <link rel="icon" type="image/x-icon" href="img/favicon.ico">
     <link rel="apple-touch-icon" sizes="180x180" href="img/favicon-180.png">
-    <script src="js/theme.js?v=20260803-2"></script>
+    <script src="js/theme.js?v=20260803-3"></script>
     <title>CARPRIX | Confianza que te mueve</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/styles.css?v=20260803-2">
+    <link rel="stylesheet" href="css/styles.css?v=20260803-3">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
@@ -53,10 +53,6 @@ $reseñas = [
                 <li><a href="#" class="btn-outline">Iniciar Sesión</a></li>
             </ul>
             <div class="nav-actions">
-                <button type="button" class="theme-toggle" id="theme-toggle" data-theme-toggle aria-label="Cambiar tema" title="Cambiar tema">
-                    <i class="fas fa-sun" aria-hidden="true"></i>
-                    <span class="sr-only">Cambiar tema</span>
-                </button>
                 <div class="menu-toggle" id="mobile-menu"><i class="fas fa-bars"></i></div>
             </div>
         </nav>
@@ -146,6 +142,6 @@ $reseñas = [
         </div>
     </footer>
 
-    <script src="js/scripts.js?v=20260803-2"></script>
+    <script src="js/scripts.js?v=20260803-3"></script>
 </body>
 </html>

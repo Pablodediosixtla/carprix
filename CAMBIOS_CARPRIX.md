@@ -1,3 +1,13 @@
+# Ajustes CARPRIX — revisión 20260803-3
+
+- La página principal (`index.php`) queda bloqueada permanentemente en modo oscuro y ya no muestra el selector de tema.
+- Las vistas secundarias conservan el selector claro/oscuro y la preferencia del usuario.
+- Se corrigió la duplicación del logotipo en tema claro: ahora solo se muestra una variante por resolución y tema.
+- Se reforzó el contraste de la etiqueta del tipo de vehículo en tema claro.
+- Se corrigió el desbordamiento horizontal en la vista móvil de detalle.
+- La fotografía principal móvil usa un escenario 4:3 con `object-fit: contain`, sin recortar el vehículo.
+- No se modificaron consultas, endpoints, rutas de imágenes ni lógica de base de datos.
+
 # CARPRIX - Actualización visual y responsive
 
 ## 1. Identidad oficial

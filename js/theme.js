@@ -5,6 +5,11 @@
     const root = document.documentElement;
     const THEMES = new Set(['dark', 'light']);
 
+    const getLockedTheme = () => {
+        const locked = root.dataset.themeLocked;
+        return THEMES.has(locked) ? locked : null;
+    };
+
     const readStoredTheme = () => {
         try {
             const value = window.localStorage.getItem(STORAGE_KEY);
@@ -18,11 +23,11 @@
         try {
             window.localStorage.setItem(STORAGE_KEY, theme);
         } catch (error) {
-            // El cambio sigue funcionando durante la sesión aunque el navegador bloquee localStorage.
+            // El tema sigue funcionando durante la sesión aunque localStorage esté bloqueado.
         }
     };
 
-    const getInitialTheme = () => readStoredTheme() || 'dark';
+    const getInitialTheme = () => getLockedTheme() || readStoredTheme() || 'dark';
 
     const updateThemeColor = (theme) => {
         const themeColor = document.querySelector('meta[name="theme-color"]');
@@ -32,7 +37,16 @@
     };
 
     const updateButtons = (theme) => {
+        const lockedTheme = getLockedTheme();
+
         document.querySelectorAll('[data-theme-toggle], #theme-toggle').forEach((button) => {
+            if (lockedTheme) {
+                button.hidden = true;
+                button.disabled = true;
+                button.setAttribute('aria-hidden', 'true');
+                return;
+            }
+
             const nextTheme = theme === 'dark' ? 'light' : 'dark';
             const label = nextTheme === 'light'
                 ? 'Cambiar a tema claro'
@@ -40,6 +54,9 @@
             const icon = button.querySelector('i');
             const text = button.querySelector('[data-theme-label]');
 
+            button.hidden = false;
+            button.disabled = false;
+            button.removeAttribute('aria-hidden');
             button.setAttribute('aria-label', label);
             button.setAttribute('title', label);
             button.setAttribute('aria-pressed', String(theme === 'light'));
@@ -53,8 +70,10 @@
         });
     };
 
-    const applyTheme = (theme, persist = false) => {
-        const validTheme = THEMES.has(theme) ? theme : 'dark';
+    const applyTheme = (requestedTheme, persist = false) => {
+        const lockedTheme = getLockedTheme();
+        const validTheme = lockedTheme || (THEMES.has(requestedTheme) ? requestedTheme : 'dark');
+
         root.setAttribute('data-theme', validTheme);
         root.style.colorScheme = validTheme;
 
@@ -66,30 +85,33 @@
         updateThemeColor(validTheme);
         updateButtons(validTheme);
 
-        if (persist) {
+        if (persist && !lockedTheme) {
             storeTheme(validTheme);
         }
 
         window.dispatchEvent(new CustomEvent('carprix:themechange', {
-            detail: { theme: validTheme }
+            detail: { theme: validTheme, locked: Boolean(lockedTheme) }
         }));
     };
 
-    // Se aplica antes de cargar el CSS para evitar el destello de un tema incorrecto.
+    // Se ejecuta antes de cargar el CSS para evitar destellos de un tema incorrecto.
     applyTheme(getInitialTheme());
 
     const bindThemeControls = () => {
-        applyTheme(root.getAttribute('data-theme') || getInitialTheme());
+        const lockedTheme = getLockedTheme();
+        applyTheme(lockedTheme || root.getAttribute('data-theme') || getInitialTheme());
 
-        document.querySelectorAll('[data-theme-toggle], #theme-toggle').forEach((button) => {
-            if (button.dataset.themeBound === 'true') return;
+        if (!lockedTheme) {
+            document.querySelectorAll('[data-theme-toggle], #theme-toggle').forEach((button) => {
+                if (button.dataset.themeBound === 'true') return;
 
-            button.dataset.themeBound = 'true';
-            button.addEventListener('click', () => {
-                const currentTheme = root.getAttribute('data-theme') || 'dark';
-                applyTheme(currentTheme === 'dark' ? 'light' : 'dark', true);
+                button.dataset.themeBound = 'true';
+                button.addEventListener('click', () => {
+                    const currentTheme = root.getAttribute('data-theme') || 'dark';
+                    applyTheme(currentTheme === 'dark' ? 'light' : 'dark', true);
+                });
             });
-        });
+        }
 
         const header = document.querySelector('.main-header');
         const updateHeaderState = () => {
@@ -109,6 +131,7 @@
     }
 
     window.addEventListener('storage', (event) => {
+        if (getLockedTheme()) return;
         if (event.key === STORAGE_KEY && THEMES.has(event.newValue)) {
             applyTheme(event.newValue, false);
         }

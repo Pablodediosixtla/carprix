@@ -423,3 +423,125 @@ input[type=range]::-webkit-slider-thumb { height: 24px; width: 24px; border-radi
     .lightbox-prev { left: 8px; }
     .lightbox-next { right: 8px; }
 }
+
+
+/* =========================================================
+   CONTENCIÓN MÓVIL DE DETALLE - REVISIÓN 20260803-3
+   ========================================================= */
+@media (max-width: 768px) {
+    html,
+    body {
+        width: 100%;
+        max-width: 100%;
+        overflow-x: hidden;
+    }
+
+    .detail-container-main {
+        width: 100%;
+        max-width: 100%;
+        margin-top: 82px;
+        padding: 10px 12px 42px;
+        overflow: hidden;
+    }
+
+    .detail-wrapper {
+        display: block !important;
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+    }
+
+    .detail-content-left,
+    .gallery-container,
+    .main-img-wrapper,
+    .image-stage,
+    .gallery-thumbs,
+    .technical-info,
+    .specs-box-grid,
+    .detail-sidebar,
+    .action-card {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+    }
+
+    .mobile-vehicle-card {
+        width: 100%;
+        max-width: 100%;
+        overflow: hidden;
+    }
+
+    .mobile-card-heading {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: start;
+    }
+
+    .mobile-card-name,
+    .mobile-card-price {
+        max-width: 100%;
+        overflow-wrap: anywhere;
+        word-break: normal;
+    }
+
+    .main-img-wrapper {
+        overflow: hidden;
+    }
+
+    .image-stage {
+        aspect-ratio: 4 / 3;
+        min-height: 0;
+        overflow: hidden;
+    }
+
+    .gallery-container img#main-view {
+        display: block;
+        width: 100%;
+        height: 100%;
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+        object-position: center;
+    }
+
+    .gallery-thumbs {
+        overflow-x: auto;
+        overflow-y: hidden;
+        overscroll-behavior-inline: contain;
+    }
+
+    .detail-sidebar {
+        margin-top: 24px;
+    }
+
+    .specs-box-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+@media (max-width: 390px) {
+    .detail-container-main {
+        padding-left: 8px;
+        padding-right: 8px;
+    }
+
+    .mobile-vehicle-card {
+        padding: 15px;
+    }
+
+    .mobile-card-heading {
+        gap: 8px;
+    }
+
+    .mobile-card-name {
+        font-size: 1.08rem;
+    }
+
+    .mobile-card-price {
+        font-size: 0.84rem;
+    }
+
+    .type-badge {
+        max-width: 44%;
+    }
+}

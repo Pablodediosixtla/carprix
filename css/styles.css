@@ -544,3 +544,94 @@ body, .main-header, .nav-menu, .car-card, .action-card, .spec-card,
         transition-duration: 0.01ms !important;
     }
 }
+
+
+/* =========================================================
+   AJUSTES DE IDENTIDAD Y RESPONSIVE - REVISIÓN 20260803-3
+   ========================================================= */
+
+/*
+   Cada resolución muestra una sola variante del logotipo.
+   Esta regla evita que en tema claro aparezcan simultáneamente
+   el logotipo completo y el wordmark móvil.
+*/
+.theme-logo {
+    display: none !important;
+}
+
+html[data-theme="dark"] .brand-logo-full.theme-logo-dark,
+html[data-theme="light"] .brand-logo-full.theme-logo-light {
+    display: block !important;
+}
+
+/* La portada se mantiene permanentemente en identidad oscura. */
+html[data-theme-locked="dark"] {
+    color-scheme: dark;
+}
+
+html[data-theme-locked="dark"] .theme-toggle {
+    display: none !important;
+}
+
+/* Contraste corporativo de las etiquetas sobre fotografías. */
+html[data-theme="light"] .type-badge {
+    background: #1a1a1a !important;
+    color: #ffffff !important;
+    border-color: var(--green-accent) !important;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.16);
+}
+
+@media (max-width: 768px) {
+    html[data-theme="dark"] .brand-logo-full.theme-logo-dark,
+    html[data-theme="light"] .brand-logo-full.theme-logo-light {
+        display: none !important;
+    }
+
+    html[data-theme="dark"] .brand-logo-mobile.theme-logo-dark,
+    html[data-theme="light"] .brand-logo-mobile.theme-logo-light {
+        display: block !important;
+    }
+
+    .logo {
+        min-width: 0;
+        max-width: calc(100% - 108px);
+    }
+
+    .brand-logo-link {
+        max-width: 100%;
+        overflow: hidden;
+    }
+
+    .brand-logo-mobile {
+        width: 132px;
+        max-width: 100%;
+    }
+
+    .nav-actions {
+        flex: 0 0 auto;
+        gap: 8px;
+        margin-left: 10px;
+    }
+}
+
+@media (max-width: 390px) {
+    .container {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+
+    .brand-logo-mobile {
+        width: 118px;
+    }
+
+    .theme-toggle,
+    .menu-toggle {
+        width: 40px;
+        height: 40px;
+    }
+
+    .nav-menu {
+        left: -10px;
+        width: calc(100% + 20px);
+    }
+}
