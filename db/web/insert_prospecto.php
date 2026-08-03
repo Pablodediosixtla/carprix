@@ -208,6 +208,18 @@ if ($anio < 1980 || $anio > ((int) date('Y') + 1)) {
 if ($kilometraje < 0) {
     $errors[] = 'El kilometraje no puede ser negativo.';
 }
+if ($color === null) {
+    $errors[] = 'El color del vehículo es obligatorio.';
+}
+if ($transmision === null) {
+    $errors[] = 'La transmisión del vehículo es obligatoria.';
+}
+if ($tipoFactura === null) {
+    $errors[] = 'El tipo de factura es obligatorio.';
+}
+if ($propietarios === null) {
+    $errors[] = 'El número de propietarios es obligatorio.';
+}
 if ($nombreCliente === '') {
     $errors[] = 'El nombre del cliente es obligatorio.';
 }

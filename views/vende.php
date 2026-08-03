@@ -215,6 +215,64 @@
                                 <small class="field-error"></small>
                             </div>
 
+                            <div class="form-group">
+                                <label for="v-color">Color <span aria-hidden="true">*</span></label>
+                                <select id="v-color" required>
+                                    <option value="">Selecciona color</option>
+                                    <option value="Blanco">Blanco</option>
+                                    <option value="Negro">Negro</option>
+                                    <option value="Gris">Gris</option>
+                                    <option value="Plata">Plata</option>
+                                    <option value="Rojo">Rojo</option>
+                                    <option value="Azul">Azul</option>
+                                    <option value="Verde">Verde</option>
+                                    <option value="Arena">Arena / Beige</option>
+                                    <option value="Café">Café</option>
+                                    <option value="Amarillo">Amarillo</option>
+                                    <option value="Naranja">Naranja</option>
+                                    <option value="Otro">Otro</option>
+                                </select>
+                                <small class="field-error"></small>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="v-transmision">Transmisión <span aria-hidden="true">*</span></label>
+                                <select id="v-transmision" required>
+                                    <option value="">Selecciona transmisión</option>
+                                    <option value="Manual">Manual</option>
+                                    <option value="Automática">Automática</option>
+                                    <option value="CVT">CVT</option>
+                                    <option value="DSG / DCT">DSG / DCT</option>
+                                    <option value="Otra">Otra</option>
+                                </select>
+                                <small class="field-error"></small>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="v-tipo-factura">Tipo de factura <span aria-hidden="true">*</span></label>
+                                <select id="v-tipo-factura" required>
+                                    <option value="">Selecciona tipo de factura</option>
+                                    <option value="Original">Original</option>
+                                    <option value="Empresa">Empresa</option>
+                                    <option value="Refacturada">Refacturada</option>
+                                    <option value="Importación">Importación</option>
+                                    <option value="Otro">Otro</option>
+                                </select>
+                                <small class="field-error"></small>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="v-propietarios">Propietarios <span aria-hidden="true">*</span></label>
+                                <select id="v-propietarios" required>
+                                    <option value="">Selecciona propietarios</option>
+                                    <option value="1 (Único dueño)">1 (Único dueño)</option>
+                                    <option value="2 propietarios">2 propietarios</option>
+                                    <option value="3 propietarios">3 propietarios</option>
+                                    <option value="4 o más propietarios">4 o más propietarios</option>
+                                </select>
+                                <small class="field-error"></small>
+                            </div>
+
                             <fieldset class="form-group radio-fieldset">
                                 <legend>Refrendo vehicular <span aria-hidden="true">*</span></legend>
                                 <div class="radio-options">
@@ -385,6 +443,6 @@
         </div>
     </footer>
 
-    <script src="../js/vende.js?v=20260803-4"></script>
+    <script src="../js/vende.js?v=20260803-5"></script>
 </body>
 </html>
