@@ -1,0 +1,16 @@
+{
+  "folders": [
+    {
+      "name": "CARPRIX",
+      "path": "."
+    }
+  ],
+  "settings": {
+    "intelephense.environment.phpVersion": "8.2.0",
+    "intelephense.environment.includePaths": [
+      "db/web/auth",
+      "db/web/operativo",
+      "db/conn"
+    ]
+  }
+}
