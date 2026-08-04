@@ -234,10 +234,17 @@
             if (closeButton) closeButton.closest('dialog')?.close();
         });
         document.querySelectorAll('dialog').forEach((dialog) => {
+            /*
+             * En un <select> nativo, el navegador puede reportar el clic de una
+             * opción fuera del rectángulo visual del <dialog>. La validación por
+             * coordenadas cerraba el modal aunque el usuario estuviera usando un
+             * control interno. El backdrop del diálogo tiene como target al propio
+             * elemento <dialog>, por lo que esta comprobación es más segura.
+             */
             dialog.addEventListener('click', (event) => {
-                const rect = dialog.getBoundingClientRect();
-                const inside = event.clientX >= rect.left && event.clientX <= rect.right && event.clientY >= rect.top && event.clientY <= rect.bottom;
-                if (!inside) dialog.close();
+                if (event.target === dialog) {
+                    dialog.close();
+                }
             });
         });
     };
