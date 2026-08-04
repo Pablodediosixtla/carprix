@@ -13,7 +13,7 @@ header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-W
 if (($_SERVER['REQUEST_METHOD'] ?? '') === 'OPTIONS') { http_response_code(204); exit; }
 
 $path = realpath("/home/site/wwwroot/db/conn/conn_db.php");
-if ($path && file_exists($path)) { include $path; } else { include "../conn/conn_db.php"; }
+if ($path && file_exists($path)) { include $path; } else { include __DIR__ . "/../conn/conn_db.php"; }
 
 $in = json_decode(file_get_contents("php://input"), true) ?? [];
 $id = isset($in['id']) ? (int)$in['id'] : null;

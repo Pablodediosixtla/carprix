@@ -39,7 +39,7 @@ function applyCorsHeaders(): void
 function connectDatabase(): mysqli
 {
     $absolute = '/home/site/wwwroot/db/conn/conn_db.php';
-    $relative = __DIR__ . '/../conn/conn_db.php';
+    $relative = dirname(__DIR__, 2) . '/conn/conn_db.php';
 
     if (file_exists($absolute)) {
         require_once $absolute;

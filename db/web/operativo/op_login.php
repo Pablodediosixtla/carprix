@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-require_once __DIR__ . '/../../auth/auth_bootstrap.php';
+require_once __DIR__ . '/../auth/auth_bootstrap.php';
 
 $input = bootstrapApi(false);
 $login = mb_strtolower(requireString($input, 'login', 'login', 150), 'UTF-8');
