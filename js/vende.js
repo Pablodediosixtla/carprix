@@ -167,10 +167,6 @@ document.addEventListener('DOMContentLoaded', () => {
             ['Solicitante', fullName],
             ['Vehículo', vehicle],
             ['Kilometraje', `${Number(document.getElementById('v-km').value || 0).toLocaleString('es-MX')} km`],
-            ['Color', document.getElementById('v-color').value],
-            ['Transmisión', document.getElementById('v-transmision').value],
-            ['Tipo de factura', document.getElementById('v-tipo-factura').value],
-            ['Propietarios', document.getElementById('v-propietarios').value],
             ['Ubicación', location],
             ['Teléfono', document.getElementById('v-tel').value.trim()],
             ['Correo', document.getElementById('v-email').value.trim()]
@@ -281,25 +277,31 @@ document.addEventListener('DOMContentLoaded', () => {
         const state = document.getElementById('v-estado').value;
         const municipality = document.getElementById('v-municipio').value.trim();
 
+        /*
+         * El endpoint actual no tiene columnas separadas para correo, refrendo,
+         * imperfecciones o ubicación. Se integran en comentarios para conservar
+         * toda la información sin modificar la base de datos ni insert_prospecto.php.
+         */
+        const comments = [
+            `Correo: ${email}`,
+            `Refrendo: ${refrendo ? refrendo.value : 'No indicado'}${debtAmount ? ` (adeudo aproximado: $${Number(debtAmount).toLocaleString('es-MX')})` : ''}`,
+            `Ubicación del vehículo: ${municipality}, ${state}`,
+            `Imperfecciones: ${imperfections}`
+        ].join(' | ');
+
         const payload = {
             marca: document.getElementById('v-marca').value.trim(),
             modelo: document.getElementById('v-modelo').value.trim(),
             version: document.getElementById('v-version').value.trim(),
             anio: document.getElementById('v-anio').value,
-            kilometraje: document.getElementById('v-km').value,
-            color: document.getElementById('v-color').value,
-            transmision: document.getElementById('v-transmision').value,
-            tipo_factura: document.getElementById('v-tipo-factura').value,
-            propietarios: document.getElementById('v-propietarios').value,
-            nombre_cliente: [firstName, paternalSurname, maternalSurname].filter(Boolean).join(' '),
-            telefono: document.getElementById('v-tel').value.trim(),
-            correo_cliente: email,
-            refrendo_estatus: refrendo ? refrendo.value : '',
-            refrendo_adeudo_monto: debtAmount || 0,
-            imperfecciones: imperfections,
-            estado_vehiculo: state,
-            municipio_vehiculo: municipality,
-            comentarios: 'Solicitud generada desde el formulario web de CARPRIX.'
+            km: document.getElementById('v-km').value,
+            color: '',
+            transmision: '',
+            tipo_factura: '',
+            propietarios: '',
+            nombre: [firstName, paternalSurname, maternalSurname].filter(Boolean).join(' '),
+            tel: document.getElementById('v-tel').value.trim(),
+            comentarios: comments
         };
 
         submitButton.disabled = true;

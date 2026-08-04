@@ -33,7 +33,7 @@
                 <li><a href="vende.php">Vende</a></li>
                 <li><a href="nosotros.php">Nosotros</a></li>
                 <li><a href="contacto.php">Contacto</a></li>
-                <li><a href="#" class="btn-outline">Iniciar Sesión</a></li>
+                <li><a href="../operativo/login.php" class="btn-outline">Iniciar Sesión</a></li>
             </ul>
             <div class="nav-actions">
                 <button type="button" class="theme-toggle" id="theme-toggle" data-theme-toggle aria-label="Cambiar tema" title="Cambiar tema">

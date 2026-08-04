@@ -130,3 +130,95 @@ function userHasActiveRole(mysqli $con, int $userId, array $roleCodes): bool
 
     return $found;
 }
+
+function canManagePeople(array $user): bool
+{
+    return hasAnyRole($user, ['SUPER_ADMIN', 'ADMIN_OPERATIVO', 'AUTORIZADOR']);
+}
+
+function personLevelsAllowed(array $user): array
+{
+    if (isSuperAdmin($user)) {
+        return ['VENDEDOR', 'SUPERVISOR', 'GERENTE_OPERACIONES'];
+    }
+
+    if (hasAnyRole($user, ['ADMIN_OPERATIVO'])) {
+        return ['VENDEDOR', 'SUPERVISOR'];
+    }
+
+    if (hasAnyRole($user, ['AUTORIZADOR'])) {
+        return ['VENDEDOR'];
+    }
+
+    return [];
+}
+
+function personRoleCodes(string $level, bool $supervisorAlsoSells = false): array
+{
+    return match ($level) {
+        'VENDEDOR' => ['VENTAS'],
+        'SUPERVISOR' => $supervisorAlsoSells ? ['AUTORIZADOR', 'VENTAS'] : ['AUTORIZADOR'],
+        'GERENTE_OPERACIONES' => ['ADMIN_OPERATIVO', 'AUTORIZADOR'],
+        default => [],
+    };
+}
+
+function hierarchyDescendantIds(mysqli $con, int $rootUserId): array
+{
+    $visited = [$rootUserId => true];
+    $frontier = [$rootUserId];
+
+    for ($depth = 0; $depth < 30 && $frontier !== []; $depth++) {
+        $placeholders = implode(',', array_fill(0, count($frontier), '?'));
+        $types = str_repeat('i', count($frontier));
+        $params = array_values($frontier);
+
+        $stmt = $con->prepare(
+            "SELECT usuario_id
+             FROM operativo_usuario_jerarquia
+             WHERE activo = 1
+               AND supervisor_id IN ({$placeholders})"
+        );
+        if (!$stmt) {
+            databaseError($con);
+        }
+
+        bindDynamicParams($stmt, $types, $params);
+        $stmt->execute();
+        $rows = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+        $stmt->close();
+
+        $next = [];
+        foreach ($rows as $row) {
+            $id = (int) $row['usuario_id'];
+            if ($id > 0 && !isset($visited[$id])) {
+                $visited[$id] = true;
+                $next[] = $id;
+            }
+        }
+        $frontier = $next;
+    }
+
+    return array_map('intval', array_keys($visited));
+}
+
+function assertActiveApprover(mysqli $con, int $supervisorId): void
+{
+    $stmt = $con->prepare("SELECT id FROM operativo_usuario WHERE id = ? AND estatus = 'Activo' LIMIT 1");
+    if (!$stmt) {
+        databaseError($con);
+    }
+    $stmt->bind_param('i', $supervisorId);
+    $stmt->execute();
+    $exists = (bool) $stmt->get_result()->fetch_row();
+    $stmt->close();
+
+    if (!$exists) {
+        errorResponse('El supervisor seleccionado no existe o está inactivo.', 422, 'SUPERVISOR_NOT_AVAILABLE');
+    }
+
+    if (!userHasActiveRole($con, $supervisorId, ['SUPER_ADMIN', 'ADMIN_OPERATIVO', 'AUTORIZADOR'])) {
+        errorResponse('El supervisor debe tener rol AUTORIZADOR, ADMIN_OPERATIVO o SUPER_ADMIN.', 422, 'SUPERVISOR_ROLE_REQUIRED');
+    }
+}
+

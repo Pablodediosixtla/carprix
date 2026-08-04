@@ -71,4 +71,4 @@ if (!$stmt->execute()) {
 $stmt->close();
 $con->close();
 
-okResponse([], 'Auto actualizado correctamente.');
+okResponse(['id' => $autoId], 'Auto actualizado correctamente.');

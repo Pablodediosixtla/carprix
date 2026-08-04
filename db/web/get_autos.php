@@ -15,6 +15,15 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'OPTIONS') { http_response_code(204);
 $path = realpath("/home/site/wwwroot/db/conn/conn_db.php");
 if ($path && file_exists($path)) { include $path; } else { include __DIR__ . "/../conn/conn_db.php"; }
 
+
+function normalizarRutaImagenPublica($ruta) {
+    $ruta = trim((string)$ruta);
+    if ($ruta === '' || preg_match('#^(https?:)?//#i', $ruta) || str_starts_with($ruta, 'data:')) {
+        return $ruta;
+    }
+    return '/' . ltrim(str_replace('\\', '/', $ruta), './');
+}
+
 $in = json_decode(file_get_contents("php://input"), true) ?? [];
 $id = isset($in['id']) ? (int)$in['id'] : null;
 
@@ -40,7 +49,7 @@ if ($id) {
             
             $imagenes_extra = [];
             while ($row = $res_img->fetch_assoc()) {
-                $imagenes_extra[] = $row['ruta_imagen'];
+                $imagenes_extra[] = normalizarRutaImagenPublica($row['ruta_imagen']);
             }
             
             // Añadimos el array de imágenes al objeto del auto
@@ -48,6 +57,10 @@ if ($id) {
             $stmt_img->close();
         }
         
+        foreach ($autos as &$auto) {
+            $auto['img_principal'] = normalizarRutaImagenPublica($auto['img_principal'] ?? '');
+        }
+        unset($auto);
         echo json_encode(["ok" => true, "data" => $autos]);
     } else {
         echo json_encode(["ok" => false, "error" => $con->error]);
@@ -62,6 +75,10 @@ if ($id) {
     if ($stmt->execute()) {
         $result = $stmt->get_result();
         $autos = $result->fetch_all(MYSQLI_ASSOC);
+        foreach ($autos as &$auto) {
+            $auto['img_principal'] = normalizarRutaImagenPublica($auto['img_principal'] ?? '');
+        }
+        unset($auto);
         echo json_encode(["ok" => true, "data" => $autos]);
     } else {
         echo json_encode(["ok" => false, "error" => $con->error]);

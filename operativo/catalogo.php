@@ -3,9 +3,16 @@ require_once __DIR__ . '/_layout.php';
 operativoPageStart('Gestión de catálogo', 'catalogo');
 ?>
 <section class="op-page-head">
-    <div><span class="op-kicker">INVENTARIO</span><h2>Autos publicados</h2><p>Consulta, registra y edita la información operativa del catálogo.</p></div>
-    <button class="op-primary-button" id="new-auto-button" type="button"><i class="fa-solid fa-plus"></i> Agregar auto</button>
+    <div>
+        <span class="op-kicker">INVENTARIO</span>
+        <h2>Autos publicados</h2>
+        <p>Consulta, registra y edita la información operativa y las imágenes del catálogo.</p>
+    </div>
+    <button class="op-primary-button" id="new-auto-button" type="button">
+        <i class="fa-solid fa-plus"></i> Agregar auto
+    </button>
 </section>
+
 <section class="op-filter-bar">
     <label class="op-search"><i class="fa-solid fa-magnifying-glass"></i><input id="catalog-search" placeholder="Buscar por ID, marca o modelo"></label>
     <select id="catalog-status"><option value="">Todos los estatus</option><option>Disponible</option><option>Vendido</option><option>Oculto</option></select>
@@ -13,13 +20,20 @@ operativoPageStart('Gestión de catálogo', 'catalogo');
     <select id="catalog-location"><option value="">Todas las ubicaciones</option></select>
     <button class="op-secondary-button" id="catalog-refresh" type="button"><i class="fa-solid fa-rotate"></i></button>
 </section>
+
 <section class="op-catalog-grid" id="catalog-grid"><div class="op-loading">Cargando catálogo...</div></section>
 <div class="op-pagination" id="catalog-pagination"></div>
 
 <dialog class="op-dialog wide" id="auto-dialog">
-    <form method="dialog" class="op-dialog-card" id="auto-form">
-        <div class="op-dialog-header"><div><small>CATÁLOGO</small><h3 id="auto-dialog-title">Agregar auto</h3></div><button class="op-dialog-close" value="cancel" aria-label="Cerrar"><i class="fa-solid fa-xmark"></i></button></div>
+    <form class="op-dialog-card" id="auto-form" novalidate>
+        <div class="op-dialog-header">
+            <div><small>CATÁLOGO</small><h3 id="auto-dialog-title">Agregar auto</h3></div>
+            <button class="op-dialog-close" type="button" data-close-dialog aria-label="Cerrar"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+
         <input type="hidden" id="auto-id">
+        <input type="hidden" id="auto-imagen">
+
         <div class="op-form-grid three">
             <label class="op-field"><span>Marca *</span><input id="auto-marca" required maxlength="50"></label>
             <label class="op-field span-2"><span>Modelo *</span><input id="auto-modelo" required maxlength="100"></label>
@@ -37,10 +51,50 @@ operativoPageStart('Gestión de catálogo', 'catalogo');
             <label class="op-field"><span>Pasajeros</span><input id="auto-pasajeros" type="number" min="1" value="5"></label>
             <label class="op-field"><span>Tracción</span><input id="auto-traccion" maxlength="50" value="Delantera"></label>
             <label class="op-field"><span>Dueños</span><input id="auto-duenos" type="number" min="1" value="1"></label>
-            <label class="op-field span-3"><span>Imagen principal</span><input id="auto-imagen" maxlength="500" placeholder="Catalogo/123/Img01.jpg"></label>
+
+            <section class="op-image-manager span-3" aria-labelledby="auto-images-title">
+                <div class="op-image-manager-head">
+                    <div>
+                        <span class="op-field-label" id="auto-images-title">Imágenes del auto</span>
+                        <small>JPG, PNG o WEBP. Máximo 12 imágenes y 8 MB por archivo.</small>
+                    </div>
+                    <div>
+                        <input id="auto-image-files" type="file" accept="image/jpeg,image/png,image/webp" multiple hidden>
+                        <button class="op-secondary-button" id="add-auto-images-button" type="button">
+                            <i class="fa-solid fa-images"></i> Agregar imágenes
+                        </button>
+                    </div>
+                </div>
+
+                <div class="op-image-section" id="existing-image-section">
+                    <div class="op-image-section-title">
+                        <strong>Imágenes actuales</strong>
+                        <span id="existing-image-count">0</span>
+                    </div>
+                    <div class="op-image-grid" id="auto-existing-images"></div>
+                </div>
+
+                <div class="op-image-section" id="new-image-section" hidden>
+                    <div class="op-image-section-title">
+                        <strong>Nuevas imágenes</strong>
+                        <span id="new-image-count">0</span>
+                    </div>
+                    <div class="op-image-grid" id="auto-new-images"></div>
+                </div>
+
+                <div class="op-image-help">
+                    <i class="fa-solid fa-star"></i>
+                    Marca una imagen como principal. La imagen principal será la portada del auto en el catálogo público.
+                </div>
+            </section>
         </div>
+
         <div class="op-form-message" id="auto-message" hidden></div>
-        <div class="op-dialog-actions"><button class="op-secondary-button" value="cancel" type="button" data-close-dialog>Cancelar</button><button class="op-primary-button" id="auto-save" type="submit"><i class="fa-solid fa-floppy-disk"></i> Guardar</button></div>
+        <div class="op-dialog-actions">
+            <button class="op-secondary-button" type="button" data-close-dialog>Cancelar</button>
+            <button class="op-primary-button" id="auto-save" type="submit"><i class="fa-solid fa-floppy-disk"></i> Guardar</button>
+        </div>
     </form>
 </dialog>
+
 <?php operativoPageEnd(['operativo-catalogo.js']); ?>

@@ -1,16 +1,47 @@
-# CARPRIX — instalación del módulo operativo comercial
+# CARPRIX — instalación del módulo operativo
 
-1. Ejecutar `sql/02_operativo_comercial.sql` en la misma base donde existen `autos`, `operativo_usuario`, `operativo_rol` y `operativo_usuario_rol`.
-2. Asignar el rol `VENTAS` a los trabajadores que registrarán requerimientos.
-3. Asignar `AUTORIZADOR` a los supervisores, o utilizar `ADMIN_OPERATIVO` / `SUPER_ADMIN`.
-4. Configurar las relaciones trabajador → supervisor desde `operativo/jerarquia.php`.
-5. Acceder por `operativo/login.php`.
+## Base de datos
 
-## Flujo de autorización
+Los cambios de personas e imágenes no requieren tablas adicionales. Utilizan:
 
-- Un requerimiento inicia en `Solicitado`.
-- El cambio a `Apartado` genera una solicitud pendiente.
-- El cambio de `Apartado` a `Vendido` genera otra solicitud pendiente.
-- El supervisor configurado debe aprobar o rechazar cada solicitud.
-- `SUPER_ADMIN` puede intervenir en cualquier autorización como mecanismo de contingencia.
-- El catálogo público y sus consultas no fueron modificados.
+- `operativo_usuario`
+- `operativo_rol`
+- `operativo_usuario_rol`
+- `operativo_usuario_jerarquia`
+- `autos`
+- `imagenes_autos`
+
+El archivo `sql/02_operativo_comercial.sql` ya contiene la corrección de jerarquía mediante triggers y debe conservarse como referencia para instalaciones nuevas.
+
+## Acceso
+
+- Login: `operativo/login.php`
+- Home: `operativo/home.php`
+- Personas: `operativo/personas.php`
+- Catálogo: `operativo/catalogo.php`
+
+## Alta de personas
+
+1. El gerente crea primero a los supervisores.
+2. El gerente crea vendedores y selecciona un supervisor activo.
+3. Un supervisor también puede crear vendedores, pero siempre quedan asignados a su propia línea jerárquica.
+4. La contraseña creada es temporal y debe cambiarse en el primer inicio de sesión.
+
+## Imágenes
+
+- Formatos: JPG, PNG y WEBP.
+- Tamaño máximo: 8 MB por imagen.
+- Máximo: 12 imágenes por auto.
+- Carpeta: `Catalogo/{auto_id}/`.
+- El proceso de PHP necesita permisos de escritura sobre `Catalogo`.
+- `.user.ini` configura los límites de carga requeridos.
+
+En Azure, valida desde SSH:
+
+```bash
+mkdir -p /home/site/wwwroot/Catalogo
+chmod -R 755 /home/site/wwwroot/Catalogo
+php -i | grep -E "upload_max_filesize|post_max_size|max_file_uploads"
+```
+
+Si `WEBSITE_RUN_FROM_PACKAGE=1`, `wwwroot` puede quedar en modo de solo lectura. En ese caso debe desactivarse ese modo o migrarse la galería a almacenamiento externo.

@@ -42,9 +42,7 @@ CREATE TABLE IF NOT EXISTS operativo_usuario_jerarquia (
         FOREIGN KEY (asignado_por)
         REFERENCES operativo_usuario (id)
         ON UPDATE CASCADE
-        ON DELETE SET NULL,
-    CONSTRAINT chk_operativo_jerarquia_distintos
-        CHECK (usuario_id <> supervisor_id)
+        ON DELETE SET NULL
 ) ENGINE=InnoDB
   DEFAULT CHARSET=utf8mb4
   COLLATE=utf8mb4_spanish_ci;
@@ -171,3 +169,34 @@ CREATE TABLE IF NOT EXISTS operativo_requerimiento_historial (
   COLLATE=utf8mb4_spanish_ci;
 
 COMMIT;
+
+-- La regla usuario != supervisor se implementa con triggers porque
+-- MySQL no permite usar esas columnas en un CHECK cuando participan
+-- en llaves foráneas con acciones referenciales.
+DROP TRIGGER IF EXISTS trg_operativo_jerarquia_bi;
+DROP TRIGGER IF EXISTS trg_operativo_jerarquia_bu;
+
+DELIMITER $$
+
+CREATE TRIGGER trg_operativo_jerarquia_bi
+BEFORE INSERT ON operativo_usuario_jerarquia
+FOR EACH ROW
+BEGIN
+    IF NEW.usuario_id = NEW.supervisor_id THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Un usuario no puede ser su propio supervisor.';
+    END IF;
+END$$
+
+CREATE TRIGGER trg_operativo_jerarquia_bu
+BEFORE UPDATE ON operativo_usuario_jerarquia
+FOR EACH ROW
+BEGIN
+    IF NEW.usuario_id = NEW.supervisor_id THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Un usuario no puede ser su propio supervisor.';
+    END IF;
+END$$
+
+DELIMITER ;
+

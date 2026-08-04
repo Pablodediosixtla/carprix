@@ -11,7 +11,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-    <link rel="stylesheet" href="../css/operativo.css?v=20260803-1">
+    <link rel="stylesheet" href="../css/operativo.css?v=20260803-2">
 </head>
 <body class="op-login-body">
     <main class="op-login-shell">
@@ -68,7 +68,7 @@
         </section>
     </main>
     <div class="op-toast-zone" id="op-toast-zone" aria-live="polite"></div>
-    <script src="../js/operativo-common.js?v=20260803-1"></script>
-    <script src="../js/operativo-login.js?v=20260803-1"></script>
+    <script src="../js/operativo-common.js?v=20260803-2"></script>
+    <script src="../js/operativo-login.js?v=20260803-2"></script>
 </body>
 </html>

@@ -89,6 +89,50 @@
         return body;
     };
 
+    const upload = async (endpoint, formData, options = {}) => {
+        const { redirectOnAuth = true } = options;
+        const headers = {
+            'Accept': 'application/json',
+            'X-CSRF-Token': getToken(),
+        };
+
+        let response;
+        try {
+            response = await fetch(`${API_BASE}/${endpoint}`, {
+                method: 'POST',
+                credentials: 'include',
+                headers,
+                body: formData,
+            });
+        } catch (error) {
+            throw new Error('No fue posible cargar los archivos al servidor.');
+        }
+
+        const contentType = response.headers.get('content-type') || '';
+        if (!contentType.includes('application/json')) {
+            const text = await response.text();
+            console.error('Respuesta no JSON:', text.slice(0, 800));
+            throw new Error(`El servidor respondió con formato no válido (${response.status}).`);
+        }
+
+        const body = await response.json();
+        if (!response.ok || body.ok === false) {
+            const error = new Error(body.error || body.message || 'La carga no pudo completarse.');
+            error.code = body.code || 'UPLOAD_ERROR';
+            error.status = response.status;
+            error.details = body.details || null;
+
+            if (redirectOnAuth && (response.status === 401 || error.code === 'SESSION_EXPIRED' || error.code === 'SESSION_INVALID')) {
+                setToken('');
+                if (!location.pathname.endsWith('/login.php')) location.href = 'login.php';
+            }
+            throw error;
+        }
+
+        if (body.data?.csrf_token) setToken(body.data.csrf_token);
+        return body;
+    };
+
     const initials = (user) => {
         const parts = [user?.nombre, user?.apellido_paterno].filter(Boolean);
         return parts.map((part) => String(part).trim().charAt(0)).join('').slice(0, 2).toUpperCase() || 'CP';
@@ -285,11 +329,13 @@
 
     window.CARPRIX_OP = {
         request,
+        upload,
         getToken,
         setToken,
         loadSession,
         applyUser,
         hasAnyRole,
+        initials,
         escapeHtml,
         formatCurrency,
         formatDate,

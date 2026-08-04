@@ -104,6 +104,35 @@ function bootstrapApi(bool $requireCsrf = false): array
     return $input;
 }
 
+
+
+function bootstrapMultipartApi(bool $requireCsrf = true): array
+{
+    applyCorsHeaders();
+    header('Content-Type: application/json; charset=utf-8');
+    header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+    header('Pragma: no-cache');
+
+    $method = strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? ''));
+    if ($method === 'OPTIONS') {
+        http_response_code(204);
+        exit;
+    }
+
+    if ($method !== 'POST') {
+        errorResponse('Método no permitido. Usa POST.', 405, 'METHOD_NOT_ALLOWED');
+    }
+
+    startOperativoSession();
+    $input = is_array($_POST) ? $_POST : [];
+
+    if ($requireCsrf) {
+        validateCsrfToken($input);
+    }
+
+    return $input;
+}
+
 function cleanString(mixed $value, int $maxLength = 255): string
 {
     $text = trim((string) $value);

@@ -44,6 +44,7 @@ operativoPageStart('Centro operativo', 'home');
             <div><dt>Roles activos</dt><dd id="profile-roles">—</dd></div>
         </dl>
         <div class="op-quick-links">
+            <a href="personas.php" data-required-roles="SUPER_ADMIN,ADMIN_OPERATIVO,AUTORIZADOR"><i class="fa-solid fa-users-gear"></i><span>Agregar personas</span></a>
             <a href="catalogo.php"><i class="fa-solid fa-car-side"></i><span>Gestionar catálogo</span></a>
             <a href="requerimientos.php"><i class="fa-solid fa-file-circle-plus"></i><span>Nuevo requerimiento</span></a>
             <a href="autorizaciones.php" data-required-roles="SUPER_ADMIN,ADMIN_OPERATIVO,AUTORIZADOR"><i class="fa-solid fa-circle-check"></i><span>Revisar autorizaciones</span></a>
