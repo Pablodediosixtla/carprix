@@ -6,6 +6,7 @@ require_once __DIR__ . '/auth_session.php';
 require_once __DIR__ . '/auth_csrf.php';
 require_once __DIR__ . '/auth_roles.php';
 require_once __DIR__ . '/auth_guard.php';
+require_once __DIR__ . '/auth_workflow.php';
 
 function applyCorsHeaders(): void
 {
