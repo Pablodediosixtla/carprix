@@ -3,3 +3,4 @@
 
 # Variables de entorno locales
 .env
+db/web/setup/create_first_admin.php
