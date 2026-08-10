@@ -32,7 +32,7 @@
                 <li><a href="vende.php">Vende</a></li>
                 <li><a href="nosotros.php">Nosotros</a></li>
                 <li><a href="contacto.php">Contacto</a></li>
-                <li><a href="../operativo/login.php" class="btn-outline">Iniciar Sesión</a></li>
+                <li><a href="../operativo/login.php" class="btn-outline" data-operativo-access>Iniciar Sesión</a></li>
             </ul>
             <div class="nav-actions">
                 <button type="button" class="theme-toggle" id="theme-toggle" data-theme-toggle aria-label="Cambiar tema" title="Cambiar tema">
@@ -142,6 +142,7 @@
         </div>
     </footer>
 
-    <script src="../js/catalogo.js?v=20260803-3"></script>
+    <script src="../js/public-operativo-session.js?v=20260810-3"></script>
+    <script src="../js/catalogo.js?v=20260810-3"></script>
 </body>
 </html>

@@ -79,6 +79,43 @@
         }
     };
 
+
+    const preselectAvailableAuto = async (autoId) => {
+        const id = Number(autoId || 0);
+        if (!id) return false;
+        try {
+            const response = await OP.request('op_c_auto.php', { id });
+            const auto = response.data.auto;
+            if (!auto || auto.estatus !== 'Disponible') {
+                OP.setMessage(requirementMessage, `El auto #${id} ya no está disponible para generar un requerimiento.`);
+                return false;
+            }
+            selectAuto(auto);
+            return true;
+        } catch (error) {
+            OP.setMessage(requirementMessage, error.message);
+            return false;
+        }
+    };
+
+    const openRequirementDialog = async (preselectedAutoId = 0) => {
+        requirementForm.reset();
+        clearAutoSelection();
+        hideAutoResults();
+        OP.setMessage(requirementMessage);
+        requirementDialog.showModal();
+
+        if (Number(preselectedAutoId) > 0) {
+            autoSearch.value = `#${Number(preselectedAutoId)}`;
+            await preselectAvailableAuto(preselectedAutoId);
+        }
+
+        window.setTimeout(() => {
+            if (!Number(autoIdInput.value || 0)) autoSearch.focus();
+            else document.getElementById('req-client-name').focus();
+        }, 60);
+    };
+
     const nextStatus = (status) => status === 'Solicitado' ? 'Apartado' : (status === 'Apartado' ? 'Vendido' : null);
 
     const render = (items) => {
@@ -138,12 +175,7 @@
         if (user.debe_cambiar_password) { await OP.forcePasswordChange(); location.reload(); return; }
 
         document.getElementById('new-requirement-button').addEventListener('click', () => {
-            requirementForm.reset();
-            clearAutoSelection();
-            hideAutoResults();
-            OP.setMessage(requirementMessage);
-            requirementDialog.showModal();
-            window.setTimeout(() => autoSearch.focus(), 60);
+            openRequirementDialog();
         });
 
         autoSearch.addEventListener('input', () => {
@@ -226,6 +258,18 @@
             }
         });
         await load();
+
+        const requestedAutoId = Number(new URLSearchParams(window.location.search).get('auto_id') || 0);
+        if (requestedAutoId > 0) {
+            if (state.permissions.puede_crear) {
+                await openRequirementDialog(requestedAutoId);
+            } else {
+                OP.toast('Tu rol operativo no permite crear requerimientos de compra.', 'error');
+            }
+            const cleanUrl = new URL(window.location.href);
+            cleanUrl.searchParams.delete('auto_id');
+            window.history.replaceState({}, document.title, cleanUrl.pathname + cleanUrl.search + cleanUrl.hash);
+        }
     } catch (error) {
         OP.toast(error.message, 'error');
     }

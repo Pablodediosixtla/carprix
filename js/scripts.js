@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // 1. Carrusel de Fondo (Hero)
     const slides = document.querySelectorAll('.hero-slide');
     let currentSlide = 0;
-    if(slides.length > 0) {
+    if (slides.length > 0) {
         setInterval(() => {
             slides[currentSlide].classList.remove('active');
             currentSlide = (currentSlide + 1) % slides.length;
@@ -18,45 +18,45 @@ document.addEventListener('DOMContentLoaded', () => {
         mobileMenu.addEventListener('click', () => {
             navMenu.classList.toggle('active');
         });
+
+        navMenu.querySelectorAll('a').forEach((link) => {
+            link.addEventListener('click', () => navMenu.classList.remove('active'));
+        });
     }
 
-    // Cerrar menú al hacer clic en un enlace
-    const navLinks = document.querySelectorAll('.nav-menu a');
-    navLinks.forEach(link => {
-        link.addEventListener('click', () => {
-            navMenu.classList.remove('active');
-        });
-    });
-
-    // 4. Cargar Autos Destacados desde la API
+    // 3. Cargar los tres autos destacados configurados en Operativo / Catálogo.
     loadFeaturedCars();
 });
 
-// FUNCIÓN PARA CONSUMIR EL SERVICIO API
 async function loadFeaturedCars() {
     const grid = document.getElementById('car-grid');
     if (!grid) return;
 
     try {
-        // Hacemos la petición a tu servicio
-        const response = await fetch('db/web/get_autos.php');
+        const response = await fetch(`db/web/get_autos_destacados.php?ts=${Date.now()}`, {
+            cache: 'no-store',
+            headers: { 'Accept': 'application/json' },
+        });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const result = await response.json();
 
-        if (result.ok && result.data.length > 0) {
-            grid.innerHTML = ''; // Limpiamos el mensaje de "Cargando..."
-            
-            // Tomamos solo los primeros 3 para el index
-            const autosDestacados = result.data.slice(0, 3);
+        if (result.ok && Array.isArray(result.data) && result.data.length > 0) {
+            grid.innerHTML = '';
 
-            autosDestacados.forEach(auto => {
-                // Formateamos precio y kilometraje
-                const priceFmt = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(auto.precio);
-                const kmFmt = new Intl.NumberFormat('es-MX').format(auto.kilometraje) + ' km';
+            result.data.slice(0, 3).forEach((auto) => {
+                const priceFmt = new Intl.NumberFormat('es-MX', {
+                    style: 'currency',
+                    currency: 'MXN',
+                }).format(auto.precio);
+                const kmFmt = `${new Intl.NumberFormat('es-MX').format(auto.kilometraje)} km`;
+                const rawImage = String(auto.img_principal || 'img/hero-default.jpg');
+                const separator = rawImage.includes('?') ? '&' : '?';
+                const imageSrc = `${rawImage}${separator}carprix_cache=${Date.now()}`;
 
-                const cardHTML = `
+                grid.insertAdjacentHTML('beforeend', `
                     <div class="car-card">
                         <div class="car-img">
-                            <img src="${auto.img_principal}" alt="${auto.marca} ${auto.modelo}">
+                            <img src="${imageSrc}" alt="${auto.marca} ${auto.modelo}">
                             <span class="year-badge">${auto.anio}</span>
                         </div>
                         <div class="car-info">
@@ -66,14 +66,13 @@ async function loadFeaturedCars() {
                             <a href="views/detalle.php?id=${auto.id}" class="btn-details">Ver detalles</a>
                         </div>
                     </div>
-                `;
-                grid.innerHTML += cardHTML;
+                `);
             });
         } else {
             grid.innerHTML = '<p style="text-align:center; grid-column: 1 / -1; color: var(--gray-text);">No hay autos disponibles por el momento.</p>';
         }
     } catch (error) {
-        console.error("Error al cargar los autos:", error);
+        console.error('Error al cargar los autos destacados:', error);
         grid.innerHTML = '<p style="text-align:center; grid-column: 1 / -1; color: #ff5252;">Error al conectar con la base de datos.</p>';
     }
 }

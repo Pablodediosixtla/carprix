@@ -576,6 +576,8 @@
         });
         document.getElementById('catalog-tab-autos').hidden = tabName !== 'autos';
         document.getElementById('catalog-tab-requerimientos').hidden = tabName !== 'requerimientos';
+        const featuredPanel = document.getElementById('catalog-tab-destacados');
+        if (featuredPanel) featuredPanel.hidden = tabName !== 'destacados';
         updateNewAutoButton();
         if (tabName === 'requerimientos') {
             await loadCatalogRequests(1);

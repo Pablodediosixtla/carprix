@@ -417,3 +417,37 @@ button:disabled { opacity: .55; cursor: not-allowed; transform: none !important;
     .op-autocomplete-option { grid-template-columns: 1fr; gap: 6px; }
     .op-autocomplete-option span:last-child { text-align: left; }
 }
+
+/* =========================================================
+   Catálogo: autos destacados del index
+   ========================================================= */
+.op-featured-panel { padding: 20px; }
+.op-featured-panel .op-panel-head { align-items: flex-start; gap: 18px; }
+.op-featured-panel .op-panel-head > div { min-width: 0; }
+.op-featured-panel .op-panel-head h3 { margin: 4px 0 5px; font-size: 19px; }
+.op-featured-panel .op-panel-head p { margin: 0; max-width: 760px; color: var(--op-muted); font-size: 11px; line-height: 1.55; }
+.op-featured-grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 16px; margin-top: 18px; }
+.op-featured-slot { min-width: 0; padding: 14px; border: 1px solid var(--op-border); border-radius: 15px; background: var(--op-surface-2); }
+.op-featured-slot-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
+.op-featured-position { color: var(--op-green); font-size: 10px; font-weight: 900; letter-spacing: .08em; }
+.op-featured-preview { min-height: 235px; margin-bottom: 14px; overflow: hidden; border: 1px solid var(--op-border); border-radius: 13px; background: var(--op-surface); }
+.op-featured-preview > img { width: 100%; aspect-ratio: 16/10; display: block; object-fit: cover; background: #151815; }
+.op-featured-preview > div:not(.op-image-empty) { display: grid; gap: 4px; padding: 12px; }
+.op-featured-preview h4 { margin: 0; font-size: 14px; }
+.op-featured-preview p, .op-featured-preview small { margin: 0; color: var(--op-muted); font-size: 10px; line-height: 1.45; }
+.op-featured-preview .op-image-empty { min-height: 235px; border: 0; border-radius: 0; }
+
+@media (max-width: 1050px) {
+    .op-featured-grid { grid-template-columns: 1fr; }
+    .op-featured-slot { display: grid; grid-template-columns: minmax(240px,.8fr) minmax(300px,1.2fr); gap: 14px; }
+    .op-featured-slot-head { grid-column: 1/-1; margin-bottom: 0; }
+    .op-featured-preview { margin-bottom: 0; }
+}
+
+@media (max-width: 700px) {
+    .op-featured-panel { padding: 14px; }
+    .op-featured-panel .op-panel-head { flex-direction: column; }
+    .op-featured-panel .op-panel-head .op-primary-button { width: 100%; }
+    .op-featured-slot { display: block; }
+    .op-featured-preview { margin-bottom: 14px; }
+}

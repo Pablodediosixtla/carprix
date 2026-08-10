@@ -35,7 +35,7 @@
                 <li><a href="vende.php" class="green-text" aria-current="page">Vende</a></li>
                 <li><a href="nosotros.php">Nosotros</a></li>
                 <li><a href="contacto.php">Contacto</a></li>
-                <li><a href="#" class="btn-outline">Iniciar Sesión</a></li>
+                <li><a href="../operativo/login.php" class="btn-outline" data-operativo-access>Iniciar Sesión</a></li>
             </ul>
 
             <div class="nav-actions">
@@ -385,6 +385,7 @@
         </div>
     </footer>
 
-    <script src="../js/vende.js?v=20260803-4"></script>
+    <script src="../js/public-operativo-session.js?v=20260810-3"></script>
+    <script src="../js/vende.js?v=20260810-3"></script>
 </body>
 </html>

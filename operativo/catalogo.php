@@ -21,6 +21,9 @@ operativoPageStart('Gestión de catálogo', 'catalogo');
         <i class="fa-solid fa-clipboard-check"></i> Requerimientos catálogo
         <span class="op-tab-badge" id="catalog-request-badge" hidden>0</span>
     </button>
+    <button class="op-tab-button" type="button" data-catalog-tab="destacados">
+        <i class="fa-solid fa-star"></i> Autos destacados
+    </button>
 </nav>
 
 <section class="op-tab-panel" id="catalog-tab-autos">
@@ -56,6 +59,44 @@ operativoPageStart('Gestión de catálogo', 'catalogo');
     </section>
     <section class="op-approval-list" id="catalog-request-list"><div class="op-loading">Cargando requerimientos de catálogo...</div></section>
     <div class="op-pagination" id="catalog-request-pagination"></div>
+</section>
+
+<section class="op-tab-panel" id="catalog-tab-destacados" hidden>
+    <section class="op-panel op-featured-panel">
+        <div class="op-panel-head">
+            <div>
+                <span class="op-kicker">INDEX / AUTOS DESTACADOS</span>
+                <h3>Selecciona los tres autos del inicio</h3>
+                <p>Solo puedes destacar autos con estatus Disponible. El orden 1, 2 y 3 corresponde al orden mostrado en el index.</p>
+            </div>
+            <button class="op-primary-button" id="featured-save-button" type="button">
+                <i class="fa-solid fa-floppy-disk"></i> Guardar destacados
+            </button>
+        </div>
+        <div class="op-form-message" id="featured-message" hidden></div>
+        <div class="op-featured-grid">
+            <?php for ($slot = 1; $slot <= 3; $slot++): ?>
+            <article class="op-featured-slot" data-featured-slot="<?= $slot ?>">
+                <div class="op-featured-slot-head">
+                    <span class="op-featured-position">POSICIÓN <?= $slot ?></span>
+                    <span class="op-status-badge disponible">Disponible</span>
+                </div>
+                <div class="op-featured-preview" id="featured-preview-<?= $slot ?>">
+                    <div class="op-image-empty"><i class="fa-regular fa-star"></i><span>Selecciona un auto disponible.</span></div>
+                </div>
+                <div class="op-field">
+                    <span>Buscar auto</span>
+                    <div class="op-auto-search-box">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input id="featured-search-<?= $slot ?>" type="search" autocomplete="off" placeholder="ID, marca o modelo...">
+                        <input id="featured-auto-<?= $slot ?>" type="hidden">
+                    </div>
+                    <div class="op-autocomplete-results" id="featured-results-<?= $slot ?>" hidden></div>
+                </div>
+            </article>
+            <?php endfor; ?>
+        </div>
+    </section>
 </section>
 
 <dialog class="op-dialog wide" id="auto-dialog">
@@ -149,4 +190,4 @@ operativoPageStart('Gestión de catálogo', 'catalogo');
     </form>
 </dialog>
 
-<?php operativoPageEnd(['operativo-catalogo.js']); ?>
+<?php operativoPageEnd(['operativo-catalogo.js', 'operativo-destacados.js']); ?>

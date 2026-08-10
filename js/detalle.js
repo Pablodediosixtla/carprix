@@ -31,6 +31,18 @@ document.addEventListener('DOMContentLoaded', () => {
     let galleryImages = [];
     let currentImageIndex = 0;
     let vehicleNameForAlt = 'vehículo';
+    let currentAuto = null;
+    let operativoSession = { authenticated: false, usuario: null };
+
+    const operativoBridge = window.CARPRIX_PUBLIC_OPERATIVO;
+    const operativoSessionPromise = operativoBridge?.getSession
+        ? operativoBridge.getSession()
+        : Promise.resolve({ authenticated: false, usuario: null });
+
+    operativoSessionPromise.then((session) => {
+        operativoSession = session || { authenticated: false, usuario: null };
+        if (currentAuto) renderStatus(currentAuto);
+    });
 
     const urlParams = new URLSearchParams(window.location.search);
     const carId = urlParams.get('id');
@@ -76,6 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderCarData(auto) {
+        currentAuto = auto;
         CAR_PRICE = Number.parseFloat(auto.precio) || 0;
         const priceFmt = formatCurrency(CAR_PRICE);
         const kmFmt = `${new Intl.NumberFormat('es-MX').format(Number(auto.kilometraje) || 0)} km`;
@@ -116,8 +129,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const statusOverlay = document.getElementById('status-overlay');
         const statusBadge = document.getElementById('status-badge');
         const status = auto.estatus || 'Disponible';
+        const roles = new Set((operativoSession.usuario?.roles || []).map((role) => String(role).toUpperCase()));
+        const canCreateRequirement = operativoSession.authenticated
+            && ['SUPER_ADMIN', 'ADMIN_OPERATIVO', 'VENTAS'].some((role) => roles.has(role));
 
         btnApartar.disabled = true;
+        btnApartar.setAttribute('aria-disabled', 'true');
+        btnApartar.dataset.canRequest = '0';
         statusOverlay.style.display = 'none';
         statusBadge.className = 'status-badge';
 
@@ -125,18 +143,40 @@ document.addEventListener('DOMContentLoaded', () => {
             btnApartar.textContent = status.toUpperCase();
             btnApartar.style.background = '#555';
             btnApartar.style.cursor = 'not-allowed';
+            btnApartar.title = `Este vehículo se encuentra ${status}.`;
 
             if (status === 'Vendido' || status === 'Apartado') {
                 statusBadge.textContent = status;
                 statusBadge.classList.toggle('status-apartado', status === 'Apartado');
                 statusOverlay.style.display = 'flex';
             }
+            return;
+        }
+
+        btnApartar.textContent = 'DISPONIBLE';
+        btnApartar.style.background = '';
+
+        if (canCreateRequirement) {
+            btnApartar.disabled = false;
+            btnApartar.setAttribute('aria-disabled', 'false');
+            btnApartar.dataset.canRequest = '1';
+            btnApartar.style.cursor = 'pointer';
+            btnApartar.title = 'Crear un requerimiento de apartado para este auto.';
+        } else if (operativoSession.authenticated) {
+            btnApartar.style.cursor = 'not-allowed';
+            btnApartar.title = 'Tu rol operativo no permite crear requerimientos de compra.';
         } else {
-            btnApartar.textContent = 'DISPONIBLE';
-            btnApartar.style.background = '';
             btnApartar.style.cursor = 'default';
+            btnApartar.title = 'Inicia sesión operativa para solicitar el apartado.';
         }
     }
+
+    document.getElementById('btn-apartar')?.addEventListener('click', () => {
+        if (!currentAuto || currentAuto.estatus !== 'Disponible') return;
+        const button = document.getElementById('btn-apartar');
+        if (button?.dataset.canRequest !== '1') return;
+        window.location.href = `../operativo/requerimientos.php?auto_id=${encodeURIComponent(currentAuto.id)}`;
+    });
 
     function renderOwnership(auto) {
         const ownersElement = document.getElementById('det-duenos');

@@ -25,12 +25,19 @@ $con->begin_transaction();
 try {
     $stmt = $con->prepare(
         "SELECT
-            c.*, r.auto_id, r.estatus AS estatus_actual
+            c.*,
+            r.auto_id,
+            r.estatus AS estatus_actual,
+            a.estatus AS auto_estatus
          FROM operativo_requerimiento_cambio c
          INNER JOIN operativo_requerimiento_compra r ON r.id = c.requerimiento_id
+         INNER JOIN autos a ON a.id = r.auto_id
          WHERE c.id = ?
          FOR UPDATE"
     );
+    if (!$stmt) {
+        databaseError($con);
+    }
     $stmt->bind_param('i', $changeId);
     $stmt->execute();
     $change = $stmt->get_result()->fetch_assoc();
@@ -53,6 +60,7 @@ try {
 
     $currentStatus = (string) $change['estatus_actual'];
     $requestedStatus = (string) $change['estatus_solicitado'];
+    $autoStatus = (string) $change['auto_estatus'];
 
     if ($decision === 'Aprobado') {
         if ($currentStatus !== (string) $change['estatus_origen']) {
@@ -68,6 +76,9 @@ try {
                    AND id <> ?
                  LIMIT 1"
             );
+            if (!$conflictStmt) {
+                databaseError($con);
+            }
             $conflictAutoId = (int) $change['auto_id'];
             $conflictRequirementId = (int) $change['requerimiento_id'];
             $conflictStmt->bind_param('ii', $conflictAutoId, $conflictRequirementId);
@@ -77,6 +88,14 @@ try {
             if ($conflict) {
                 throw new DomainException('AUTO_ALREADY_RESERVED');
             }
+
+            if (in_array($autoStatus, ['Vendido', 'Oculto'], true)) {
+                throw new DomainException('AUTO_STATUS_CHANGED');
+            }
+        }
+
+        if ($requestedStatus === 'Vendido' && $autoStatus === 'Oculto') {
+            throw new DomainException('AUTO_STATUS_CHANGED');
         }
 
         $dateColumn = $requestedStatus === 'Apartado'
@@ -87,10 +106,35 @@ try {
              SET estatus = ?, {$dateColumn} fecha_actualizacion = CURRENT_TIMESTAMP
              WHERE id = ?"
         );
+        if (!$updateRequirement) {
+            databaseError($con);
+        }
         $requirementId = (int) $change['requerimiento_id'];
         $updateRequirement->bind_param('si', $requestedStatus, $requirementId);
-        $updateRequirement->execute();
+        if (!$updateRequirement->execute()) {
+            $updateRequirement->close();
+            databaseError($con);
+        }
         $updateRequirement->close();
+
+        // Mantiene sincronizado el inventario con el flujo comercial.
+        // Al aprobar Apartado/Vendido, el estatus de autos cambia dentro de
+        // la misma transacción que el requerimiento.
+        if (in_array($requestedStatus, ['Apartado', 'Vendido'], true)) {
+            $updateAuto = $con->prepare(
+                'UPDATE autos SET estatus = ? WHERE id = ?'
+            );
+            if (!$updateAuto) {
+                databaseError($con);
+            }
+            $autoId = (int) $change['auto_id'];
+            $updateAuto->bind_param('si', $requestedStatus, $autoId);
+            if (!$updateAuto->execute()) {
+                $updateAuto->close();
+                databaseError($con);
+            }
+            $updateAuto->close();
+        }
 
         addRequirementHistory(
             $con,
@@ -119,9 +163,15 @@ try {
              aprobador_id = ?, fecha_decision = NOW()
          WHERE id = ?"
     );
+    if (!$updateChange) {
+        databaseError($con);
+    }
     $approverUserId = (int) $user['id'];
     $updateChange->bind_param('ssii', $decision, $comment, $approverUserId, $changeId);
-    $updateChange->execute();
+    if (!$updateChange->execute()) {
+        $updateChange->close();
+        databaseError($con);
+    }
     $updateChange->close();
 
     $con->commit();
@@ -140,6 +190,7 @@ try {
         'SELF_APPROVAL_NOT_ALLOWED' => errorResponse('No puedes autorizar tu propia solicitud.', 403, $code),
         'REQUIREMENT_STATUS_CHANGED' => errorResponse('El estatus del requerimiento cambió antes de la autorización.', 409, $code),
         'AUTO_ALREADY_RESERVED' => errorResponse('El auto ya fue apartado en otro requerimiento.', 409, $code),
+        'AUTO_STATUS_CHANGED' => errorResponse('El estatus del auto cambió y ya no permite completar esta autorización.', 409, $code),
         'INVALID_STATUS_TRANSITION' => errorResponse('La transición de estatus solicitada no está permitida.', 422, $code),
         default => errorResponse('No fue posible resolver la autorización.', 400, $code),
     };
