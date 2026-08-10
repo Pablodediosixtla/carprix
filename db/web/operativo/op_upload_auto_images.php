@@ -75,6 +75,222 @@ function localAutoImageAbsolutePath(string $projectRoot, int $autoId, string $ro
     return rtrim($projectRoot, '/') . '/' . $route;
 }
 
+function targetDimensions(int $width, int $height, int $maxWidth = 1920, int $maxHeight = 1440): array
+{
+    if ($width <= 0 || $height <= 0) {
+        return [0, 0];
+    }
+
+    $ratio = min(1, $maxWidth / $width, $maxHeight / $height);
+    return [
+        max(1, (int) round($width * $ratio)),
+        max(1, (int) round($height * $ratio)),
+    ];
+}
+
+function orientGdImage(GdImage $image, string $tmpName, string $mime): GdImage
+{
+    if ($mime !== 'image/jpeg' || !function_exists('exif_read_data')) {
+        return $image;
+    }
+
+    $exif = @exif_read_data($tmpName);
+    $orientation = (int) ($exif['Orientation'] ?? 1);
+    $rotated = null;
+
+    if ($orientation === 3) {
+        $rotated = imagerotate($image, 180, 0);
+    } elseif ($orientation === 6) {
+        $rotated = imagerotate($image, -90, 0);
+    } elseif ($orientation === 8) {
+        $rotated = imagerotate($image, 90, 0);
+    }
+
+    if ($rotated instanceof GdImage) {
+        imagedestroy($image);
+        return $rotated;
+    }
+
+    return $image;
+}
+
+function compressImageWithGd(string $tmpName, string $mime, string $destinationBase): array
+{
+    if (!function_exists('imagecreatefromstring')) {
+        throw new RuntimeException('GD_NOT_AVAILABLE');
+    }
+
+    $raw = @file_get_contents($tmpName);
+    if ($raw === false) {
+        throw new RuntimeException('IMAGE_READ_ERROR');
+    }
+
+    $source = @imagecreatefromstring($raw);
+    if (!$source instanceof GdImage) {
+        throw new RuntimeException('IMAGE_DECODE_ERROR');
+    }
+
+    $source = orientGdImage($source, $tmpName, $mime);
+    $width = imagesx($source);
+    $height = imagesy($source);
+    [$targetWidth, $targetHeight] = targetDimensions($width, $height);
+
+    $canvas = imagecreatetruecolor($targetWidth, $targetHeight);
+    if (!$canvas instanceof GdImage) {
+        imagedestroy($source);
+        throw new RuntimeException('IMAGE_MEMORY_ERROR');
+    }
+
+    imagealphablending($canvas, false);
+    imagesavealpha($canvas, true);
+    $transparent = imagecolorallocatealpha($canvas, 255, 255, 255, 127);
+    imagefill($canvas, 0, 0, $transparent);
+
+    if (!imagecopyresampled(
+        $canvas,
+        $source,
+        0,
+        0,
+        0,
+        0,
+        $targetWidth,
+        $targetHeight,
+        $width,
+        $height
+    )) {
+        imagedestroy($source);
+        imagedestroy($canvas);
+        throw new RuntimeException('IMAGE_RESIZE_ERROR');
+    }
+
+    imagedestroy($source);
+
+    if (function_exists('imagewebp')) {
+        $destination = $destinationBase . '.webp';
+        $saved = imagewebp($canvas, $destination, 82);
+        $extension = 'webp';
+    } else {
+        // JPEG fallback: fondo blanco para imágenes con transparencia.
+        $jpegCanvas = imagecreatetruecolor($targetWidth, $targetHeight);
+        $white = imagecolorallocate($jpegCanvas, 255, 255, 255);
+        imagefill($jpegCanvas, 0, 0, $white);
+        imagealphablending($jpegCanvas, true);
+        imagecopy($jpegCanvas, $canvas, 0, 0, 0, 0, $targetWidth, $targetHeight);
+        $destination = $destinationBase . '.jpg';
+        $saved = imagejpeg($jpegCanvas, $destination, 82);
+        imagedestroy($jpegCanvas);
+        $extension = 'jpg';
+    }
+
+    imagedestroy($canvas);
+
+    if (!$saved || !is_file($destination) || filesize($destination) <= 0) {
+        @unlink($destination);
+        throw new RuntimeException('IMAGE_SAVE_ERROR');
+    }
+
+    return [
+        'path' => $destination,
+        'extension' => $extension,
+        'width' => $targetWidth,
+        'height' => $targetHeight,
+        'bytes' => (int) filesize($destination),
+    ];
+}
+
+function compressImageWithImagick(string $tmpName, string $destinationBase): array
+{
+    if (!class_exists('Imagick')) {
+        throw new RuntimeException('IMAGICK_NOT_AVAILABLE');
+    }
+
+    $image = new Imagick($tmpName);
+    if (method_exists($image, 'autoOrient')) {
+        $image->autoOrient();
+    } elseif (method_exists($image, 'autoOrientImage')) {
+        $image->autoOrientImage();
+    }
+
+    $width = $image->getImageWidth();
+    $height = $image->getImageHeight();
+    [$targetWidth, $targetHeight] = targetDimensions($width, $height);
+    if ($targetWidth !== $width || $targetHeight !== $height) {
+        $image->thumbnailImage($targetWidth, $targetHeight, true, true);
+    }
+
+    $supportsWebp = in_array('WEBP', $image->queryFormats('WEBP'), true);
+    if ($supportsWebp) {
+        $extension = 'webp';
+        $image->setImageFormat('webp');
+        $image->setImageCompressionQuality(82);
+    } else {
+        $extension = 'jpg';
+        $image->setImageBackgroundColor('white');
+        if ($image->getImageAlphaChannel()) {
+            $image = $image->mergeImageLayers(Imagick::LAYERMETHOD_FLATTEN);
+        }
+        $image->setImageFormat('jpeg');
+        $image->setImageCompressionQuality(82);
+    }
+
+    $destination = $destinationBase . '.' . $extension;
+    if (!$image->writeImage($destination)) {
+        $image->clear();
+        $image->destroy();
+        throw new RuntimeException('IMAGE_SAVE_ERROR');
+    }
+
+    $finalWidth = $image->getImageWidth();
+    $finalHeight = $image->getImageHeight();
+    $image->clear();
+    $image->destroy();
+
+    if (!is_file($destination) || filesize($destination) <= 0) {
+        @unlink($destination);
+        throw new RuntimeException('IMAGE_SAVE_ERROR');
+    }
+
+    return [
+        'path' => $destination,
+        'extension' => $extension,
+        'width' => $finalWidth,
+        'height' => $finalHeight,
+        'bytes' => (int) filesize($destination),
+    ];
+}
+
+function compressCatalogImage(string $tmpName, string $mime, string $destinationBase): array
+{
+    if (function_exists('imagecreatefromstring')) {
+        return compressImageWithGd($tmpName, $mime, $destinationBase);
+    }
+    if (class_exists('Imagick')) {
+        return compressImageWithImagick($tmpName, $destinationBase);
+    }
+
+    // Fallback para App Service sin GD/Imagick. La vista operativa ya
+    // comprime las imágenes en el navegador antes de enviarlas.
+    $extension = match ($mime) {
+        'image/jpeg' => 'jpg',
+        'image/png' => 'png',
+        'image/webp' => 'webp',
+        default => throw new RuntimeException('IMAGE_TYPE_NOT_ALLOWED'),
+    };
+    $destination = $destinationBase . '.' . $extension;
+    if (!copy($tmpName, $destination) || !is_file($destination) || filesize($destination) <= 0) {
+        @unlink($destination);
+        throw new RuntimeException('IMAGE_SAVE_ERROR');
+    }
+    $dimensions = @getimagesize($destination);
+    return [
+        'path' => $destination,
+        'extension' => $extension,
+        'width' => (int) ($dimensions[0] ?? 0),
+        'height' => (int) ($dimensions[1] ?? 0),
+        'bytes' => (int) filesize($destination),
+    ];
+}
+
 $input = bootstrapMultipartApi(true);
 $con = connectDatabase();
 $user = requireAuthenticated($con);
@@ -149,11 +365,7 @@ $files = array_values(array_filter(
 ));
 
 $maxFileBytes = 8 * 1024 * 1024;
-$allowedMime = [
-    'image/jpeg' => 'jpg',
-    'image/png' => 'png',
-    'image/webp' => 'webp',
-];
+$allowedMime = ['image/jpeg', 'image/png', 'image/webp'];
 $validatedFiles = [];
 
 foreach ($files as $file) {
@@ -178,12 +390,22 @@ foreach ($files as $file) {
     if ($mime === '' && function_exists('mime_content_type')) {
         $mime = (string) mime_content_type($file['tmp_name']);
     }
-    if (!isset($allowedMime[$mime])) {
+    if (!in_array($mime, $allowedMime, true)) {
         $con->close();
         errorResponse('Solo se permiten imágenes JPG, PNG o WEBP.', 422, 'IMAGE_TYPE_NOT_ALLOWED');
     }
 
-    $file['extension'] = $allowedMime[$mime];
+    $dimensions = @getimagesize($file['tmp_name']);
+    if (!$dimensions || (int) $dimensions[0] <= 0 || (int) $dimensions[1] <= 0) {
+        $con->close();
+        errorResponse('Una imagen no pudo ser validada.', 422, 'INVALID_IMAGE');
+    }
+    if (((int) $dimensions[0] * (int) $dimensions[1]) > 60000000) {
+        $con->close();
+        errorResponse('La resolución de una imagen es demasiado grande.', 422, 'IMAGE_DIMENSIONS_TOO_LARGE');
+    }
+
+    $file['mime'] = $mime;
     $validatedFiles[] = $file;
 }
 
@@ -225,22 +447,32 @@ if ($validatedFiles !== [] && !is_writable($absoluteDirectory)) {
 
 $newRoutes = [];
 $newAbsoluteFiles = [];
-foreach ($validatedFiles as $file) {
-    $filename = 'Img_' . date('Ymd_His') . '_' . bin2hex(random_bytes(5)) . '.' . $file['extension'];
-    $absolutePath = $absoluteDirectory . '/' . $filename;
-    $route = '/' . $relativeDirectory . '/' . $filename;
+$compressionStats = [];
 
-    if (!move_uploaded_file($file['tmp_name'], $absolutePath)) {
-        foreach ($newAbsoluteFiles as $createdFile) {
-            @unlink($createdFile);
-        }
-        $con->close();
-        errorResponse('No fue posible guardar una de las imágenes.', 500, 'IMAGE_SAVE_ERROR');
+try {
+    foreach ($validatedFiles as $file) {
+        $baseName = 'Img_' . date('Ymd_His') . '_' . bin2hex(random_bytes(5));
+        $destinationBase = $absoluteDirectory . '/' . $baseName;
+        $compressed = compressCatalogImage($file['tmp_name'], $file['mime'], $destinationBase);
+
+        @chmod($compressed['path'], 0644);
+        $route = '/' . $relativeDirectory . '/' . basename($compressed['path']);
+        $newRoutes[] = $route;
+        $newAbsoluteFiles[] = $compressed['path'];
+        $compressionStats[] = [
+            'archivo' => (string) $file['name'],
+            'bytes_originales' => (int) $file['size'],
+            'bytes_finales' => (int) $compressed['bytes'],
+            'ancho' => (int) $compressed['width'],
+            'alto' => (int) $compressed['height'],
+        ];
     }
-
-    @chmod($absolutePath, 0644);
-    $newRoutes[] = $route;
-    $newAbsoluteFiles[] = $absolutePath;
+} catch (RuntimeException $e) {
+    foreach ($newAbsoluteFiles as $createdFile) {
+        @unlink($createdFile);
+    }
+    $con->close();
+    errorResponse('No fue posible comprimir y guardar una de las imágenes.', 500, 'IMAGE_COMPRESSION_ERROR');
 }
 
 $con->begin_transaction();
@@ -280,9 +512,14 @@ try {
         $deletePathStmt->close();
     }
 
-    $orderRow = $con->query(
+    $orderResult = $con->query(
         'SELECT COALESCE(MAX(orden), 0) AS max_orden FROM imagenes_autos WHERE auto_id = ' . (int) $autoId
-    )->fetch_assoc();
+    );
+    if (!$orderResult) {
+        throw new RuntimeException($con->error);
+    }
+    $orderRow = $orderResult->fetch_assoc();
+    $orderResult->free();
     $nextOrder = (int) ($orderRow['max_orden'] ?? 0) + 1;
 
     if ($newRoutes !== []) {
@@ -342,13 +579,24 @@ try {
         }
     }
 
+    $originalBytes = array_sum(array_column($compressionStats, 'bytes_originales'));
+    $finalBytes = array_sum(array_column($compressionStats, 'bytes_finales'));
+
     $con->close();
     okResponse([
         'auto_id' => $autoId,
         'img_principal' => $primaryPath,
         'imagenes_agregadas' => $newRoutes,
         'total_imagenes' => count($allRemaining),
-    ], 'Imágenes actualizadas correctamente.');
+        'compresion' => [
+            'bytes_originales' => $originalBytes,
+            'bytes_finales' => $finalBytes,
+            'ahorro_bytes' => max(0, $originalBytes - $finalBytes),
+            'max_ancho' => 1920,
+            'max_alto' => 1440,
+            'calidad' => 82,
+        ],
+    ], 'Imágenes comprimidas y actualizadas correctamente.');
 } catch (Throwable $e) {
     $con->rollback();
     foreach ($newAbsoluteFiles as $createdFile) {

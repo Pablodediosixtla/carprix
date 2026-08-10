@@ -25,15 +25,39 @@ $pasajeros = max(1, (int) ($input['pasajeros'] ?? 5));
 $traccion = cleanString($input['traccion'] ?? '', 50);
 $duenos = max(1, (int) ($input['duenos'] ?? 1));
 $imgPrincipal = cleanString($input['img_principal'] ?? '', 500);
-$estatus = cleanString($input['estatus'] ?? 'Disponible', 30);
+$estatus = cleanString($input['estatus'] ?? 'Oculto', 30);
 
 if ($anio < 1950 || $anio > ((int) date('Y') + 1) || $precio <= 0) {
     $con->close();
     errorResponse('Año o precio no válido.', 422, 'VALIDATION_ERROR');
 }
-if (!in_array($estatus, ['Disponible', 'Vendido', 'Oculto'], true)) {
+if (!in_array($estatus, ['Disponible', 'Apartado', 'Vendido', 'Oculto'], true)) {
     $con->close();
     errorResponse('Estatus no válido.', 422, 'VALIDATION_ERROR');
+}
+
+$currentStmt = $con->prepare('SELECT estatus FROM autos WHERE id = ? LIMIT 1');
+if (!$currentStmt) {
+    databaseError($con);
+}
+$currentStmt->bind_param('i', $autoId);
+$currentStmt->execute();
+$current = $currentStmt->get_result()->fetch_assoc();
+$currentStmt->close();
+
+if (!$current) {
+    $con->close();
+    errorResponse('Auto no encontrado.', 404, 'AUTO_NOT_FOUND');
+}
+
+$currentStatus = (string) $current['estatus'];
+if ($currentStatus === 'Oculto' && $estatus !== 'Oculto') {
+    $con->close();
+    errorResponse(
+        'Los autos ocultos deben pasar por un requerimiento de catálogo antes de publicarse.',
+        409,
+        'CATALOG_APPROVAL_REQUIRED'
+    );
 }
 
 $sql = "UPDATE autos
@@ -43,6 +67,9 @@ $sql = "UPDATE autos
             img_principal = ?, estatus = ?
         WHERE id = ?";
 $stmt = $con->prepare($sql);
+if (!$stmt) {
+    databaseError($con);
+}
 $stmt->bind_param(
     'sssiddsissssisissi',
     $marca,

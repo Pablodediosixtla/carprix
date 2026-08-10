@@ -222,3 +222,73 @@ function assertActiveApprover(mysqli $con, int $supervisorId): void
     }
 }
 
+
+function canAuthorizeCatalogRequests(array $user): bool
+{
+    return hasAnyRole($user, ['SUPER_ADMIN', 'ADMIN_OPERATIVO', 'AUTORIZADOR']);
+}
+
+function canViewAllCatalogRequests(array $user): bool
+{
+    return hasAnyRole($user, ['SUPER_ADMIN', 'ADMIN_OPERATIVO']);
+}
+
+function createCatalogPublicationRequest(
+    mysqli $con,
+    int $autoId,
+    int $requesterId,
+    string $reason
+): int {
+    $pendingStmt = $con->prepare(
+        "SELECT id
+         FROM operativo_catalogo_requerimiento
+         WHERE auto_id = ?
+           AND decision = 'Pendiente'
+         LIMIT 1"
+    );
+    if (!$pendingStmt) {
+        databaseError($con);
+    }
+    $pendingStmt->bind_param('i', $autoId);
+    $pendingStmt->execute();
+    $pending = $pendingStmt->get_result()->fetch_assoc();
+    $pendingStmt->close();
+
+    if ($pending) {
+        return (int) $pending['id'];
+    }
+
+    $approverId = resolveHierarchyApprover($con, $requesterId);
+    if ($approverId !== null && !userHasActiveRole(
+        $con,
+        $approverId,
+        ['SUPER_ADMIN', 'ADMIN_OPERATIVO', 'AUTORIZADOR']
+    )) {
+        $approverId = null;
+    }
+    $reason = cleanString($reason, 500);
+    if ($reason === '') {
+        $reason = 'Solicitud para publicar el auto en el catálogo.';
+    }
+
+    $insert = $con->prepare(
+        "INSERT INTO operativo_catalogo_requerimiento
+            (auto_id, tipo, estatus_origen, estatus_solicitado, motivo,
+             solicitado_por, aprobador_id, decision)
+         VALUES (?, 'PUBLICACION', 'Oculto', 'Disponible', ?, ?, NULLIF(?, 0), 'Pendiente')"
+    );
+    if (!$insert) {
+        databaseError($con);
+    }
+
+    $approver = $approverId ?? 0;
+    $insert->bind_param('isii', $autoId, $reason, $requesterId, $approver);
+    if (!$insert->execute()) {
+        $insert->close();
+        databaseError($con);
+    }
+
+    $requestId = (int) $con->insert_id;
+    $insert->close();
+    return $requestId;
+}

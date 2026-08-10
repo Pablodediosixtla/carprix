@@ -18,7 +18,16 @@ operativoPageStart('Requerimientos de compra', 'requerimientos');
     <form class="op-dialog-card" id="requirement-form">
         <div class="op-dialog-header"><div><small>NUEVA OPORTUNIDAD</small><h3>Registrar requerimiento</h3></div><button class="op-dialog-close" type="button" data-close-dialog><i class="fa-solid fa-xmark"></i></button></div>
         <div class="op-form-grid two">
-            <label class="op-field span-2"><span>Auto disponible *</span><select id="req-auto" required><option value="">Selecciona un auto</option></select></label>
+            <div class="op-field span-2">
+                <span>Auto disponible *</span>
+                <div class="op-auto-search-box">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input id="req-auto-search" type="search" autocomplete="off" placeholder="Busca por ID, marca o modelo..." aria-autocomplete="list" aria-controls="req-auto-results">
+                    <input id="req-auto" type="hidden">
+                </div>
+                <div class="op-autocomplete-results" id="req-auto-results" role="listbox" hidden></div>
+                <small class="op-field-help" id="req-auto-selected">Escribe al menos 2 caracteres. Solo se consultan autos con estatus Disponible.</small>
+            </div>
             <label class="op-field"><span>Nombre del cliente *</span><input id="req-client-name" maxlength="150" required></label>
             <label class="op-field"><span>Teléfono *</span><input id="req-client-phone" maxlength="20" required></label>
             <label class="op-field"><span>Correo</span><input id="req-client-email" type="email" maxlength="150"></label>

@@ -15,7 +15,7 @@ $status = cleanString($input['estatus'] ?? '', 30);
 $type = cleanString($input['tipo'] ?? '', 50);
 $location = cleanString($input['ubicacion'] ?? '', 100);
 
-$allowedStatuses = ['', 'Disponible', 'Vendido', 'Oculto'];
+$allowedStatuses = ['', 'Disponible', 'Apartado', 'Vendido', 'Oculto'];
 if (!in_array($status, $allowedStatuses, true)) {
     $con->close();
     errorResponse('El estatus del catálogo no es válido.', 422, 'VALIDATION_ERROR');
@@ -49,6 +49,9 @@ if ($location !== '') {
 
 $whereSql = implode(' AND ', $where);
 $countStmt = $con->prepare("SELECT COUNT(*) AS total FROM autos a WHERE {$whereSql}");
+if (!$countStmt) {
+    databaseError($con);
+}
 $countParams = $params;
 bindDynamicParams($countStmt, $types, $countParams);
 $countStmt->execute();
@@ -59,7 +62,15 @@ $sql = "SELECT
             a.id, a.marca, a.modelo, a.tipo, a.anio, a.precio, a.mensualidad,
             a.ubicacion, a.kilometraje, a.transmision, a.color, a.motor,
             a.combustible, a.pasajeros, a.traccion, a.duenos,
-            a.img_principal, a.estatus, a.fecha_carga, a.fecha_modificacion
+            a.img_principal, a.estatus, a.fecha_carga, a.fecha_modificacion,
+            (
+                SELECT cr.id
+                FROM operativo_catalogo_requerimiento cr
+                WHERE cr.auto_id = a.id
+                  AND cr.decision = 'Pendiente'
+                ORDER BY cr.id DESC
+                LIMIT 1
+            ) AS requerimiento_catalogo_pendiente_id
         FROM autos a
         WHERE {$whereSql}
         ORDER BY a.fecha_modificacion DESC, a.id DESC
@@ -67,6 +78,9 @@ $sql = "SELECT
 $listTypes = $types . 'ii';
 $listParams = array_merge($params, [$size, $offset]);
 $stmt = $con->prepare($sql);
+if (!$stmt) {
+    databaseError($con);
+}
 bindDynamicParams($stmt, $listTypes, $listParams);
 $stmt->execute();
 $rows = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
@@ -86,6 +100,9 @@ foreach ($rows as &$row) {
     $row['kilometraje'] = (int) $row['kilometraje'];
     $row['pasajeros'] = $row['pasajeros'] !== null ? (int) $row['pasajeros'] : null;
     $row['duenos'] = $row['duenos'] !== null ? (int) $row['duenos'] : null;
+    $row['requerimiento_catalogo_pendiente_id'] = $row['requerimiento_catalogo_pendiente_id'] !== null
+        ? (int) $row['requerimiento_catalogo_pendiente_id']
+        : null;
 }
 unset($row);
 
@@ -97,6 +114,7 @@ okResponse([
     ],
     'permisos' => [
         'puede_editar' => canManageCatalog($user),
+        'puede_autorizar_catalogo' => canAuthorizeCatalogRequests($user),
     ],
     'pagination' => [
         'page' => $page,

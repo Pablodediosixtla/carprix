@@ -36,12 +36,20 @@
         }).format(parsed);
     };
 
+    const IMAGE_CACHE_VERSION = Date.now().toString(36);
+
     const imageUrl = (value) => {
         const path = String(value || '').trim();
-        if (!path) return '../img/hero-default.jpg';
-        if (/^https?:\/\//i.test(path) || path.startsWith('data:')) return path;
-        if (path.startsWith('/')) return `..${path}`;
-        return `../${path.replace(/^\.\//, '')}`;
+        if (path.startsWith('data:') || path.startsWith('blob:')) return path;
+
+        let url;
+        if (!path) url = '../img/hero-default.jpg';
+        else if (/^https?:\/\//i.test(path)) url = path;
+        else if (path.startsWith('/')) url = `..${path}`;
+        else url = `../${path.replace(/^\.\//, '')}`;
+
+        const separator = url.includes('?') ? '&' : '?';
+        return `${url}${separator}carprix_cache=${IMAGE_CACHE_VERSION}`;
     };
 
     const request = async (endpoint, payload = {}, options = {}) => {

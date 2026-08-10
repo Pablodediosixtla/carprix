@@ -364,3 +364,56 @@ button:disabled { opacity: .55; cursor: not-allowed; transform: none !important;
 .op-status-badge.activo { background: rgba(57,181,74,.16); color: #68db77; border: 1px solid rgba(57,181,74,.32); }
 .op-status-badge.inactivo { background: rgba(255,255,255,.08); color: #cdd2ce; border: 1px solid rgba(255,255,255,.12); }
 .op-status-badge.bloqueado { background: rgba(239,91,91,.15); color: #ff8989; border: 1px solid rgba(239,91,91,.3); }
+
+/* =========================================================
+   Catálogo: pestañas, publicación y buscadores
+   ========================================================= */
+.op-tabs { display: flex; align-items: center; gap: 8px; margin: 0 0 18px; padding: 5px; width: fit-content; max-width: 100%; border: 1px solid var(--op-border); border-radius: 14px; background: var(--op-surface); overflow-x: auto; }
+.op-tab-button { min-height: 40px; display: inline-flex; align-items: center; gap: 8px; padding: 0 14px; border: 0; border-radius: 10px; background: transparent; color: var(--op-muted); font: inherit; font-size: 12px; font-weight: 800; white-space: nowrap; cursor: pointer; }
+.op-tab-button:hover { color: var(--op-text); background: var(--op-surface-2); }
+.op-tab-button.active { color: #071108; background: var(--op-green); }
+.op-tab-badge { min-width: 21px; height: 21px; display: inline-grid; place-items: center; padding: 0 6px; border-radius: 999px; background: rgba(0,0,0,.18); color: inherit; font-size: 9px; }
+.op-tab-panel[hidden] { display: none !important; }
+.op-field-help { display: block; margin-top: 6px; color: var(--op-muted); font-size: 10px; line-height: 1.45; }
+.op-publication-note { width: fit-content; display: inline-flex; align-items: center; gap: 6px; margin-top: 10px; padding: 6px 9px; border-radius: 9px; font-size: 10px; font-weight: 800; }
+.op-publication-note.pending { background: rgba(245, 166, 35, .12); color: #f0b758; border: 1px solid rgba(245, 166, 35, .2); }
+.op-publish-button { width: 100%; margin-top: 12px; }
+.op-primary-button.danger { background: var(--op-danger); border-color: var(--op-danger); color: #fff; }
+
+.op-catalog-request-card { grid-template-columns: minmax(260px, 1.1fr) minmax(260px, 1fr) minmax(190px, .7fr) auto; }
+.op-catalog-request-auto { display: grid; grid-template-columns: 92px minmax(0,1fr); gap: 12px; align-items: center; min-width: 0; }
+.op-catalog-request-auto img { width: 92px; height: 68px; border-radius: 11px; object-fit: cover; background: #151815; }
+.op-catalog-request-auto h3 { margin: 4px 0 3px; font-size: 15px; }
+.op-catalog-request-auto p, .op-catalog-request-card small { margin: 0; color: var(--op-muted); font-size: 10px; line-height: 1.5; }
+
+.op-auto-search-box { min-height: 46px; display: flex; align-items: center; gap: 10px; padding: 0 13px; border: 1px solid var(--op-border); border-radius: 12px; background: var(--op-surface); position: relative; }
+.op-auto-search-box:focus-within { border-color: var(--op-green); box-shadow: 0 0 0 2px rgba(57,181,74,.12); }
+.op-auto-search-box i { color: var(--op-muted); }
+.op-auto-search-box input[type="search"] { width: 100%; min-width: 0; border: 0; outline: 0; background: transparent; color: var(--op-text); font: inherit; }
+.op-autocomplete-results { position: relative; z-index: 20; max-height: 300px; margin-top: 6px; overflow: auto; border: 1px solid var(--op-border); border-radius: 12px; background: var(--op-surface); box-shadow: var(--op-shadow); }
+.op-autocomplete-results[hidden] { display: none !important; }
+.op-autocomplete-option { width: 100%; display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 14px; align-items: center; padding: 12px 13px; border: 0; border-bottom: 1px solid var(--op-border); background: transparent; color: var(--op-text); text-align: left; cursor: pointer; }
+.op-autocomplete-option:last-child { border-bottom: 0; }
+.op-autocomplete-option:hover, .op-autocomplete-option:focus { background: var(--op-surface-2); outline: 0; }
+.op-autocomplete-option span { min-width: 0; display: grid; gap: 3px; }
+.op-autocomplete-option span:last-child { text-align: right; }
+.op-autocomplete-option strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11px; }
+.op-autocomplete-option small { color: var(--op-muted); font-size: 9px; }
+.op-autocomplete-empty { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 54px; padding: 12px; color: var(--op-muted); font-size: 10px; }
+.op-autocomplete-empty.error { color: #ff7a7a; }
+
+@media (max-width: 1080px) {
+    .op-catalog-request-card { grid-template-columns: minmax(240px,1fr) minmax(240px,1fr) auto; }
+    .op-catalog-request-card > :nth-child(3) { grid-column: 1/3; }
+}
+
+@media (max-width: 700px) {
+    .op-tabs { width: 100%; }
+    .op-tab-button { flex: 1 0 auto; justify-content: center; }
+    .op-catalog-request-card { grid-template-columns: 1fr; }
+    .op-catalog-request-card > :nth-child(3) { grid-column: auto; }
+    .op-catalog-request-auto { grid-template-columns: 78px minmax(0,1fr); }
+    .op-catalog-request-auto img { width: 78px; height: 60px; }
+    .op-autocomplete-option { grid-template-columns: 1fr; gap: 6px; }
+    .op-autocomplete-option span:last-child { text-align: left; }
+}

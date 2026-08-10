@@ -24,49 +24,69 @@ $pasajeros = max(1, (int) ($input['pasajeros'] ?? 5));
 $traccion = cleanString($input['traccion'] ?? '', 50);
 $duenos = max(1, (int) ($input['duenos'] ?? 1));
 $imgPrincipal = cleanString($input['img_principal'] ?? '', 500);
-$estatus = cleanString($input['estatus'] ?? 'Disponible', 30);
 
 if ($anio < 1950 || $anio > ((int) date('Y') + 1) || $precio <= 0) {
     $con->close();
     errorResponse('Año o precio no válido.', 422, 'VALIDATION_ERROR');
 }
-if (!in_array($estatus, ['Disponible', 'Vendido', 'Oculto'], true)) {
-    $con->close();
-    errorResponse('Estatus no válido.', 422, 'VALIDATION_ERROR');
-}
 
-$sql = "INSERT INTO autos
-        (marca, modelo, tipo, anio, precio, mensualidad, ubicacion, kilometraje,
-         transmision, color, motor, combustible, pasajeros, traccion, duenos,
-         img_principal, estatus)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-$stmt = $con->prepare($sql);
-$stmt->bind_param(
-    'sssiddsissssisiss',
-    $marca,
-    $modelo,
-    $tipo,
-    $anio,
-    $precio,
-    $mensualidad,
-    $ubicacion,
-    $kilometraje,
-    $transmision,
-    $color,
-    $motor,
-    $combustible,
-    $pasajeros,
-    $traccion,
-    $duenos,
-    $imgPrincipal,
-    $estatus
-);
-if (!$stmt->execute()) {
+// Todo auto nuevo entra oculto. Su publicación se resuelve mediante
+// operativo_catalogo_requerimiento.
+$estatus = 'Oculto';
+
+$con->begin_transaction();
+try {
+    $sql = "INSERT INTO autos
+            (marca, modelo, tipo, anio, precio, mensualidad, ubicacion, kilometraje,
+             transmision, color, motor, combustible, pasajeros, traccion, duenos,
+             img_principal, estatus)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    $stmt = $con->prepare($sql);
+    if (!$stmt) {
+        throw new RuntimeException($con->error);
+    }
+    $stmt->bind_param(
+        'sssiddsissssisiss',
+        $marca,
+        $modelo,
+        $tipo,
+        $anio,
+        $precio,
+        $mensualidad,
+        $ubicacion,
+        $kilometraje,
+        $transmision,
+        $color,
+        $motor,
+        $combustible,
+        $pasajeros,
+        $traccion,
+        $duenos,
+        $imgPrincipal,
+        $estatus
+    );
+    if (!$stmt->execute()) {
+        throw new RuntimeException($stmt->error, $stmt->errno);
+    }
+    $autoId = (int) $con->insert_id;
     $stmt->close();
-    databaseError($con);
-}
-$autoId = (int) $con->insert_id;
-$stmt->close();
-$con->close();
 
-okResponse(['id' => $autoId], 'Auto agregado correctamente.', 201);
+    $requestId = createCatalogPublicationRequest(
+        $con,
+        $autoId,
+        (int) $user['id'],
+        "Alta de auto nuevo #{$autoId}. Se solicita autorización para publicarlo como Disponible."
+    );
+
+    $con->commit();
+    $con->close();
+
+    okResponse([
+        'id' => $autoId,
+        'estatus' => 'Oculto',
+        'requerimiento_catalogo_id' => $requestId,
+    ], 'Auto agregado como Oculto y enviado a autorización de catálogo.', 201);
+} catch (Throwable $e) {
+    $con->rollback();
+    databaseError($con, $e);
+}

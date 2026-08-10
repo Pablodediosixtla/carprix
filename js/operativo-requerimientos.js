@@ -1,7 +1,13 @@
 (async () => {
     'use strict';
     const OP = window.CARPRIX_OP;
-    const state = { page: 1, permissions: {}, timer: null };
+    const state = {
+        page: 1,
+        permissions: {},
+        timer: null,
+        autoTimer: null,
+        autoRequestSeq: 0,
+    };
     const list = document.getElementById('requirement-list');
     const pagination = document.getElementById('requirement-pagination');
     const requirementDialog = document.getElementById('requirement-dialog');
@@ -10,19 +16,67 @@
     const statusDialog = document.getElementById('status-dialog');
     const statusForm = document.getElementById('status-form');
     const statusMessage = document.getElementById('status-message');
+    const autoSearch = document.getElementById('req-auto-search');
+    const autoIdInput = document.getElementById('req-auto');
+    const autoResults = document.getElementById('req-auto-results');
+    const autoSelected = document.getElementById('req-auto-selected');
 
-    const loadAvailableAutos = async () => {
-        const all = [];
-        let page = 1;
-        let pages = 1;
-        do {
-            const response = await OP.request('op_c_catalogo.php', { page, size: 100, estatus: 'Disponible' });
-            all.push(...response.data.items);
-            pages = response.data.pagination.pages;
-            page += 1;
-        } while (page <= pages && page <= 20);
-        const select = document.getElementById('req-auto');
-        select.innerHTML = '<option value="">Selecciona un auto</option>' + all.map((auto) => `<option value="${auto.id}">#${auto.id} · ${OP.escapeHtml(auto.marca)} ${OP.escapeHtml(auto.modelo)} ${auto.anio} · ${OP.formatCurrency(auto.precio)}</option>`).join('');
+    const clearAutoSelection = () => {
+        autoIdInput.value = '';
+        autoSelected.textContent = 'Escribe al menos 2 caracteres. Solo se consultan autos con estatus Disponible.';
+    };
+
+    const hideAutoResults = () => {
+        autoResults.hidden = true;
+        autoResults.innerHTML = '';
+    };
+
+    const selectAuto = (auto) => {
+        autoIdInput.value = String(auto.id);
+        autoSearch.value = `#${auto.id} · ${auto.marca} ${auto.modelo} ${auto.anio}`;
+        autoSelected.textContent = `${OP.formatCurrency(auto.precio)} · ${auto.ubicacion} · ${new Intl.NumberFormat('es-MX').format(auto.kilometraje)} km`;
+        hideAutoResults();
+    };
+
+    const renderAutoResults = (items) => {
+        if (!items.length) {
+            autoResults.innerHTML = '<div class="op-autocomplete-empty"><i class="fa-solid fa-car-burst"></i> No se encontraron autos disponibles.</div>';
+            autoResults.hidden = false;
+            return;
+        }
+
+        autoResults.innerHTML = items.map((auto) => `
+            <button type="button" class="op-autocomplete-option" data-auto-id="${auto.id}" role="option">
+                <span><strong>#${auto.id} · ${OP.escapeHtml(auto.marca)} ${OP.escapeHtml(auto.modelo)}</strong><small>${auto.anio} · ${OP.escapeHtml(auto.ubicacion)}</small></span>
+                <span><strong>${OP.formatCurrency(auto.precio)}</strong><small>${new Intl.NumberFormat('es-MX').format(auto.kilometraje)} km</small></span>
+            </button>`).join('');
+        autoResults.hidden = false;
+
+        const byId = new Map(items.map((auto) => [Number(auto.id), auto]));
+        autoResults.querySelectorAll('[data-auto-id]').forEach((button) => {
+            button.addEventListener('click', () => selectAuto(byId.get(Number(button.dataset.autoId))));
+        });
+    };
+
+    const searchAvailableAutos = async (query = '') => {
+        const seq = ++state.autoRequestSeq;
+        autoResults.innerHTML = '<div class="op-autocomplete-empty"><i class="fa-solid fa-spinner fa-spin"></i> Buscando autos disponibles...</div>';
+        autoResults.hidden = false;
+
+        try {
+            const response = await OP.request('op_c_catalogo.php', {
+                page: 1,
+                size: 15,
+                estatus: 'Disponible',
+                search: query,
+            });
+            if (seq !== state.autoRequestSeq) return;
+            renderAutoResults(response.data.items || []);
+        } catch (error) {
+            if (seq !== state.autoRequestSeq) return;
+            autoResults.innerHTML = `<div class="op-autocomplete-empty error">${OP.escapeHtml(error.message)}</div>`;
+            autoResults.hidden = false;
+        }
     };
 
     const nextStatus = (status) => status === 'Solicitado' ? 'Apartado' : (status === 'Apartado' ? 'Vendido' : null);
@@ -51,7 +105,7 @@
                 document.getElementById('status-requirement-id').value = button.dataset.statusChange;
                 document.getElementById('status-requested-value').value = requested;
                 document.getElementById('status-dialog-title').textContent = `Solicitar estatus ${requested}`;
-                document.getElementById('status-description').textContent = `El cambio será enviado al supervisor configurado y no se aplicará hasta ser autorizado.`;
+                document.getElementById('status-description').textContent = 'El cambio será enviado al supervisor configurado y no se aplicará hasta ser autorizado.';
                 document.getElementById('status-reason').value = '';
                 OP.setMessage(statusMessage);
                 statusDialog.showModal();
@@ -82,26 +136,57 @@
         const user = await OP.loadSession();
         if (!user) return;
         if (user.debe_cambiar_password) { await OP.forcePasswordChange(); location.reload(); return; }
-        document.getElementById('new-requirement-button').addEventListener('click', async () => {
+
+        document.getElementById('new-requirement-button').addEventListener('click', () => {
             requirementForm.reset();
+            clearAutoSelection();
+            hideAutoResults();
             OP.setMessage(requirementMessage);
             requirementDialog.showModal();
-            if (document.getElementById('req-auto').options.length <= 1) await loadAvailableAutos();
+            window.setTimeout(() => autoSearch.focus(), 60);
         });
+
+        autoSearch.addEventListener('input', () => {
+            clearAutoSelection();
+            clearTimeout(state.autoTimer);
+            const query = autoSearch.value.trim();
+            if (query.length < 2) {
+                hideAutoResults();
+                return;
+            }
+            state.autoTimer = setTimeout(() => searchAvailableAutos(query), 280);
+        });
+        autoSearch.addEventListener('focus', () => {
+            const query = autoSearch.value.trim();
+            if (query.length >= 2) searchAvailableAutos(query);
+        });
+        document.addEventListener('click', (event) => {
+            if (!event.target.closest('.op-auto-search-box') && !event.target.closest('#req-auto-results')) {
+                hideAutoResults();
+            }
+        });
+
         document.getElementById('requirement-refresh').addEventListener('click', () => load(1));
         document.getElementById('requirement-status').addEventListener('change', () => load(1));
         document.getElementById('requirement-search').addEventListener('input', () => {
             clearTimeout(state.timer);
             state.timer = setTimeout(() => load(1), 350);
         });
+
         requirementForm.addEventListener('submit', async (event) => {
             event.preventDefault();
             const button = document.getElementById('requirement-save');
             OP.setMessage(requirementMessage);
+            if (!Number(autoIdInput.value || 0)) {
+                OP.setMessage(requirementMessage, 'Selecciona un auto disponible desde el buscador.');
+                autoSearch.focus();
+                return;
+            }
+
             OP.buttonLoading(button, true, 'Registrando...');
             try {
                 const response = await OP.request('op_i_requerimiento.php', {
-                    auto_id: Number(document.getElementById('req-auto').value),
+                    auto_id: Number(autoIdInput.value),
                     cliente_nombre: document.getElementById('req-client-name').value.trim(),
                     cliente_telefono: document.getElementById('req-client-phone').value.trim(),
                     cliente_email: document.getElementById('req-client-email').value.trim(),
@@ -119,6 +204,7 @@
                 OP.buttonLoading(button, false);
             }
         });
+
         statusForm.addEventListener('submit', async (event) => {
             event.preventDefault();
             const button = statusForm.querySelector('button[type="submit"]');
