@@ -259,28 +259,21 @@ function compressImageWithImagick(string $tmpName, string $destinationBase): arr
     ];
 }
 
-function compressCatalogImage(string $tmpName, string $mime, string $destinationBase): array
+function copyCatalogImageFallback(string $tmpName, string $mime, string $destinationBase): array
 {
-    if (function_exists('imagecreatefromstring')) {
-        return compressImageWithGd($tmpName, $mime, $destinationBase);
-    }
-    if (class_exists('Imagick')) {
-        return compressImageWithImagick($tmpName, $destinationBase);
-    }
-
-    // Fallback para App Service sin GD/Imagick. La vista operativa ya
-    // comprime las imágenes en el navegador antes de enviarlas.
     $extension = match ($mime) {
         'image/jpeg' => 'jpg',
         'image/png' => 'png',
         'image/webp' => 'webp',
         default => throw new RuntimeException('IMAGE_TYPE_NOT_ALLOWED'),
     };
+
     $destination = $destinationBase . '.' . $extension;
-    if (!copy($tmpName, $destination) || !is_file($destination) || filesize($destination) <= 0) {
+    if (!@copy($tmpName, $destination) || !is_file($destination) || (int) @filesize($destination) <= 0) {
         @unlink($destination);
         throw new RuntimeException('IMAGE_SAVE_ERROR');
     }
+
     $dimensions = @getimagesize($destination);
     return [
         'path' => $destination,
@@ -288,7 +281,52 @@ function compressCatalogImage(string $tmpName, string $mime, string $destination
         'width' => (int) ($dimensions[0] ?? 0),
         'height' => (int) ($dimensions[1] ?? 0),
         'bytes' => (int) filesize($destination),
+        'engine' => 'copy',
     ];
+}
+
+function compressCatalogImage(string $tmpName, string $mime, string $destinationBase): array
+{
+    $errors = [];
+
+    /*
+     * En App Service puede existir GD, pero no necesariamente con soporte
+     * para todos los codecs (especialmente WEBP). Antes se elegía GD solo
+     * por existir imagecreatefromstring(); si GD no podía decodificar el
+     * archivo, la carga terminaba en 500 sin intentar otra alternativa.
+     *
+     * Ahora cada motor es un intento independiente:
+     *   GD -> Imagick -> copia segura del archivo ya comprimido en navegador.
+     */
+    if (function_exists('imagecreatefromstring')) {
+        try {
+            $result = compressImageWithGd($tmpName, $mime, $destinationBase);
+            $result['engine'] = 'gd';
+            return $result;
+        } catch (Throwable $e) {
+            $errors[] = 'GD:' . $e->getMessage();
+            error_log('[CARPRIX IMAGE] GD falló: ' . $e->getMessage());
+        }
+    }
+
+    if (class_exists('Imagick')) {
+        try {
+            $result = compressImageWithImagick($tmpName, $destinationBase);
+            $result['engine'] = 'imagick';
+            return $result;
+        } catch (Throwable $e) {
+            $errors[] = 'IMAGICK:' . $e->getMessage();
+            error_log('[CARPRIX IMAGE] Imagick falló: ' . $e->getMessage());
+        }
+    }
+
+    try {
+        return copyCatalogImageFallback($tmpName, $mime, $destinationBase);
+    } catch (Throwable $e) {
+        $errors[] = 'COPY:' . $e->getMessage();
+        error_log('[CARPRIX IMAGE] Fallback de copia falló: ' . $e->getMessage());
+        throw new RuntimeException(implode(' | ', $errors));
+    }
 }
 
 $input = bootstrapMultipartApi(true);
@@ -431,17 +469,42 @@ $relativeDirectory = "Catalogo/{$autoId}";
 $absoluteDirectory = $projectRoot . '/' . $relativeDirectory;
 
 if ($validatedFiles !== [] && !is_dir($absoluteDirectory)) {
-    if (!mkdir($absoluteDirectory, 0755, true) && !is_dir($absoluteDirectory)) {
+    if (!@mkdir($absoluteDirectory, 0775, true) && !is_dir($absoluteDirectory)) {
+        error_log('[CARPRIX IMAGE] No se pudo crear directorio: ' . $absoluteDirectory);
         $con->close();
-        errorResponse('No fue posible crear la carpeta de imágenes del auto.', 500, 'IMAGE_DIRECTORY_ERROR');
+        errorResponse(
+            'No fue posible crear la carpeta de imágenes del auto.',
+            500,
+            'IMAGE_DIRECTORY_ERROR',
+            ['auto_id' => $autoId]
+        );
     }
 }
+
+if ($validatedFiles !== []) {
+    @chmod($absoluteDirectory, 0775);
+}
+
 if ($validatedFiles !== [] && !is_writable($absoluteDirectory)) {
+    $runFromPackage = trim((string) (getenv('WEBSITE_RUN_FROM_PACKAGE') ?: ''));
+    $owner = function_exists('fileowner') ? @fileowner($absoluteDirectory) : false;
+    $perms = @fileperms($absoluteDirectory);
+    error_log(sprintf(
+        '[CARPRIX IMAGE] Directorio no escribible: %s | owner=%s | perms=%s | WEBSITE_RUN_FROM_PACKAGE=%s',
+        $absoluteDirectory,
+        $owner === false ? 'unknown' : (string) $owner,
+        $perms === false ? 'unknown' : substr(sprintf('%o', $perms), -4),
+        $runFromPackage === '' ? '<empty>' : $runFromPackage
+    ));
+
     $con->close();
     errorResponse(
-        'La carpeta del catálogo no tiene permisos de escritura. Revisa el almacenamiento del App Service.',
+        $runFromPackage !== ''
+            ? 'El App Service está ejecutándose en modo de paquete de solo lectura. El catálogo necesita almacenamiento escribible.'
+            : 'La carpeta del catálogo no tiene permisos de escritura para PHP.',
         500,
-        'IMAGE_DIRECTORY_NOT_WRITABLE'
+        $runFromPackage !== '' ? 'APP_SERVICE_READ_ONLY' : 'IMAGE_DIRECTORY_NOT_WRITABLE',
+        ['auto_id' => $autoId]
     );
 }
 
@@ -465,14 +528,20 @@ try {
             'bytes_finales' => (int) $compressed['bytes'],
             'ancho' => (int) $compressed['width'],
             'alto' => (int) $compressed['height'],
+            'motor' => (string) ($compressed['engine'] ?? 'unknown'),
         ];
     }
-} catch (RuntimeException $e) {
+} catch (Throwable $e) {
     foreach ($newAbsoluteFiles as $createdFile) {
         @unlink($createdFile);
     }
+    error_log('[CARPRIX IMAGE] Error de compresión/guardado: ' . $e->getMessage());
     $con->close();
-    errorResponse('No fue posible comprimir y guardar una de las imágenes.', 500, 'IMAGE_COMPRESSION_ERROR');
+    errorResponse(
+        'No fue posible procesar y guardar una de las imágenes.',
+        500,
+        'IMAGE_COMPRESSION_ERROR'
+    );
 }
 
 $con->begin_transaction();

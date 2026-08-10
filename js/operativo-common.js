@@ -116,14 +116,29 @@
             throw new Error('No fue posible cargar los archivos al servidor.');
         }
 
-        const contentType = response.headers.get('content-type') || '';
-        if (!contentType.includes('application/json')) {
-            const text = await response.text();
-            console.error('Respuesta no JSON:', text.slice(0, 800));
-            throw new Error(`El servidor respondió con formato no válido (${response.status}).`);
+        /*
+         * Algunos errores de PHP/FPM pueden llegar a través de Nginx con un
+         * Content-Type distinto aunque el cuerpo siga siendo JSON. Leemos el
+         * cuerpo primero e intentamos interpretarlo antes de declarar que la
+         * respuesta no es válida. Esto además conserva el código real de la API.
+         */
+        const raw = await response.text();
+        let body = null;
+        try {
+            body = raw ? JSON.parse(raw) : null;
+        } catch (parseError) {
+            console.error('Respuesta de carga no JSON:', {
+                status: response.status,
+                contentType: response.headers.get('content-type') || '',
+                body: raw.slice(0, 1200),
+            });
+            throw new Error(`La carga de imágenes falló en el servidor (HTTP ${response.status}).`);
         }
 
-        const body = await response.json();
+        if (!body || typeof body !== 'object') {
+            throw new Error(`La carga de imágenes devolvió una respuesta vacía o inválida (HTTP ${response.status}).`);
+        }
+
         if (!response.ok || body.ok === false) {
             const error = new Error(body.error || body.message || 'La carga no pudo completarse.');
             error.code = body.code || 'UPLOAD_ERROR';

@@ -92,7 +92,7 @@ function operativoPageEnd(array $scripts = []): void
 {
     echo '</main></div></div><div class="op-sidebar-overlay" id="op-sidebar-overlay"></div>';
     echo '<div class="op-toast-zone" id="op-toast-zone" aria-live="polite"></div>';
-    echo '<script src="../js/operativo-common.js?v=20260810-1"></script>';
+    echo '<script src="../js/operativo-common.js?v=20260810-2"></script>';
     foreach ($scripts as $script) {
         echo '<script src="../js/' . htmlspecialchars($script, ENT_QUOTES, 'UTF-8') . '?v=20260810-1"></script>';
     }
