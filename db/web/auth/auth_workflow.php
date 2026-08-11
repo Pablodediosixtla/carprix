@@ -743,3 +743,145 @@ function createCatalogPublicationRequest(
     $insert->close();
     return $requestId;
 }
+
+/* =========================================================
+ * Recompensas operativas
+ * ========================================================= */
+function rewardsCurrentYear(): int
+{
+    $timezone = trim((string) (getenv('CARPRIX_TIMEZONE') ?: 'America/Mexico_City'));
+    try {
+        $now = new DateTimeImmutable('now', new DateTimeZone($timezone));
+    } catch (Throwable) {
+        $now = new DateTimeImmutable('now');
+    }
+    return (int) $now->format('Y');
+}
+
+function canManageRewardsCatalog(array $user): bool
+{
+    return hasAnyRole($user, ['SUPER_ADMIN', 'ADMIN_OPERATIVO']);
+}
+
+function rewardAssignableUserIds(mysqli $con, array $user): array
+{
+    $currentId = (int) ($user['id'] ?? 0);
+    if ($currentId <= 0) {
+        return [];
+    }
+
+    if (canManageRewardsCatalog($user)) {
+        $stmt = $con->prepare("SELECT id FROM operativo_usuario WHERE estatus = 'Activo' AND id <> ? ORDER BY id");
+        if (!$stmt) {
+            databaseError($con);
+        }
+        $stmt->bind_param('i', $currentId);
+        $stmt->execute();
+        $ids = array_map('intval', array_column($stmt->get_result()->fetch_all(MYSQLI_ASSOC), 'id'));
+        $stmt->close();
+        return $ids;
+    }
+
+    if (!hasAnyRole($user, ['AUTORIZADOR'])) {
+        return [];
+    }
+
+    $ids = hierarchyDescendantIds($con, $currentId);
+    return array_values(array_filter(
+        array_map('intval', $ids),
+        static fn(int $id): bool => $id > 0 && $id !== $currentId
+    ));
+}
+
+function canGrantRewardToUser(mysqli $con, array $user, int $targetUserId): bool
+{
+    $currentId = (int) ($user['id'] ?? 0);
+    if ($currentId <= 0 || $targetUserId <= 0 || $currentId === $targetUserId) {
+        return false;
+    }
+
+    return in_array($targetUserId, rewardAssignableUserIds($con, $user), true);
+}
+
+function rewardSignedPoints(string $categoryType, int $points): int
+{
+    $magnitude = max(0, $points);
+    return strtoupper($categoryType) === 'RESTA' ? -$magnitude : $magnitude;
+}
+
+function grantAutomaticReward(
+    mysqli $con,
+    string $catalogCode,
+    int $targetUserId,
+    int $referenceId,
+    int $actorUserId,
+    string $referenceType,
+    string $comment = ''
+): void {
+    if ($targetUserId <= 0 || $referenceId <= 0 || $actorUserId <= 0) {
+        return;
+    }
+
+    $stmt = $con->prepare(
+        "SELECT rc.id, rc.puntos, rc.origen, cat.tipo
+         FROM operativo_recompensa_catalogo rc
+         INNER JOIN operativo_recompensa_categoria cat
+            ON cat.id = rc.categoria_id
+           AND cat.activo = 1
+         WHERE rc.codigo = ?
+           AND rc.activo = 1
+         LIMIT 1"
+    );
+    if (!$stmt) {
+        databaseError($con);
+    }
+    $stmt->bind_param('s', $catalogCode);
+    $stmt->execute();
+    $rule = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+
+    // La recompensa automática puede desactivarse desde gestión sin romper
+    // el flujo comercial. En ese caso simplemente no se genera movimiento.
+    if (!$rule) {
+        return;
+    }
+
+    $catalogId = (int) $rule['id'];
+    $points = rewardSignedPoints((string) $rule['tipo'], (int) $rule['puntos']);
+    if ($points === 0) {
+        return;
+    }
+
+    $year = rewardsCurrentYear();
+    $origin = (string) $rule['origen'];
+    $eventKey = sprintf('AUTO:%s:%d:%d', $catalogCode, $referenceId, $targetUserId);
+    $commentValue = cleanString($comment, 700);
+
+    $insert = $con->prepare(
+        "INSERT IGNORE INTO operativo_recompensa_movimiento
+            (usuario_id, catalogo_id, anio, puntos_aplicados, origen,
+             referencia_tipo, referencia_id, clave_evento, asignado_por, comentario)
+         VALUES (?, ?, ?, ?, ?, NULLIF(?, ''), ?, ?, ?, NULLIF(?, ''))"
+    );
+    if (!$insert) {
+        databaseError($con);
+    }
+    $insert->bind_param(
+        'iiiissisis',
+        $targetUserId,
+        $catalogId,
+        $year,
+        $points,
+        $origin,
+        $referenceType,
+        $referenceId,
+        $eventKey,
+        $actorUserId,
+        $commentValue
+    );
+    if (!$insert->execute()) {
+        $insert->close();
+        databaseError($con);
+    }
+    $insert->close();
+}

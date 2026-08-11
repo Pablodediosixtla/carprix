@@ -168,6 +168,7 @@
 
     const PAGE_ROLES = {
         personas: ['SUPER_ADMIN', 'ADMIN_OPERATIVO', 'AUTORIZADOR'],
+        gestion_recompensas: ['SUPER_ADMIN', 'ADMIN_OPERATIVO'],
         catalogo: ['SUPER_ADMIN', 'ADMIN_OPERATIVO', 'INVENTARIO'],
         requerimientos: ['SUPER_ADMIN', 'ADMIN_OPERATIVO', 'AUTORIZADOR', 'INVENTARIO', 'VENTAS'],
         autorizaciones: ['SUPER_ADMIN', 'ADMIN_OPERATIVO', 'AUTORIZADOR'],

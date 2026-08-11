@@ -27,6 +27,8 @@ try {
         "SELECT
             c.*,
             r.auto_id,
+            r.creado_por,
+            r.asignado_a,
             r.estatus AS estatus_actual,
             a.estatus AS auto_estatus
          FROM operativo_requerimiento_cambio c
@@ -142,6 +144,28 @@ try {
             $comment !== '' ? $comment : 'Cambio autorizado.',
             (int) $user['id']
         );
+
+        // Recompensas comerciales automáticas. El responsable comercial del
+        // requerimiento recibe los puntos únicamente después de que el cambio
+        // fue autorizado. INSERT IGNORE + clave_evento evita duplicados.
+        $rewardCode = $requestedStatus === 'Apartado'
+            ? 'AUTO_APARTADO'
+            : ($requestedStatus === 'Vendido' ? 'AUTO_VENDIDO' : '');
+
+        if ($rewardCode !== '') {
+            $rewardTargetId = (int) ($change['asignado_a'] ?? $change['creado_por'] ?? 0);
+            grantAutomaticReward(
+                $con,
+                $rewardCode,
+                $rewardTargetId,
+                $changeId,
+                (int) $user['id'],
+                'REQUERIMIENTO_CAMBIO',
+                $requestedStatus === 'Apartado'
+                    ? 'Recompensa automática por apartado autorizado.'
+                    : 'Recompensa automática por venta autorizada.'
+            );
+        }
     } else {
         // Cuando se rechaza la primera transición comercial
         // Solicitado -> Apartado, el requerimiento completo queda Rechazado.

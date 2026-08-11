@@ -8,6 +8,8 @@ function operativoPageStart(string $title, string $page): void
     $items = [
         ['home', 'home.php', 'fa-house', 'Inicio', ''],
         ['tareas', 'tareas.php', 'fa-list-check', 'Tareas', ''],
+        ['recompensas', 'recompensas.php', 'fa-award', 'Recompensas', ''],
+        ['gestion_recompensas', 'gestion_recompensas.php', 'fa-gift', 'Gestión recompensas', 'SUPER_ADMIN,ADMIN_OPERATIVO'],
         ['personas', 'personas.php', 'fa-users-gear', 'Personas', 'SUPER_ADMIN,ADMIN_OPERATIVO,AUTORIZADOR'],
         ['catalogo', 'catalogo.php', 'fa-car-side', 'Gestión de catálogo', 'SUPER_ADMIN,ADMIN_OPERATIVO,INVENTARIO'],
         ['requerimientos', 'requerimientos.php', 'fa-file-circle-plus', 'Requerimientos', 'SUPER_ADMIN,ADMIN_OPERATIVO,AUTORIZADOR,INVENTARIO,VENTAS'],
@@ -29,7 +31,7 @@ function operativoPageStart(string $title, string $page): void
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-    <link rel="stylesheet" href="../css/operativo.css?v=20260810-7">
+    <link rel="stylesheet" href="../css/operativo.css?v=20260810-8">
 </head>
 <body class="op-body" data-page="{$safePage}">
     <div class="op-shell">
@@ -96,9 +98,9 @@ function operativoPageEnd(array $scripts = []): void
 {
     echo '</main></div></div><div class="op-sidebar-overlay" id="op-sidebar-overlay"></div>';
     echo '<div class="op-toast-zone" id="op-toast-zone" aria-live="polite"></div>';
-    echo '<script src="../js/operativo-common.js?v=20260810-7"></script>';
+    echo '<script src="../js/operativo-common.js?v=20260810-8"></script>';
     foreach ($scripts as $script) {
-        echo '<script src="../js/' . htmlspecialchars($script, ENT_QUOTES, 'UTF-8') . '?v=20260810-7"></script>';
+        echo '<script src="../js/' . htmlspecialchars($script, ENT_QUOTES, 'UTF-8') . '?v=20260810-8"></script>';
     }
     echo '</body></html>';
 }

@@ -719,3 +719,138 @@ button:disabled { opacity: .55; cursor: not-allowed; transform: none !important;
 .op-rejected-change strong { color: #ffd1d1; font-size: 12px; }
 .op-rejected-change span { color: #f0c4c4; font-size: 12px; line-height: 1.45; overflow-wrap: anywhere; }
 .op-rejected-change small { color: #c79b9b; font-size: 10px; }
+
+/* =========================================================
+   Home responsive: evita desbordamientos y separa monto/fecha
+   ========================================================= */
+.op-grid-two > *,
+.op-panel,
+.op-list,
+.op-list-item,
+.op-profile-details,
+.op-quick-links { min-width: 0; max-width: 100%; }
+.op-list-item-amount {
+    min-width: 118px;
+    padding-left: 18px;
+    border-left: 1px solid var(--op-border);
+    display: grid;
+    justify-items: end;
+    gap: 6px;
+    white-space: nowrap;
+}
+.op-list-item-amount strong,
+.op-list-item-amount span { display: block; }
+.op-list-item-amount span { color: var(--op-muted); font-size: 10px; }
+.op-profile-details div { min-width: 0; }
+.op-profile-details dd { min-width: 0; max-width: 68%; overflow-wrap: anywhere; word-break: break-word; }
+.op-quick-links a { min-width: 0; }
+.op-quick-links a span { min-width: 0; overflow-wrap: anywhere; }
+
+@media (max-width: 680px) {
+    .op-grid-two { width: 100%; min-width: 0; }
+    .op-grid-two > .op-panel { width: 100%; min-width: 0; overflow: hidden; }
+    .op-list-item {
+        width: 100%;
+        min-width: 0;
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr);
+        align-items: center;
+        gap: 10px 12px;
+    }
+    .op-list-item-main { min-width: 0; }
+    .op-list-item-main strong,
+    .op-list-item-main span { white-space: normal; overflow-wrap: anywhere; }
+    .op-list-item-amount {
+        grid-column: 1 / -1;
+        width: 100%;
+        min-width: 0;
+        padding: 10px 0 0;
+        margin-top: 2px;
+        border-left: 0;
+        border-top: 1px solid var(--op-border);
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 24px;
+        text-align: right;
+    }
+    .op-list-item-amount strong,
+    .op-list-item-amount span { padding: 0 4px; }
+    .op-profile-details div {
+        display: grid;
+        grid-template-columns: minmax(84px, .8fr) minmax(0, 1.2fr);
+        align-items: start;
+        gap: 12px;
+    }
+    .op-profile-details dd { max-width: none; width: 100%; }
+    .op-quick-links a { width: 100%; }
+}
+
+/* =========================================================
+   Recompensas
+   ========================================================= */
+.op-reward-head-actions { display: flex; align-items: end; justify-content: flex-end; gap: 10px; flex-wrap: wrap; }
+.op-year-field { min-width: 110px; margin: 0; }
+.op-year-field select { min-height: 43px; }
+.op-year-notice { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 18px; padding: 12px 14px; border: 1px solid rgba(57,181,74,.24); border-radius: 13px; background: rgba(57,181,74,.07); color: var(--op-muted); font-size: 11px; line-height: 1.5; }
+.op-year-notice i { color: var(--op-green); margin-top: 2px; }
+.op-reward-metrics { grid-template-columns: repeat(4, minmax(0,1fr)); }
+.op-reward-grid { grid-template-columns: minmax(0,1fr) minmax(360px,.9fr); }
+.op-prize-list, .op-reward-history, .op-management-list { display: grid; gap: 10px; }
+.op-prize-card { padding: 15px; border: 1px solid var(--op-border); border-radius: 14px; background: var(--op-surface-2); }
+.op-prize-card.achieved { border-color: rgba(57,181,74,.45); background: rgba(57,181,74,.07); }
+.op-prize-card-head { display: grid; grid-template-columns: auto minmax(0,1fr) auto; gap: 11px; align-items: center; }
+.op-prize-card-head > div { min-width: 0; display: grid; gap: 3px; }
+.op-prize-card-head strong { overflow-wrap: anywhere; }
+.op-prize-card-head small { color: var(--op-muted); font-size: 10px; }
+.op-prize-card p { margin: 10px 0 0; color: var(--op-muted); font-size: 11px; line-height: 1.5; }
+.op-prize-icon { width: 38px; height: 38px; display: grid; place-items: center; border-radius: 11px; background: rgba(155,118,255,.16); color: #bea4ff; }
+.op-prize-card.achieved .op-prize-icon { background: rgba(57,181,74,.16); color: #68db77; }
+.op-progress { height: 8px; margin-top: 13px; overflow: hidden; border-radius: 999px; background: #101210; }
+.op-progress span { display: block; height: 100%; border-radius: inherit; background: var(--op-green); }
+.op-prize-progress-copy { display: block; margin-top: 7px; color: var(--op-muted); font-size: 9px; text-align: right; }
+.op-reward-history-item { min-width: 0; display: grid; grid-template-columns: auto minmax(0,1fr) auto; gap: 11px; align-items: center; padding: 12px; border: 1px solid var(--op-border); border-radius: 13px; background: var(--op-surface-2); }
+.op-reward-points { min-width: 60px; padding: 7px 8px; border-radius: 9px; text-align: center; font-size: 12px; font-weight: 900; }
+.op-reward-points.positive, .op-points-value.positive { color: #68db77; background: rgba(57,181,74,.12); }
+.op-reward-points.negative, .op-points-value.negative { color: #ff8989; background: rgba(239,91,91,.12); }
+.op-reward-history-main { min-width: 0; display: grid; gap: 3px; }
+.op-reward-history-main strong { overflow-wrap: anywhere; }
+.op-reward-history-main span, .op-reward-history-item time { color: var(--op-muted); font-size: 10px; }
+.op-reward-history-main p { margin: 3px 0 0; color: #d7ddd8; font-size: 10px; line-height: 1.4; overflow-wrap: anywhere; }
+.op-reward-history-item time { white-space: nowrap; text-align: right; }
+.op-reward-preview { display: flex; align-items: flex-start; gap: 10px; padding: 12px; border-radius: 12px; }
+.op-reward-preview.positive { border: 1px solid rgba(57,181,74,.3); background: rgba(57,181,74,.08); color: #77e486; }
+.op-reward-preview.negative { border: 1px solid rgba(239,91,91,.3); background: rgba(239,91,91,.08); color: #ff9696; }
+.op-reward-preview > div { display: grid; gap: 3px; }
+.op-reward-preview span { color: var(--op-muted); font-size: 10px; }
+
+.op-management-row { min-width: 0; display: grid; grid-template-columns: minmax(0,1fr) auto auto auto; gap: 12px; align-items: center; padding: 13px 14px; border: 1px solid var(--op-border); border-radius: 13px; background: var(--op-surface-2); }
+.op-management-main { min-width: 0; display: grid; gap: 4px; }
+.op-management-main strong, .op-management-main span { overflow-wrap: anywhere; }
+.op-management-main span { color: var(--op-muted); font-size: 10px; line-height: 1.4; }
+.op-reward-type { display: inline-flex; align-items: center; padding: 6px 9px; border-radius: 999px; font-size: 10px; font-weight: 900; white-space: nowrap; }
+.op-reward-type.suma { color: #68db77; background: rgba(57,181,74,.12); }
+.op-reward-type.resta { color: #ff8989; background: rgba(239,91,91,.12); }
+.op-points-value { padding: 7px 9px; border-radius: 9px; white-space: nowrap; font-size: 11px; }
+.op-system-lock { margin-left: 5px; color: var(--op-warning); font-size: 9px; }
+
+@media (max-width: 1050px) {
+    .op-reward-metrics { grid-template-columns: repeat(2, minmax(0,1fr)); }
+    .op-reward-grid { grid-template-columns: 1fr; }
+    .op-management-row { grid-template-columns: minmax(0,1fr) auto auto; }
+    .op-management-row > .op-secondary-button { grid-column: 1 / -1; justify-self: end; }
+}
+
+@media (max-width: 680px) {
+    .op-reward-head-actions { width: 100%; justify-content: stretch; }
+    .op-reward-head-actions .op-year-field { flex: 1; }
+    .op-reward-head-actions .op-primary-button { width: 100%; }
+    .op-reward-metrics { grid-template-columns: repeat(2, minmax(0,1fr)); }
+    .op-prize-card-head { grid-template-columns: auto minmax(0,1fr); }
+    .op-prize-card-head .op-status-badge { grid-column: 1 / -1; width: fit-content; }
+    .op-reward-history-item { grid-template-columns: auto minmax(0,1fr); }
+    .op-reward-history-item time { grid-column: 1 / -1; text-align: right; }
+    .op-management-row { grid-template-columns: 1fr; align-items: stretch; }
+    .op-management-row > * { justify-self: start; }
+    .op-management-row > .op-secondary-button { grid-column: auto; justify-self: stretch; }
+}
