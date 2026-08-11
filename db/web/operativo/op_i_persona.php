@@ -7,7 +7,7 @@ $input = bootstrapApi(true);
 $con = connectDatabase();
 $currentUser = requireAuthenticated($con);
 
-if (!canManagePeople($currentUser)) {
+if (!canCreatePeople($currentUser)) {
     $con->close();
     errorResponse('No tienes permisos para agregar personas.', 403, 'FORBIDDEN');
 }
@@ -18,6 +18,7 @@ $nombre = requireString($input, 'nombre', 'nombre', 100);
 $apellidoPaterno = requireString($input, 'apellido_paterno', 'apellido paterno', 100);
 $apellidoMaterno = cleanString($input['apellido_materno'] ?? '', 100);
 $telefono = cleanString($input['telefono'] ?? '', 20);
+$fechaNacimiento = normalizeBirthDate($input['fecha_nacimiento'] ?? null);
 $password = (string) ($input['password_temporal'] ?? '');
 $level = strtoupper(cleanString($input['nivel'] ?? '', 40));
 $supervisorId = (int) ($input['supervisor_id'] ?? 0);
@@ -36,28 +37,18 @@ if (!in_array($level, $allowedLevels, true)) {
 
 $isSuperAdmin = isSuperAdmin($currentUser);
 $isManager = hasAnyRole($currentUser, ['ADMIN_OPERATIVO']);
-$isSupervisorOnly = !$isSuperAdmin && !$isManager && hasAnyRole($currentUser, ['AUTORIZADOR']);
 
-if ($isSupervisorOnly) {
-    $supervisorId = (int) $currentUser['id'];
+if (in_array($level, ['VENDEDOR', 'RESPONSABLE_INVENTARIO'], true) && $supervisorId <= 0) {
+    $con->close();
+    errorResponse('Debes asignar un supervisor directo.', 422, 'SUPERVISOR_REQUIRED', ['field' => 'supervisor_id']);
 }
 
 if ($level === 'SUPERVISOR' && $isManager && $supervisorId <= 0) {
     $supervisorId = (int) $currentUser['id'];
 }
 
-if ($level === 'VENDEDOR' && $supervisorId <= 0) {
-    $con->close();
-    errorResponse('Debes asignar un supervisor al vendedor.', 422, 'SUPERVISOR_REQUIRED', ['field' => 'supervisor_id']);
-}
-
-if ($isSupervisorOnly && $supervisorId !== (int) $currentUser['id']) {
-    $con->close();
-    errorResponse('Como supervisor, los vendedores nuevos deben quedar en tu propia línea jerárquica.', 403, 'SUPERVISOR_SCOPE_FORBIDDEN');
-}
-
 if ($supervisorId > 0) {
-    assertActiveApprover($con, $supervisorId);
+    assertHierarchyAssignmentValid($con, -1, $supervisorId);
 }
 
 $roleCodes = personRoleCodes($level, $supervisorAlsoSells);
@@ -99,21 +90,22 @@ $con->begin_transaction();
 try {
     $insert = $con->prepare(
         "INSERT INTO operativo_usuario
-            (username, email, nombre, apellido_paterno, apellido_materno, telefono,
+            (username, email, nombre, apellido_paterno, apellido_materno, telefono, fecha_nacimiento,
              password_hash, estatus, debe_cambiar_password)
-         VALUES (?, ?, ?, ?, NULLIF(?, ''), NULLIF(?, ''), ?, 'Activo', 1)"
+         VALUES (?, ?, ?, ?, NULLIF(?, ''), NULLIF(?, ''), ?, ?, 'Activo', 1)"
     );
     if (!$insert) {
         throw new RuntimeException($con->error);
     }
     $insert->bind_param(
-        'sssssss',
+        'ssssssss',
         $username,
         $email,
         $nombre,
         $apellidoPaterno,
         $apellidoMaterno,
         $telefono,
+        $fechaNacimiento,
         $passwordHash
     );
     if (!$insert->execute()) {
@@ -141,19 +133,7 @@ try {
     $assign->close();
 
     if ($supervisorId > 0) {
-        $hierarchy = $con->prepare(
-            "INSERT INTO operativo_usuario_jerarquia
-                (usuario_id, supervisor_id, activo, asignado_por)
-             VALUES (?, ?, 1, ?)"
-        );
-        if (!$hierarchy) {
-            throw new RuntimeException($con->error);
-        }
-        $hierarchy->bind_param('iii', $userId, $supervisorId, $creatorId);
-        if (!$hierarchy->execute()) {
-            throw new RuntimeException($hierarchy->error, $hierarchy->errno);
-        }
-        $hierarchy->close();
+        saveHierarchyAssignment($con, $userId, $supervisorId, $creatorId);
     }
 
     $con->commit();

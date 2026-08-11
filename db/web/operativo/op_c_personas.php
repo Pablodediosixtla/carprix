@@ -23,16 +23,14 @@ if (!in_array($status, ['', 'Activo', 'Inactivo', 'Bloqueado'], true)) {
     errorResponse('El estatus no es válido.', 422, 'VALIDATION_ERROR', ['field' => 'estatus']);
 }
 
-$isGlobalManager = isSuperAdmin($currentUser) || hasAnyRole($currentUser, ['ADMIN_OPERATIVO']);
-$scopeIds = $isGlobalManager
-    ? []
-    : hierarchyDescendantIds($con, (int) $currentUser['id']);
+$isGlobalManager = canFullyManagePeople($currentUser);
+$scopeIds = $isGlobalManager ? [] : hierarchyDescendantIds($con, (int) $currentUser['id']);
 
 $where = ['1 = 1'];
 $types = '';
 $params = [];
 
-if ($scopeIds !== []) {
+if (!$isGlobalManager) {
     $placeholders = implode(',', array_fill(0, count($scopeIds), '?'));
     $where[] = "u.id IN ({$placeholders})";
     $types .= str_repeat('i', count($scopeIds));
@@ -61,7 +59,7 @@ if (!$countStmt) {
 $countParams = $params;
 bindDynamicParams($countStmt, $types, $countParams);
 $countStmt->execute();
-$total = (int) $countStmt->get_result()->fetch_assoc()['total'];
+$total = (int) ($countStmt->get_result()->fetch_assoc()['total'] ?? 0);
 $countStmt->close();
 
 $sql = "SELECT
@@ -72,12 +70,13 @@ $sql = "SELECT
             u.apellido_paterno,
             u.apellido_materno,
             u.telefono,
+            u.fecha_nacimiento,
             u.estatus,
             u.debe_cambiar_password,
             u.ultimo_login_at,
             u.creado_en,
             j.supervisor_id,
-            CONCAT(s.nombre, ' ', s.apellido_paterno) AS supervisor_nombre,
+            CONCAT_WS(' ', s.nombre, s.apellido_paterno, s.apellido_materno) AS supervisor_nombre,
             s.username AS supervisor_username,
             GROUP_CONCAT(DISTINCT r.codigo ORDER BY r.codigo SEPARATOR ',') AS roles
         FROM operativo_usuario u
@@ -95,9 +94,9 @@ $sql = "SELECT
         WHERE {$whereSql}
         GROUP BY
             u.id, u.username, u.email, u.nombre, u.apellido_paterno,
-            u.apellido_materno, u.telefono, u.estatus,
+            u.apellido_materno, u.telefono, u.fecha_nacimiento, u.estatus,
             u.debe_cambiar_password, u.ultimo_login_at, u.creado_en,
-            j.supervisor_id, s.nombre, s.apellido_paterno, s.username
+            j.supervisor_id, s.nombre, s.apellido_paterno, s.apellido_materno, s.username
         ORDER BY u.apellido_paterno, u.nombre, u.id
         LIMIT ? OFFSET ?";
 
@@ -112,73 +111,64 @@ $stmt->execute();
 $rows = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 $stmt->close();
 
-$supervisorWhere = "u.estatus = 'Activo'
-    AND EXISTS (
-        SELECT 1
-        FROM operativo_usuario_rol ur2
-        INNER JOIN operativo_rol r2
-            ON r2.id = ur2.rol_id
-           AND r2.activo = 1
-        WHERE ur2.usuario_id = u.id
-          AND ur2.activo = 1
-          AND r2.codigo IN ('SUPER_ADMIN', 'ADMIN_OPERATIVO', 'AUTORIZADOR')
-    )";
-$supervisorTypes = '';
-$supervisorParams = [];
-
-if (!$isGlobalManager) {
-    $supervisorWhere .= ' AND u.id = ?';
-    $supervisorTypes = 'i';
-    $supervisorParams[] = (int) $currentUser['id'];
+$supervisors = [];
+if ($isGlobalManager) {
+    $supervisorStmt = $con->prepare(
+        "SELECT u.id, u.username, u.nombre, u.apellido_paterno, u.apellido_materno
+         FROM operativo_usuario u
+         WHERE u.estatus = 'Activo'
+           AND EXISTS (
+                SELECT 1
+                FROM operativo_usuario_rol ur2
+                INNER JOIN operativo_rol r2
+                    ON r2.id = ur2.rol_id
+                   AND r2.activo = 1
+                WHERE ur2.usuario_id = u.id
+                  AND ur2.activo = 1
+                  AND r2.codigo IN ('SUPER_ADMIN', 'ADMIN_OPERATIVO', 'AUTORIZADOR')
+           )
+         ORDER BY u.apellido_paterno, u.nombre"
+    );
+    if (!$supervisorStmt) {
+        databaseError($con);
+    }
+    $supervisorStmt->execute();
+    $supervisors = $supervisorStmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    $supervisorStmt->close();
 }
-
-$supervisorStmt = $con->prepare(
-    "SELECT u.id, u.username, u.nombre, u.apellido_paterno
-     FROM operativo_usuario u
-     WHERE {$supervisorWhere}
-     ORDER BY u.apellido_paterno, u.nombre"
-);
-if (!$supervisorStmt) {
-    databaseError($con);
-}
-bindDynamicParams($supervisorStmt, $supervisorTypes, $supervisorParams);
-$supervisorStmt->execute();
-$supervisors = $supervisorStmt->get_result()->fetch_all(MYSQLI_ASSOC);
-$supervisorStmt->close();
-$con->close();
 
 foreach ($rows as &$row) {
     $rolesText = trim((string) ($row['roles'] ?? ''));
     $roles = $rolesText === '' ? [] : explode(',', $rolesText);
+    $targetId = (int) $row['id'];
 
-    $level = 'OTRO';
-    if (in_array('SUPER_ADMIN', $roles, true)) {
-        $level = 'SUPER_ADMIN';
-    } elseif (in_array('ADMIN_OPERATIVO', $roles, true)) {
-        $level = 'GERENTE_OPERACIONES';
-    } elseif (in_array('AUTORIZADOR', $roles, true)) {
-        $level = 'SUPERVISOR';
-    } elseif (in_array('VENTAS', $roles, true)) {
-        $level = 'VENDEDOR';
-    }
-
-    $row['id'] = (int) $row['id'];
+    $row['id'] = $targetId;
     $row['supervisor_id'] = $row['supervisor_id'] !== null ? (int) $row['supervisor_id'] : null;
     $row['debe_cambiar_password'] = (bool) $row['debe_cambiar_password'];
     $row['roles'] = $roles;
-    $row['nivel'] = $level;
+    $row['nivel'] = operationalLevelFromRoles($roles);
+    $row['puede_editar_completo'] = canFullyManageTargetUser($con, $currentUser, $targetId);
+    $row['puede_gestionar_estatus'] = canManageTargetStatusOrPassword($con, $currentUser, $targetId)
+        && $targetId !== (int) $currentUser['id'];
+    $row['puede_reset_password'] = canManageTargetStatusOrPassword($con, $currentUser, $targetId)
+        && $targetId !== (int) $currentUser['id'];
 }
 unset($row);
 
 foreach ($supervisors as &$supervisor) {
     $supervisor['id'] = (int) $supervisor['id'];
-    $supervisor['nombre_completo'] = trim($supervisor['nombre'] . ' ' . $supervisor['apellido_paterno']);
+    $supervisor['nombre_completo'] = trim(implode(' ', array_filter([
+        $supervisor['nombre'] ?? '',
+        $supervisor['apellido_paterno'] ?? '',
+        $supervisor['apellido_materno'] ?? '',
+    ])));
 }
 unset($supervisor);
 
 $levelLabels = [
     'VENDEDOR' => 'Vendedor',
     'SUPERVISOR' => 'Supervisor',
+    'RESPONSABLE_INVENTARIO' => 'Responsable de inventario',
     'GERENTE_OPERACIONES' => 'Gerente de operaciones',
 ];
 $allowedLevels = array_map(
@@ -186,16 +176,18 @@ $allowedLevels = array_map(
     personLevelsAllowed($currentUser)
 );
 
+$con->close();
+
 okResponse([
     'items' => $rows,
     'supervisores' => $supervisors,
     'permisos' => [
-        'puede_crear' => true,
+        'puede_crear' => canCreatePeople($currentUser),
+        'puede_editar_completo' => $isGlobalManager,
         'niveles_permitidos' => $allowedLevels,
-        'supervisor_forzado_id' => $isGlobalManager ? null : (int) $currentUser['id'],
         'es_super_admin' => isSuperAdmin($currentUser),
         'es_gerente' => hasAnyRole($currentUser, ['ADMIN_OPERATIVO']),
-        'es_supervisor' => hasAnyRole($currentUser, ['AUTORIZADOR']),
+        'es_supervisor' => hasAnyRole($currentUser, ['AUTORIZADOR']) && !$isGlobalManager,
     ],
     'pagination' => [
         'page' => $page,

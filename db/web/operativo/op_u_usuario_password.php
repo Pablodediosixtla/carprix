@@ -6,7 +6,6 @@ require_once __DIR__ . '/../auth/auth_bootstrap.php';
 $input = bootstrapApi(true);
 $con = connectDatabase();
 $currentUser = requireAuthenticated($con);
-requireAnyRole($currentUser, ['SUPER_ADMIN', 'ADMIN_OPERATIVO']);
 
 $userId = positiveInt($input['usuario_id'] ?? null, 'usuario_id');
 $temporaryPassword = (string) ($input['password_temporal'] ?? '');
@@ -18,9 +17,9 @@ if (!$target) {
     errorResponse('Usuario no encontrado.', 404, 'USER_NOT_FOUND');
 }
 
-if (hasAnyRole($target, ['SUPER_ADMIN']) && !isSuperAdmin($currentUser)) {
+if (!canManageTargetStatusOrPassword($con, $currentUser, $userId)) {
     $con->close();
-    errorResponse('Solo un superadministrador puede restablecer la contraseña de otro superadministrador.', 403, 'FORBIDDEN');
+    errorResponse('No tienes permisos para restablecer la contraseña de este usuario.', 403, 'FORBIDDEN');
 }
 
 $hash = password_hash($temporaryPassword, PASSWORD_DEFAULT);

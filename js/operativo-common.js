@@ -166,6 +166,24 @@
         return allowed.some((role) => roles.has(String(role).toUpperCase()));
     };
 
+    const PAGE_ROLES = {
+        personas: ['SUPER_ADMIN', 'ADMIN_OPERATIVO', 'AUTORIZADOR'],
+        catalogo: ['SUPER_ADMIN', 'ADMIN_OPERATIVO', 'INVENTARIO'],
+        requerimientos: ['SUPER_ADMIN', 'ADMIN_OPERATIVO', 'AUTORIZADOR', 'INVENTARIO', 'VENTAS'],
+        autorizaciones: ['SUPER_ADMIN', 'ADMIN_OPERATIVO', 'AUTORIZADOR'],
+        jerarquia: ['SUPER_ADMIN', 'ADMIN_OPERATIVO', 'AUTORIZADOR', 'INVENTARIO', 'VENTAS'],
+    };
+
+    const guardCurrentPage = (user) => {
+        const page = document.body?.dataset?.page || '';
+        const allowed = PAGE_ROLES[page];
+        if (Array.isArray(allowed) && allowed.length > 0 && !hasAnyRole(user, allowed)) {
+            location.href = 'home.php';
+            return false;
+        }
+        return true;
+    };
+
     const applyRoleVisibility = (user) => {
         document.querySelectorAll('[data-required-roles]').forEach((element) => {
             const required = (element.dataset.requiredRoles || '').split(',').map((item) => item.trim()).filter(Boolean);
@@ -192,6 +210,7 @@
         }
         setToken(token);
         applyUser(usuario);
+        if (!guardCurrentPage(usuario)) return null;
         return usuario;
     };
 

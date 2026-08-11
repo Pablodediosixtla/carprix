@@ -136,18 +136,24 @@ function canManagePeople(array $user): bool
     return hasAnyRole($user, ['SUPER_ADMIN', 'ADMIN_OPERATIVO', 'AUTORIZADOR']);
 }
 
+function canCreatePeople(array $user): bool
+{
+    return hasAnyRole($user, ['SUPER_ADMIN', 'ADMIN_OPERATIVO']);
+}
+
+function canFullyManagePeople(array $user): bool
+{
+    return hasAnyRole($user, ['SUPER_ADMIN', 'ADMIN_OPERATIVO']);
+}
+
 function personLevelsAllowed(array $user): array
 {
     if (isSuperAdmin($user)) {
-        return ['VENDEDOR', 'SUPERVISOR', 'GERENTE_OPERACIONES'];
+        return ['VENDEDOR', 'SUPERVISOR', 'RESPONSABLE_INVENTARIO', 'GERENTE_OPERACIONES'];
     }
 
     if (hasAnyRole($user, ['ADMIN_OPERATIVO'])) {
-        return ['VENDEDOR', 'SUPERVISOR'];
-    }
-
-    if (hasAnyRole($user, ['AUTORIZADOR'])) {
-        return ['VENDEDOR'];
+        return ['VENDEDOR', 'SUPERVISOR', 'RESPONSABLE_INVENTARIO'];
     }
 
     return [];
@@ -158,9 +164,56 @@ function personRoleCodes(string $level, bool $supervisorAlsoSells = false): arra
     return match ($level) {
         'VENDEDOR' => ['VENTAS'],
         'SUPERVISOR' => $supervisorAlsoSells ? ['AUTORIZADOR', 'VENTAS'] : ['AUTORIZADOR'],
+        'RESPONSABLE_INVENTARIO' => ['INVENTARIO'],
         'GERENTE_OPERACIONES' => ['ADMIN_OPERATIVO', 'AUTORIZADOR'],
         default => [],
     };
+}
+
+function operationalLevelFromRoles(array $roles): string
+{
+    if (in_array('SUPER_ADMIN', $roles, true)) {
+        return 'SUPER_ADMIN';
+    }
+    if (in_array('ADMIN_OPERATIVO', $roles, true)) {
+        return 'GERENTE_OPERACIONES';
+    }
+    if (in_array('AUTORIZADOR', $roles, true)) {
+        return 'SUPERVISOR';
+    }
+    if (in_array('INVENTARIO', $roles, true)) {
+        return 'RESPONSABLE_INVENTARIO';
+    }
+    if (in_array('VENTAS', $roles, true)) {
+        return 'VENDEDOR';
+    }
+    return 'OTRO';
+}
+
+function normalizeBirthDate(mixed $value): ?string
+{
+    $raw = trim((string) $value);
+    if ($raw === '') {
+        return null;
+    }
+
+    $date = DateTimeImmutable::createFromFormat('!Y-m-d', $raw);
+    $errors = DateTimeImmutable::getLastErrors();
+    if (!$date || ($errors !== false && ($errors['warning_count'] > 0 || $errors['error_count'] > 0))
+        || $date->format('Y-m-d') !== $raw) {
+        errorResponse('La fecha de nacimiento no es válida.', 422, 'VALIDATION_ERROR', ['field' => 'fecha_nacimiento']);
+    }
+
+    $today = new DateTimeImmutable('today');
+    if ($date > $today) {
+        errorResponse('La fecha de nacimiento no puede ser futura.', 422, 'VALIDATION_ERROR', ['field' => 'fecha_nacimiento']);
+    }
+
+    if ($date < $today->modify('-100 years')) {
+        errorResponse('Revisa la fecha de nacimiento capturada.', 422, 'VALIDATION_ERROR', ['field' => 'fecha_nacimiento']);
+    }
+
+    return $raw;
 }
 
 function hierarchyDescendantIds(mysqli $con, int $rootUserId): array
@@ -200,6 +253,201 @@ function hierarchyDescendantIds(mysqli $con, int $rootUserId): array
     }
 
     return array_map('intval', array_keys($visited));
+}
+
+
+function hierarchyAncestorIds(mysqli $con, int $userId): array
+{
+    $ids = [];
+    $current = $userId;
+
+    for ($depth = 0; $depth < 30; $depth++) {
+        $stmt = $con->prepare(
+            "SELECT supervisor_id
+             FROM operativo_usuario_jerarquia
+             WHERE usuario_id = ?
+               AND activo = 1
+             LIMIT 1"
+        );
+        if (!$stmt) {
+            databaseError($con);
+        }
+
+        $stmt->bind_param('i', $current);
+        $stmt->execute();
+        $row = $stmt->get_result()->fetch_assoc();
+        $stmt->close();
+
+        if (!$row) {
+            break;
+        }
+
+        $supervisorId = (int) $row['supervisor_id'];
+        if ($supervisorId <= 0 || in_array($supervisorId, $ids, true)) {
+            break;
+        }
+
+        $ids[] = $supervisorId;
+        $current = $supervisorId;
+    }
+
+    return $ids;
+}
+
+function hierarchyVisibleUserIds(mysqli $con, array $user): array
+{
+    if (hasAnyRole($user, ['SUPER_ADMIN', 'ADMIN_OPERATIVO'])) {
+        return [];
+    }
+
+    $userId = (int) $user['id'];
+    $visible = [$userId];
+
+    if (hasAnyRole($user, ['AUTORIZADOR'])) {
+        $visible = array_merge($visible, hierarchyDescendantIds($con, $userId));
+    }
+
+    $visible = array_merge($visible, hierarchyAncestorIds($con, $userId));
+    $visible = array_values(array_unique(array_map('intval', $visible)));
+
+    return array_values(array_filter($visible, static fn(int $id): bool => $id > 0));
+}
+
+function targetHasProtectedAdminRole(array $target): bool
+{
+    return hasAnyRole($target, ['SUPER_ADMIN']);
+}
+
+function canFullyManageTargetUser(mysqli $con, array $currentUser, int $targetUserId): bool
+{
+    if (!canFullyManagePeople($currentUser)) {
+        return false;
+    }
+
+    return fetchUserContext($con, $targetUserId) !== null;
+}
+
+function canSupervisorManageTargetUser(mysqli $con, array $currentUser, int $targetUserId): bool
+{
+    if (!hasAnyRole($currentUser, ['AUTORIZADOR']) || hasAnyRole($currentUser, ['SUPER_ADMIN', 'ADMIN_OPERATIVO'])) {
+        return false;
+    }
+
+    $currentId = (int) $currentUser['id'];
+    if ($targetUserId <= 0 || $targetUserId === $currentId) {
+        return false;
+    }
+
+    if (!isHierarchyAncestorOf($con, $currentId, $targetUserId)) {
+        return false;
+    }
+
+    $target = fetchUserContext($con, $targetUserId);
+    if (!$target || hasAnyRole($target, ['SUPER_ADMIN', 'ADMIN_OPERATIVO'])) {
+        return false;
+    }
+
+    return true;
+}
+
+function canManageTargetStatusOrPassword(mysqli $con, array $currentUser, int $targetUserId): bool
+{
+    return canFullyManageTargetUser($con, $currentUser, $targetUserId)
+        || canSupervisorManageTargetUser($con, $currentUser, $targetUserId);
+}
+
+function assertHierarchyAssignmentValid(
+    mysqli $con,
+    int $employeeId,
+    int $supervisorId
+): void {
+    if ($supervisorId <= 0) {
+        return;
+    }
+
+    if ($employeeId === $supervisorId) {
+        errorResponse('Un usuario no puede ser su propio supervisor.', 422, 'INVALID_HIERARCHY');
+    }
+
+    assertActiveApprover($con, $supervisorId);
+
+    $current = $supervisorId;
+    for ($depth = 0; $depth < 30; $depth++) {
+        if ($current === $employeeId) {
+            errorResponse('La relación generaría un ciclo jerárquico.', 422, 'HIERARCHY_CYCLE');
+        }
+
+        $stmt = $con->prepare(
+            "SELECT supervisor_id
+             FROM operativo_usuario_jerarquia
+             WHERE usuario_id = ?
+               AND activo = 1
+             LIMIT 1"
+        );
+        if (!$stmt) {
+            databaseError($con);
+        }
+        $stmt->bind_param('i', $current);
+        $stmt->execute();
+        $row = $stmt->get_result()->fetch_assoc();
+        $stmt->close();
+
+        if (!$row) {
+            break;
+        }
+
+        $current = (int) $row['supervisor_id'];
+    }
+}
+
+function saveHierarchyAssignment(
+    mysqli $con,
+    int $employeeId,
+    int $supervisorId,
+    int $assignedBy
+): void {
+    if ($supervisorId <= 0) {
+        $stmt = $con->prepare(
+            "UPDATE operativo_usuario_jerarquia
+             SET activo = 0,
+                 asignado_por = ?,
+                 actualizado_en = CURRENT_TIMESTAMP
+             WHERE usuario_id = ?"
+        );
+        if (!$stmt) {
+            databaseError($con);
+        }
+        $stmt->bind_param('ii', $assignedBy, $employeeId);
+        if (!$stmt->execute()) {
+            $stmt->close();
+            databaseError($con);
+        }
+        $stmt->close();
+        return;
+    }
+
+    assertHierarchyAssignmentValid($con, $employeeId, $supervisorId);
+
+    $stmt = $con->prepare(
+        "INSERT INTO operativo_usuario_jerarquia
+            (usuario_id, supervisor_id, activo, asignado_por)
+         VALUES (?, ?, 1, ?)
+         ON DUPLICATE KEY UPDATE
+            supervisor_id = VALUES(supervisor_id),
+            activo = 1,
+            asignado_por = VALUES(asignado_por),
+            actualizado_en = CURRENT_TIMESTAMP"
+    );
+    if (!$stmt) {
+        databaseError($con);
+    }
+
+    $stmt->bind_param('iii', $employeeId, $supervisorId, $assignedBy);
+    if (!$stmt->execute()) {
+        $stmt->close();
+        databaseError($con);
+    }
+    $stmt->close();
 }
 
 function assertActiveApprover(mysqli $con, int $supervisorId): void

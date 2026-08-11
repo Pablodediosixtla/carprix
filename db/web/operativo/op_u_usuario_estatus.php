@@ -6,7 +6,6 @@ require_once __DIR__ . '/../auth/auth_bootstrap.php';
 $input = bootstrapApi(true);
 $con = connectDatabase();
 $currentUser = requireAuthenticated($con);
-requireAnyRole($currentUser, ['SUPER_ADMIN', 'ADMIN_OPERATIVO']);
 
 $userId = positiveInt($input['usuario_id'] ?? null, 'usuario_id');
 $status = requireString($input, 'estatus', 'estatus', 20);
@@ -27,12 +26,12 @@ if (!$target) {
     errorResponse('Usuario no encontrado.', 404, 'USER_NOT_FOUND');
 }
 
-if (hasAnyRole($target, ['SUPER_ADMIN'])) {
-    if (!isSuperAdmin($currentUser)) {
-        $con->close();
-        errorResponse('Solo un superadministrador puede modificar el estatus de otro superadministrador.', 403, 'FORBIDDEN');
-    }
+if (!canManageTargetStatusOrPassword($con, $currentUser, $userId)) {
+    $con->close();
+    errorResponse('No tienes permisos para modificar el estatus de este usuario.', 403, 'FORBIDDEN');
+}
 
+if (hasAnyRole($target, ['SUPER_ADMIN'])) {
     if ($status !== 'Activo') {
         $count = $con->query("SELECT COUNT(DISTINCT u.id) AS total
                              FROM operativo_usuario u

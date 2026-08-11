@@ -544,3 +544,159 @@ button:disabled { opacity: .55; cursor: not-allowed; transform: none !important;
     .op-task-detail-grid { grid-template-columns: 1fr; }
     .op-task-comment-form { grid-template-columns: 1fr; }
 }
+
+/* ===== Personas / perfil / cumpleaños ===== */
+.op-row-actions {
+    display: flex;
+    align-items: center;
+    gap: .45rem;
+    flex-wrap: wrap;
+}
+
+.op-icon-action {
+    width: 34px;
+    height: 34px;
+    border: 1px solid var(--op-border, rgba(255,255,255,.12));
+    border-radius: 10px;
+    background: rgba(255,255,255,.04);
+    color: inherit;
+    cursor: pointer;
+    display: inline-grid;
+    place-items: center;
+    transition: .2s ease;
+}
+
+.op-icon-action:hover {
+    transform: translateY(-1px);
+    border-color: rgba(57,181,74,.65);
+    background: rgba(57,181,74,.10);
+}
+
+.op-profile-actions {
+    display: flex;
+    gap: .65rem;
+    flex-wrap: wrap;
+    margin: 1rem 0;
+}
+
+.op-birthday-summary {
+    width: 100%;
+    margin: .75rem 0 1rem;
+    border: 1px solid rgba(57,181,74,.28);
+    border-radius: 16px;
+    background: linear-gradient(135deg, rgba(57,181,74,.13), rgba(255,255,255,.025));
+    color: inherit;
+    padding: .9rem 1rem;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: .9rem;
+    text-align: left;
+    cursor: pointer;
+}
+
+.op-birthday-summary:hover {
+    border-color: rgba(57,181,74,.65);
+}
+
+.op-birthday-summary > span:nth-child(2) {
+    display: grid;
+    gap: .18rem;
+}
+
+.op-birthday-summary small {
+    font-size: .68rem;
+    letter-spacing: .1em;
+    opacity: .68;
+}
+
+.op-birthday-summary strong {
+    font-size: 1rem;
+}
+
+.op-birthday-summary em {
+    font-size: .78rem;
+    font-style: normal;
+    opacity: .72;
+}
+
+.op-birthday-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+    background: rgba(57,181,74,.18);
+    color: #5bd36b;
+    font-size: 1.05rem;
+}
+
+.op-birthday-list {
+    display: grid;
+    gap: .65rem;
+    max-height: min(58vh, 520px);
+    overflow: auto;
+    padding-right: .2rem;
+}
+
+.op-birthday-item {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: .9rem;
+    align-items: center;
+    padding: .85rem;
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 14px;
+    background: rgba(255,255,255,.025);
+}
+
+.op-birthday-item.today {
+    border-color: rgba(57,181,74,.6);
+    background: rgba(57,181,74,.08);
+}
+
+.op-birthday-date {
+    width: 54px;
+    height: 54px;
+    border-radius: 13px;
+    display: grid;
+    place-items: center;
+    align-content: center;
+    background: rgba(57,181,74,.13);
+    line-height: 1;
+}
+
+.op-birthday-date b {
+    font-size: 1.25rem;
+}
+
+.op-birthday-date small {
+    margin-top: .25rem;
+    text-transform: uppercase;
+    font-size: .65rem;
+    opacity: .7;
+}
+
+.op-birthday-item > div {
+    display: grid;
+    gap: .2rem;
+}
+
+.op-birthday-item span,
+.op-birthday-item em {
+    font-size: .78rem;
+    opacity: .72;
+    font-style: normal;
+}
+
+.op-birthday-item em {
+    color: #5bd36b;
+    opacity: 1;
+    font-weight: 700;
+}
+
+@media (max-width: 760px) {
+    .op-row-actions { min-width: 110px; }
+    .op-profile-actions { flex-direction: column; }
+    .op-profile-actions .op-secondary-button { width: 100%; justify-content: center; }
+}

@@ -1,7 +1,7 @@
 (async () => {
     'use strict';
     const OP = window.CARPRIX_OP;
-    const state = { items: [] };
+    const state = { items: [], canEdit: false };
     const table = document.getElementById('hierarchy-table');
     const form = document.getElementById('hierarchy-form');
     const message = document.getElementById('hierarchy-message');
@@ -22,16 +22,18 @@
                 <td>${(item.roles || []).map((role) => `<span class="op-role-chip">${OP.escapeHtml(role)}</span>`).join(' ') || '—'}</td>
                 <td>${item.supervisor_nombre ? `<strong>${OP.escapeHtml(item.supervisor_nombre)}</strong><br><span class="op-muted">${OP.escapeHtml(item.supervisor_username)}</span>` : '<span class="op-muted">Sin supervisor</span>'}</td>
                 <td><span class="op-status-badge ${item.activo ? 'aprobado' : 'oculto'}">${item.activo ? 'Activa' : 'Sin asignar'}</span></td>
-                <td><button class="op-secondary-button" data-edit-hierarchy="${item.usuario_id}"><i class="fa-solid fa-pen"></i></button></td>
+                <td>${state.canEdit ? `<button class="op-secondary-button" data-edit-hierarchy="${item.usuario_id}"><i class="fa-solid fa-pen"></i></button>` : '<span class="op-muted">Consulta</span>'}</td>
             </tr>`).join('');
-        table.querySelectorAll('[data-edit-hierarchy]').forEach((button) => {
-            button.addEventListener('click', () => {
-                const item = state.items.find((row) => row.usuario_id === Number(button.dataset.editHierarchy));
-                userSelect.value = item.usuario_id;
-                supervisorSelect.value = item.supervisor_id || 0;
-                window.scrollTo({ top: 0, behavior: 'smooth' });
+        if (state.canEdit) {
+            table.querySelectorAll('[data-edit-hierarchy]').forEach((button) => {
+                button.addEventListener('click', () => {
+                    const item = state.items.find((row) => row.usuario_id === Number(button.dataset.editHierarchy));
+                    userSelect.value = item.usuario_id;
+                    supervisorSelect.value = item.supervisor_id || 0;
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                });
             });
-        });
+        }
     };
 
     const load = async () => {
@@ -39,7 +41,9 @@
         try {
             const response = await OP.request('op_c_jerarquia.php');
             state.items = response.data.items;
-            populateSelects();
+            state.canEdit = Boolean(response.data.permisos?.puede_editar);
+            document.querySelector('.op-hierarchy-form-panel').hidden = !state.canEdit;
+            if (state.canEdit) populateSelects();
             render();
         } catch (error) {
             table.innerHTML = `<tr><td colspan="5">${OP.escapeHtml(error.message)}</td></tr>`;
@@ -50,7 +54,6 @@
         const user = await OP.loadSession();
         if (!user) return;
         if (user.debe_cambiar_password) { await OP.forcePasswordChange(); location.reload(); return; }
-        if (!OP.hasAnyRole(user, ['SUPER_ADMIN', 'ADMIN_OPERATIVO'])) { location.href = 'home.php'; return; }
         document.getElementById('hierarchy-refresh').addEventListener('click', load);
         form.addEventListener('submit', async (event) => {
             event.preventDefault();

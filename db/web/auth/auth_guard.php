@@ -11,6 +11,7 @@ function fetchUserContext(mysqli $con, int $userId): ?array
                 u.apellido_paterno,
                 u.apellido_materno,
                 u.telefono,
+                u.fecha_nacimiento,
                 u.estatus,
                 u.debe_cambiar_password,
                 u.ultimo_login_at,
@@ -26,7 +27,7 @@ function fetchUserContext(mysqli $con, int $userId): ?array
             GROUP BY
                 u.id, u.username, u.email, u.nombre,
                 u.apellido_paterno, u.apellido_materno, u.telefono,
-                u.estatus, u.debe_cambiar_password, u.ultimo_login_at";
+                u.fecha_nacimiento, u.estatus, u.debe_cambiar_password, u.ultimo_login_at";
 
     $stmt = $con->prepare($sql);
     if (!$stmt) {
