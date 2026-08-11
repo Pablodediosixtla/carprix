@@ -22,14 +22,24 @@ $requested = scalarCount($con, "SELECT COUNT(*) AS total FROM operativo_requerim
 $reserved = scalarCount($con, "SELECT COUNT(*) AS total FROM operativo_requerimiento_compra WHERE estatus = 'Apartado'");
 $sold = scalarCount($con, "SELECT COUNT(*) AS total FROM operativo_requerimiento_compra WHERE estatus = 'Vendido'");
 
-if (isSuperAdmin($user) || hasAnyRole($user, ['ADMIN_OPERATIVO'])) {
+if (hasFullRequestApprovalAccess($user)) {
     $pendingApprovals = scalarCount($con, "SELECT COUNT(*) AS total FROM operativo_requerimiento_cambio WHERE decision = 'Pendiente'");
 } else {
     $stmt = $con->prepare("SELECT COUNT(*) AS total
-                           FROM operativo_requerimiento_cambio
-                           WHERE decision = 'Pendiente'
-                             AND aprobador_id = ?");
-    $stmt->bind_param('i', $user['id']);
+                           FROM operativo_requerimiento_cambio c
+                           WHERE c.decision = 'Pendiente'
+                             AND EXISTS (
+                                 SELECT 1
+                                 FROM operativo_usuario_jerarquia j
+                                 WHERE j.usuario_id = c.solicitado_por
+                                   AND j.supervisor_id = ?
+                                   AND j.activo = 1
+                             )");
+    if (!$stmt) {
+        databaseError($con);
+    }
+    $userId = (int) $user['id'];
+    $stmt->bind_param('i', $userId);
     $stmt->execute();
     $pendingApprovals = (int) ($stmt->get_result()->fetch_assoc()['total'] ?? 0);
     $stmt->close();

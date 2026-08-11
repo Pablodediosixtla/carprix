@@ -463,11 +463,7 @@
 
     const canResolveCatalogRequest = (item) => {
         if (item.decision !== 'Pendiente' || !state.canAuthorizeCatalog || !state.user) return false;
-        const privileged = OP.hasAnyRole(state.user, ['SUPER_ADMIN', 'ADMIN_OPERATIVO']);
-        const superAdmin = OP.hasAnyRole(state.user, ['SUPER_ADMIN']);
-        if (!privileged && Number(item.aprobador_id || 0) !== Number(state.user.id)) return false;
-        if (Number(item.solicitado_por) === Number(state.user.id) && !superAdmin) return false;
-        return true;
+        return Boolean(item.puede_resolver);
     };
 
     const openApproval = (item, decision) => {
@@ -500,7 +496,7 @@
             const actions = canResolve ? `
                 <button class="op-primary-button" data-catalog-approve="${item.id}"><i class="fa-solid fa-check"></i> Aprobar</button>
                 <button class="op-secondary-button" data-catalog-reject="${item.id}"><i class="fa-solid fa-xmark"></i> Rechazar</button>` : '';
-            const approver = item.aprobador_nombre || (item.aprobador_id ? `Usuario #${item.aprobador_id}` : 'Sin autorizador directo');
+            const approver = item.manager_actual_nombre || item.aprobador_nombre || (item.aprobador_id ? `Usuario #${item.aprobador_id}` : 'Sin manager directo');
             return `
                 <article class="op-approval-card op-catalog-request-card">
                     <div class="op-catalog-request-auto">

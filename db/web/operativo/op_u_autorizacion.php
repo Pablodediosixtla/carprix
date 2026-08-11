@@ -50,11 +50,13 @@ try {
         throw new DomainException('CHANGE_ALREADY_RESOLVED');
     }
 
-    $isPrivileged = isSuperAdmin($user) || hasAnyRole($user, ['ADMIN_OPERATIVO']);
-    if (!$isPrivileged && (int) $change['aprobador_id'] !== (int) $user['id']) {
+    // La autorización no depende del aprobador_id guardado: se valida contra
+    // la jerarquía VIGENTE. Solo el manager directo puede resolverla, salvo
+    // SUPER_ADMIN y ADMIN_OPERATIVO, que tienen acceso full.
+    if (!canResolveHierarchyRequest($con, $user, (int) $change['solicitado_por'])) {
         throw new DomainException('FORBIDDEN');
     }
-    if ((int) $change['solicitado_por'] === (int) $user['id'] && !isSuperAdmin($user)) {
+    if ((int) $change['solicitado_por'] === (int) $user['id'] && !hasFullRequestApprovalAccess($user)) {
         throw new DomainException('SELF_APPROVAL_NOT_ALLOWED');
     }
 
@@ -117,13 +119,8 @@ try {
         }
         $updateRequirement->close();
 
-        // Mantiene sincronizado el inventario con el flujo comercial.
-        // Al aprobar Apartado/Vendido, el estatus de autos cambia dentro de
-        // la misma transacción que el requerimiento.
         if (in_array($requestedStatus, ['Apartado', 'Vendido'], true)) {
-            $updateAuto = $con->prepare(
-                'UPDATE autos SET estatus = ? WHERE id = ?'
-            );
+            $updateAuto = $con->prepare('UPDATE autos SET estatus = ? WHERE id = ?');
             if (!$updateAuto) {
                 databaseError($con);
             }
@@ -186,7 +183,7 @@ try {
     match ($code) {
         'CHANGE_NOT_FOUND' => errorResponse('Solicitud de cambio no encontrada.', 404, $code),
         'CHANGE_ALREADY_RESOLVED' => errorResponse('La solicitud ya fue resuelta.', 409, $code),
-        'FORBIDDEN' => errorResponse('No eres el autorizador asignado.', 403, $code),
+        'FORBIDDEN' => errorResponse('Solo el manager directo del solicitante puede autorizar esta solicitud.', 403, $code),
         'SELF_APPROVAL_NOT_ALLOWED' => errorResponse('No puedes autorizar tu propia solicitud.', 403, $code),
         'REQUIREMENT_STATUS_CHANGED' => errorResponse('El estatus del requerimiento cambió antes de la autorización.', 409, $code),
         'AUTO_ALREADY_RESERVED' => errorResponse('El auto ya fue apartado en otro requerimiento.', 409, $code),

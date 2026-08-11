@@ -86,6 +86,15 @@ try {
         'estatus' => 'Oculto',
         'requerimiento_catalogo_id' => $requestId,
     ], 'Auto agregado como Oculto y enviado a autorización de catálogo.', 201);
+} catch (DomainException $e) {
+    $con->rollback();
+    $code = $e->getMessage();
+    $con->close();
+    match ($code) {
+        'HIERARCHY_NOT_CONFIGURED' => errorResponse('No tienes un manager directo configurado para autorizar la publicación del auto.', 409, $code),
+        'HIERARCHY_APPROVER_ROLE_REQUIRED' => errorResponse('Tu manager directo no cuenta con permisos de autorización.', 409, $code),
+        default => errorResponse('No fue posible crear el requerimiento de publicación.', 400, $code),
+    };
 } catch (Throwable $e) {
     $con->rollback();
     databaseError($con, $e);

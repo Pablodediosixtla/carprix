@@ -20,6 +20,9 @@ try {
          WHERE id = ?
          FOR UPDATE'
     );
+    if (!$stmt) {
+        databaseError($con);
+    }
     $stmt->bind_param('i', $requirementId);
     $stmt->execute();
     $requirement = $stmt->get_result()->fetch_assoc();
@@ -42,6 +45,9 @@ try {
          WHERE requerimiento_id = ? AND decision = 'Pendiente'
          LIMIT 1"
     );
+    if (!$pendingStmt) {
+        databaseError($con);
+    }
     $pendingStmt->bind_param('i', $requirementId);
     $pendingStmt->execute();
     $hasPending = (bool) $pendingStmt->get_result()->fetch_row();
@@ -56,6 +62,9 @@ try {
              WHERE auto_id = ? AND estatus = 'Apartado' AND id <> ?
              LIMIT 1"
         );
+        if (!$conflictStmt) {
+            databaseError($con);
+        }
         $conflictAutoId = (int) $requirement['auto_id'];
         $conflictStmt->bind_param('ii', $conflictAutoId, $requirementId);
         $conflictStmt->execute();
@@ -66,9 +75,19 @@ try {
         }
     }
 
+    // La autorización se asigna al manager DIRECTO del solicitante.
+    // SUPER_ADMIN y ADMIN_OPERATIVO pueden generar solicitudes sin manager,
+    // ya que ellos tienen acceso full para resolver requerimientos.
     $approverId = resolveHierarchyApprover($con, (int) $user['id']);
-    if ($approverId === null && !isSuperAdmin($user)) {
+    if ($approverId === null && !hasFullRequestApprovalAccess($user)) {
         throw new DomainException('HIERARCHY_NOT_CONFIGURED');
+    }
+    if ($approverId !== null && !userHasActiveRole(
+        $con,
+        $approverId,
+        ['SUPER_ADMIN', 'ADMIN_OPERATIVO', 'AUTORIZADOR']
+    )) {
+        throw new DomainException('HIERARCHY_APPROVER_ROLE_REQUIRED');
     }
 
     $insert = $con->prepare(
@@ -77,6 +96,9 @@ try {
              solicitado_por, aprobador_id, decision)
          VALUES (?, ?, ?, ?, ?, ?, 'Pendiente')"
     );
+    if (!$insert) {
+        databaseError($con);
+    }
     $requesterId = (int) $user['id'];
     $insert->bind_param(
         'isssii',
@@ -87,7 +109,10 @@ try {
         $requesterId,
         $approverId
     );
-    $insert->execute();
+    if (!$insert->execute()) {
+        $insert->close();
+        databaseError($con);
+    }
     $changeId = (int) $con->insert_id;
     $insert->close();
 
@@ -116,7 +141,8 @@ try {
         'FORBIDDEN' => errorResponse('No tienes acceso a este requerimiento.', 403, $code),
         'PENDING_CHANGE_EXISTS' => errorResponse('Ya existe una solicitud de cambio pendiente.', 409, $code),
         'AUTO_ALREADY_RESERVED' => errorResponse('El auto ya se encuentra apartado en otro requerimiento.', 409, $code),
-        'HIERARCHY_NOT_CONFIGURED' => errorResponse('No tienes un supervisor configurado para autorizar el cambio.', 409, $code),
+        'HIERARCHY_NOT_CONFIGURED' => errorResponse('No tienes un manager directo configurado para autorizar el cambio.', 409, $code),
+        'HIERARCHY_APPROVER_ROLE_REQUIRED' => errorResponse('Tu manager directo no cuenta con permisos de autorización.', 409, $code),
         'INVALID_STATUS_TRANSITION' => errorResponse('La transición de estatus solicitada no está permitida.', 422, $code),
         default => errorResponse('No fue posible solicitar el cambio.', 400, $code),
     };

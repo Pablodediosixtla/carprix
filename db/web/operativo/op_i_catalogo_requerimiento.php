@@ -53,6 +53,8 @@ try {
     match ($code) {
         'AUTO_NOT_FOUND' => errorResponse('Auto no encontrado.', 404, $code),
         'AUTO_NOT_HIDDEN' => errorResponse('Solo los autos ocultos pueden solicitar publicación.', 409, $code),
+        'HIERARCHY_NOT_CONFIGURED' => errorResponse('No tienes un manager directo configurado para autorizar la publicación.', 409, $code),
+        'HIERARCHY_APPROVER_ROLE_REQUIRED' => errorResponse('Tu manager directo no cuenta con permisos de autorización.', 409, $code),
         default => errorResponse('No fue posible generar el requerimiento.', 400, $code),
     };
 } catch (Throwable $e) {

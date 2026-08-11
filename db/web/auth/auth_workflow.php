@@ -223,6 +223,134 @@ function assertActiveApprover(mysqli $con, int $supervisorId): void
 }
 
 
+function hasFullRequestApprovalAccess(array $user): bool
+{
+    return isSuperAdmin($user) || hasAnyRole($user, ['ADMIN_OPERATIVO']);
+}
+
+function currentDirectManagerId(mysqli $con, int $userId): ?int
+{
+    return resolveHierarchyApprover($con, $userId);
+}
+
+function isCurrentDirectManagerOf(mysqli $con, int $managerId, int $subordinateId): bool
+{
+    if ($managerId <= 0 || $subordinateId <= 0) {
+        return false;
+    }
+
+    $stmt = $con->prepare(
+        "SELECT 1
+         FROM operativo_usuario_jerarquia
+         WHERE usuario_id = ?
+           AND supervisor_id = ?
+           AND activo = 1
+         LIMIT 1"
+    );
+    if (!$stmt) {
+        databaseError($con);
+    }
+    $stmt->bind_param('ii', $subordinateId, $managerId);
+    $stmt->execute();
+    $found = (bool) $stmt->get_result()->fetch_row();
+    $stmt->close();
+    return $found;
+}
+
+function canResolveHierarchyRequest(mysqli $con, array $user, int $requesterId): bool
+{
+    if (hasFullRequestApprovalAccess($user)) {
+        return true;
+    }
+
+    return isCurrentDirectManagerOf($con, (int) $user['id'], $requesterId);
+}
+
+function isHierarchyAncestorOf(mysqli $con, int $managerId, int $subordinateId): bool
+{
+    if ($managerId <= 0 || $subordinateId <= 0 || $managerId === $subordinateId) {
+        return false;
+    }
+
+    $descendants = hierarchyDescendantIds($con, $managerId);
+    return in_array($subordinateId, $descendants, true);
+}
+
+function taskAssignableUserIds(mysqli $con, array $user): array
+{
+    if (isSuperAdmin($user)) {
+        $result = $con->query("SELECT id FROM operativo_usuario WHERE estatus = 'Activo' ORDER BY id");
+        if (!$result) {
+            databaseError($con);
+        }
+        return array_map('intval', array_column($result->fetch_all(MYSQLI_ASSOC), 'id'));
+    }
+
+    return hierarchyDescendantIds($con, (int) $user['id']);
+}
+
+function canAccessTask(mysqli $con, array $user, array $task): bool
+{
+    if (isSuperAdmin($user)) {
+        return true;
+    }
+
+    $userId = (int) $user['id'];
+    $creatorId = (int) ($task['creado_por'] ?? 0);
+    $assigneeId = (int) ($task['asignado_a'] ?? 0);
+    $approverId = (int) ($task['aprobador_id'] ?? 0);
+
+    if (in_array($userId, [$creatorId, $assigneeId, $approverId], true)) {
+        return true;
+    }
+
+    return isHierarchyAncestorOf($con, $userId, $assigneeId);
+}
+
+function canApproveTask(mysqli $con, array $user, array $task): bool
+{
+    if (isSuperAdmin($user)) {
+        return true;
+    }
+
+    $assigneeId = (int) ($task['asignado_a'] ?? 0);
+    return isCurrentDirectManagerOf($con, (int) $user['id'], $assigneeId);
+}
+
+function taskStatusValues(): array
+{
+    return ['Pendiente', 'En progreso', 'En revision', 'Completada', 'Cancelada'];
+}
+
+function addTaskHistory(
+    mysqli $con,
+    int $taskId,
+    string $eventType,
+    ?string $previousStatus,
+    ?string $newStatus,
+    string $detail,
+    int $userId
+): void {
+    $stmt = $con->prepare(
+        "INSERT INTO operativo_tarea_historial
+            (tarea_id, tipo_evento, estatus_anterior, estatus_nuevo, detalle, usuario_id)
+         VALUES (?, ?, NULLIF(?, ''), NULLIF(?, ''), NULLIF(?, ''), ?)"
+    );
+    if (!$stmt) {
+        databaseError($con);
+    }
+
+    $previous = $previousStatus ?? '';
+    $next = $newStatus ?? '';
+    $stmt->bind_param('issssi', $taskId, $eventType, $previous, $next, $detail, $userId);
+    if (!$stmt->execute()) {
+        $stmt->close();
+        databaseError($con);
+    }
+    $stmt->close();
+}
+
+
 function canAuthorizeCatalogRequests(array $user): bool
 {
     return hasAnyRole($user, ['SUPER_ADMIN', 'ADMIN_OPERATIVO', 'AUTORIZADOR']);
@@ -230,7 +358,7 @@ function canAuthorizeCatalogRequests(array $user): bool
 
 function canViewAllCatalogRequests(array $user): bool
 {
-    return hasAnyRole($user, ['SUPER_ADMIN', 'ADMIN_OPERATIVO']);
+    return hasFullRequestApprovalAccess($user);
 }
 
 function createCatalogPublicationRequest(
@@ -259,12 +387,16 @@ function createCatalogPublicationRequest(
     }
 
     $approverId = resolveHierarchyApprover($con, $requesterId);
+    $requesterHasFullAccess = userHasActiveRole($con, $requesterId, ['SUPER_ADMIN', 'ADMIN_OPERATIVO']);
+    if (!$requesterHasFullAccess && $approverId === null) {
+        throw new DomainException('HIERARCHY_NOT_CONFIGURED');
+    }
     if ($approverId !== null && !userHasActiveRole(
         $con,
         $approverId,
         ['SUPER_ADMIN', 'ADMIN_OPERATIVO', 'AUTORIZADOR']
     )) {
-        $approverId = null;
+        throw new DomainException('HIERARCHY_APPROVER_ROLE_REQUIRED');
     }
     $reason = cleanString($reason, 500);
     if ($reason === '') {

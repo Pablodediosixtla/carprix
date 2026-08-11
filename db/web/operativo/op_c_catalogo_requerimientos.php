@@ -25,7 +25,18 @@ $params = [];
 
 if (!canViewAllCatalogRequests($user)) {
     if (canAuthorizeCatalogRequests($user)) {
-        $where[] = '(cr.aprobador_id = ? OR cr.solicitado_por = ?)';
+        // Un autorizador solo ve sus propias solicitudes y las solicitudes
+        // de subordinados DIRECTOS según la jerarquía vigente.
+        $where[] = "(
+            cr.solicitado_por = ?
+            OR EXISTS (
+                SELECT 1
+                FROM operativo_usuario_jerarquia hjf
+                WHERE hjf.usuario_id = cr.solicitado_por
+                  AND hjf.supervisor_id = ?
+                  AND hjf.activo = 1
+            )
+        )";
         $types .= 'ii';
         $params[] = (int) $user['id'];
         $params[] = (int) $user['id'];
@@ -88,11 +99,17 @@ $sql = "SELECT
             a.img_principal,
             a.estatus AS auto_estatus,
             CONCAT_WS(' ', su.nombre, su.apellido_paterno, su.apellido_materno) AS solicitado_por_nombre,
-            CONCAT_WS(' ', au.nombre, au.apellido_paterno, au.apellido_materno) AS aprobador_nombre
+            CONCAT_WS(' ', au.nombre, au.apellido_paterno, au.apellido_materno) AS aprobador_nombre,
+            hj.supervisor_id AS manager_actual_id,
+            CONCAT_WS(' ', hm.nombre, hm.apellido_paterno, hm.apellido_materno) AS manager_actual_nombre
         FROM operativo_catalogo_requerimiento cr
         INNER JOIN autos a ON a.id = cr.auto_id
         INNER JOIN operativo_usuario su ON su.id = cr.solicitado_por
         LEFT JOIN operativo_usuario au ON au.id = cr.aprobador_id
+        LEFT JOIN operativo_usuario_jerarquia hj
+            ON hj.usuario_id = cr.solicitado_por
+           AND hj.activo = 1
+        LEFT JOIN operativo_usuario hm ON hm.id = hj.supervisor_id
         WHERE {$whereSql}
         ORDER BY
             CASE cr.decision WHEN 'Pendiente' THEN 0 ELSE 1 END,
@@ -109,7 +126,6 @@ bindDynamicParams($stmt, $listTypes, $listParams);
 $stmt->execute();
 $rows = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 $stmt->close();
-$con->close();
 
 foreach ($rows as &$row) {
     $row['id'] = (int) $row['id'];
@@ -118,14 +134,19 @@ foreach ($rows as &$row) {
     $row['precio'] = (float) $row['precio'];
     $row['solicitado_por'] = (int) $row['solicitado_por'];
     $row['aprobador_id'] = $row['aprobador_id'] !== null ? (int) $row['aprobador_id'] : null;
+    $row['manager_actual_id'] = $row['manager_actual_id'] !== null ? (int) $row['manager_actual_id'] : null;
+    $row['puede_resolver'] = $row['decision'] === 'Pendiente'
+        && canResolveHierarchyRequest($con, $user, (int) $row['solicitado_por']);
 }
 unset($row);
+$con->close();
 
 okResponse([
     'items' => $rows,
     'permisos' => [
         'puede_autorizar' => canAuthorizeCatalogRequests($user),
         'puede_ver_todos' => canViewAllCatalogRequests($user),
+        'acceso_full' => hasFullRequestApprovalAccess($user),
     ],
     'pagination' => [
         'page' => $page,

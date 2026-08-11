@@ -46,12 +46,10 @@ try {
         throw new DomainException('CATALOG_REQUEST_ALREADY_RESOLVED');
     }
 
-    $isPrivileged = isSuperAdmin($user) || hasAnyRole($user, ['ADMIN_OPERATIVO']);
-    $assignedApprover = $request['aprobador_id'] !== null ? (int) $request['aprobador_id'] : null;
-    if (!$isPrivileged && $assignedApprover !== (int) $user['id']) {
+    if (!canResolveHierarchyRequest($con, $user, (int) $request['solicitado_por'])) {
         throw new DomainException('FORBIDDEN');
     }
-    if ((int) $request['solicitado_por'] === (int) $user['id'] && !isSuperAdmin($user)) {
+    if ((int) $request['solicitado_por'] === (int) $user['id'] && !hasFullRequestApprovalAccess($user)) {
         throw new DomainException('SELF_APPROVAL_NOT_ALLOWED');
     }
 
@@ -101,7 +99,7 @@ try {
     match ($code) {
         'CATALOG_REQUEST_NOT_FOUND' => errorResponse('Requerimiento de catálogo no encontrado.', 404, $code),
         'CATALOG_REQUEST_ALREADY_RESOLVED' => errorResponse('El requerimiento ya fue resuelto.', 409, $code),
-        'FORBIDDEN' => errorResponse('No eres el autorizador asignado para este requerimiento.', 403, $code),
+        'FORBIDDEN' => errorResponse('Solo el manager directo del solicitante puede autorizar este requerimiento.', 403, $code),
         'SELF_APPROVAL_NOT_ALLOWED' => errorResponse('No puedes autorizar tu propia solicitud.', 403, $code),
         'AUTO_STATUS_CHANGED' => errorResponse('El estatus del auto cambió antes de la autorización.', 409, $code),
         default => errorResponse('No fue posible resolver el requerimiento.', 400, $code),

@@ -24,11 +24,21 @@ $where = ['1 = 1'];
 $types = '';
 $params = [];
 
-if (!isSuperAdmin($user) && !hasAnyRole($user, ['ADMIN_OPERATIVO'])) {
-    $where[] = 'c.aprobador_id = ?';
+// SUPER_ADMIN y GERENTE DE OPERACIONES (ADMIN_OPERATIVO) tienen acceso full.
+// El resto de autorizadores solo ve solicitudes cuyo solicitante es su
+// subordinado DIRECTO en la jerarquía vigente.
+if (!hasFullRequestApprovalAccess($user)) {
+    $where[] = "EXISTS (
+        SELECT 1
+        FROM operativo_usuario_jerarquia hj
+        WHERE hj.usuario_id = c.solicitado_por
+          AND hj.supervisor_id = ?
+          AND hj.activo = 1
+    )";
     $types .= 'i';
-    $params[] = $user['id'];
+    $params[] = (int) $user['id'];
 }
+
 if ($decision !== '') {
     $where[] = 'c.decision = ?';
     $types .= 's';
@@ -48,6 +58,9 @@ $countSql = "SELECT COUNT(*) AS total
              INNER JOIN autos a ON a.id = r.auto_id
              WHERE {$whereSql}";
 $countStmt = $con->prepare($countSql);
+if (!$countStmt) {
+    databaseError($con);
+}
 $countParams = $params;
 bindDynamicParams($countStmt, $types, $countParams);
 $countStmt->execute();
@@ -60,13 +73,19 @@ $sql = "SELECT
             c.fecha_solicitud, c.fecha_decision, c.solicitado_por, c.aprobador_id,
             r.folio, r.cliente_nombre, r.cliente_telefono, r.estatus AS estatus_actual,
             a.id AS auto_id, a.marca, a.modelo, a.anio, a.img_principal,
-            CONCAT(s.nombre, ' ', s.apellido_paterno) AS solicitante,
-            CONCAT(ap.nombre, ' ', ap.apellido_paterno) AS aprobador
+            CONCAT_WS(' ', s.nombre, s.apellido_paterno, s.apellido_materno) AS solicitante,
+            CONCAT_WS(' ', ap.nombre, ap.apellido_paterno, ap.apellido_materno) AS aprobador,
+            hj.supervisor_id AS manager_actual_id,
+            CONCAT_WS(' ', hm.nombre, hm.apellido_paterno, hm.apellido_materno) AS manager_actual
         FROM operativo_requerimiento_cambio c
         INNER JOIN operativo_requerimiento_compra r ON r.id = c.requerimiento_id
         INNER JOIN autos a ON a.id = r.auto_id
         INNER JOIN operativo_usuario s ON s.id = c.solicitado_por
         LEFT JOIN operativo_usuario ap ON ap.id = c.aprobador_id
+        LEFT JOIN operativo_usuario_jerarquia hj
+            ON hj.usuario_id = c.solicitado_por
+           AND hj.activo = 1
+        LEFT JOIN operativo_usuario hm ON hm.id = hj.supervisor_id
         WHERE {$whereSql}
         ORDER BY
             CASE WHEN c.decision = 'Pendiente' THEN 0 ELSE 1 END,
@@ -76,11 +95,13 @@ $sql = "SELECT
 $listParams = array_merge($params, [$size, $offset]);
 $listTypes = $types . 'ii';
 $stmt = $con->prepare($sql);
+if (!$stmt) {
+    databaseError($con);
+}
 bindDynamicParams($stmt, $listTypes, $listParams);
 $stmt->execute();
 $rows = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 $stmt->close();
-$con->close();
 
 foreach ($rows as &$row) {
     $row['id'] = (int) $row['id'];
@@ -89,11 +110,18 @@ foreach ($rows as &$row) {
     $row['anio'] = (int) $row['anio'];
     $row['solicitado_por'] = (int) $row['solicitado_por'];
     $row['aprobador_id'] = $row['aprobador_id'] !== null ? (int) $row['aprobador_id'] : null;
+    $row['manager_actual_id'] = $row['manager_actual_id'] !== null ? (int) $row['manager_actual_id'] : null;
+    $row['puede_resolver'] = $row['decision'] === 'Pendiente'
+        && canResolveHierarchyRequest($con, $user, (int) $row['solicitado_por']);
 }
 unset($row);
+$con->close();
 
 okResponse([
     'items' => $rows,
+    'permisos' => [
+        'acceso_full' => hasFullRequestApprovalAccess($user),
+    ],
     'pagination' => [
         'page' => $page,
         'size' => $size,
