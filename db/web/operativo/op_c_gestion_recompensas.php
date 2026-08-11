@@ -64,9 +64,25 @@ foreach ($prizes as &$item) {
 }
 unset($item);
 
+$currentYear = rewardsCurrentYear();
+$yearsResult = $con->query(
+    "SELECT DISTINCT anio
+     FROM operativo_recompensa_movimiento
+     ORDER BY anio DESC"
+);
+if (!$yearsResult) {
+    databaseError($con);
+}
+$availableYears = array_map('intval', array_column($yearsResult->fetch_all(MYSQLI_ASSOC), 'anio'));
+if (!in_array($currentYear, $availableYears, true)) {
+    array_unshift($availableYears, $currentYear);
+}
+
 $con->close();
 okResponse([
     'categorias' => $categories,
     'catalogo' => $catalog,
     'premios' => $prizes,
+    'anio_actual' => $currentYear,
+    'anios_disponibles' => $availableYears,
 ]);

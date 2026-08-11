@@ -35,7 +35,7 @@ operativoPageStart('Recompensas', 'recompensas');
 </section>
 
 <dialog class="op-dialog" id="reward-grant-dialog">
-    <form class="op-dialog-card" id="reward-grant-form">
+    <form class="op-dialog-card op-reward-grant-form" id="reward-grant-form">
         <div class="op-dialog-header">
             <div><small>RECONOCIMIENTO</small><h3>Asignar recompensa</h3></div>
             <button class="op-dialog-close" type="button" data-close-dialog><i class="fa-solid fa-xmark"></i></button>

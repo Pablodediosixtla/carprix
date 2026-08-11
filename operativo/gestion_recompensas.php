@@ -6,7 +6,7 @@ operativoPageStart('Gestión de recompensas', 'gestion_recompensas');
     <div>
         <span class="op-kicker">CONFIGURACIÓN</span>
         <h2>Gestión de recompensas</h2>
-        <p>Administra categorías, valores de puntos, reglas automáticas de Apartado/Vendido y premios por alcanzar.</p>
+        <p>Administra categorías, valores de puntos, reglas automáticas, metas y la entrega anual de premios.</p>
     </div>
 </section>
 
@@ -14,6 +14,7 @@ operativoPageStart('Gestión de recompensas', 'gestion_recompensas');
     <button class="op-tab-button active" type="button" data-reward-tab="categorias"><i class="fa-solid fa-layer-group"></i> Categorías</button>
     <button class="op-tab-button" type="button" data-reward-tab="catalogo"><i class="fa-solid fa-star"></i> Catálogo de puntos</button>
     <button class="op-tab-button" type="button" data-reward-tab="premios"><i class="fa-solid fa-gift"></i> Premios y metas</button>
+    <button class="op-tab-button" type="button" data-reward-tab="entregas"><i class="fa-solid fa-trophy"></i> Entrega de premios</button>
 </div>
 
 <section class="op-tab-panel" data-reward-panel="categorias">
@@ -35,6 +36,29 @@ operativoPageStart('Gestión de recompensas', 'gestion_recompensas');
     <div class="op-panel">
         <div class="op-panel-header"><div><small>METAS</small><h3>Premios por puntos</h3></div><button class="op-primary-button" id="new-reward-prize" type="button"><i class="fa-solid fa-plus"></i> Nuevo premio</button></div>
         <div class="op-management-list" id="reward-prize-list"><div class="op-loading">Cargando...</div></div>
+    </div>
+</section>
+
+<section class="op-tab-panel" data-reward-panel="entregas" hidden>
+    <div class="op-panel op-prize-award-panel">
+        <div class="op-panel-header op-prize-award-header">
+            <div><small>GANADORES</small><h3>Entrega de premios</h3><p>Selecciona un premio para consultar el ranking anual de mayor a menor puntaje y registrar su entrega.</p></div>
+            <label class="op-field op-year-field"><span>Año</span><select id="reward-award-year"></select></label>
+        </div>
+        <div class="op-year-notice"><i class="fa-solid fa-circle-info"></i><span>Los puntos y las entregas se controlan por año. Marcar un premio como otorgado no descuenta puntos; únicamente deja evidencia de que la persona recibió el premio alcanzado.</span></div>
+        <div class="op-award-prize-grid" id="reward-award-prize-list"><div class="op-loading">Cargando premios...</div></div>
+
+        <div class="op-award-ranking-shell" id="reward-award-ranking-shell" hidden>
+            <div class="op-award-ranking-head">
+                <div>
+                    <small id="reward-award-ranking-kicker">RANKING</small>
+                    <h3 id="reward-award-ranking-title">Selecciona un premio</h3>
+                    <p id="reward-award-ranking-copy"></p>
+                </div>
+                <div class="op-award-ranking-summary" id="reward-award-ranking-summary"></div>
+            </div>
+            <div class="op-award-ranking-list" id="reward-award-ranking-list"></div>
+        </div>
     </div>
 </section>
 
@@ -76,6 +100,18 @@ operativoPageStart('Gestión de recompensas', 'gestion_recompensas');
         <div class="op-form-grid two"><label class="op-field"><span>Orden</span><input id="reward-prize-order" type="number" min="0" value="0"></label><label class="op-check-field"><input id="reward-prize-active" type="checkbox" checked><span><strong>Activo</strong><small>Visible como meta para las personas.</small></span></label></div>
         <div class="op-form-message" id="reward-prize-message" hidden></div>
         <div class="op-dialog-actions"><button class="op-secondary-button" type="button" data-close-dialog>Cancelar</button><button class="op-primary-button" type="submit">Guardar</button></div>
+    </form>
+</dialog>
+
+<dialog class="op-dialog" id="reward-award-dialog">
+    <form class="op-dialog-card op-prize-award-form" id="reward-award-form">
+        <div class="op-dialog-header"><div><small>ENTREGA DE PREMIO</small><h3>Confirmar entrega</h3></div><button class="op-dialog-close" type="button" data-close-dialog><i class="fa-solid fa-xmark"></i></button></div>
+        <input id="reward-award-prize-id" type="hidden">
+        <input id="reward-award-user-id" type="hidden">
+        <div class="op-prize-award-confirm" id="reward-award-confirm"></div>
+        <label class="op-field"><span>Comentario</span><textarea id="reward-award-comment" rows="4" maxlength="700" placeholder="Ej. Premio entregado durante reunión mensual..."></textarea></label>
+        <div class="op-form-message" id="reward-award-message" hidden></div>
+        <div class="op-dialog-actions"><button class="op-secondary-button" type="button" data-close-dialog>Cancelar</button><button class="op-primary-button" type="submit"><i class="fa-solid fa-gift"></i> Marcar como otorgado</button></div>
     </form>
 </dialog>
 
