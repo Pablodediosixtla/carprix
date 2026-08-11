@@ -22,10 +22,16 @@ $where = ['1 = 1'];
 $types = '';
 $params = [];
 
-if (!canViewAllRequirements($user)) {
-    $where[] = '(r.creado_por = ? OR r.asignado_a = ?)';
-    $types .= 'ii';
-    array_push($params, $user['id'], $user['id']);
+$visibleUserIds = requirementVisibleUserIds($con, $user);
+if ($visibleUserIds !== null) {
+    if ($visibleUserIds === []) {
+        $where[] = '1 = 0';
+    } else {
+        $placeholders = implode(',', array_fill(0, count($visibleUserIds), '?'));
+        $where[] = "(r.creado_por IN ({$placeholders}) OR r.asignado_a IN ({$placeholders}))";
+        $types .= str_repeat('i', count($visibleUserIds) * 2);
+        $params = array_merge($params, $visibleUserIds, $visibleUserIds);
+    }
 }
 if ($search !== '') {
     $like = '%' . $search . '%';
@@ -100,6 +106,7 @@ okResponse([
         'puede_crear' => canCreateRequirement($user),
         'puede_solicitar_cambio' => canCreateRequirement($user),
         'puede_ver_todos' => canViewAllRequirements($user),
+        'alcance_jerarquia' => $visibleUserIds !== null,
     ],
     'pagination' => [
         'page' => $page,

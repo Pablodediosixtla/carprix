@@ -31,9 +31,12 @@ try {
     if (!$requirement) {
         throw new DomainException('REQUIREMENT_NOT_FOUND');
     }
-    if (!canViewAllRequirements($user)
-        && (int) $requirement['creado_por'] !== (int) $user['id']
-        && (int) $requirement['asignado_a'] !== (int) $user['id']) {
+    if (!canViewRequirementRecord(
+        $con,
+        $user,
+        (int) $requirement['creado_por'],
+        (int) $requirement['asignado_a']
+    )) {
         throw new DomainException('FORBIDDEN');
     }
 

@@ -28,14 +28,16 @@ $params = [];
 // El resto de autorizadores solo ve solicitudes cuyo solicitante es su
 // subordinado DIRECTO en la jerarquía vigente.
 if (!hasFullRequestApprovalAccess($user)) {
-    $where[] = "EXISTS (
-        SELECT 1
-        FROM operativo_usuario_jerarquia hj
-        WHERE hj.usuario_id = c.solicitado_por
-          AND hj.supervisor_id = ?
-          AND hj.activo = 1
-    )";
-    $types .= 'i';
+    $where[] = "c.solicitado_por <> ?
+        AND EXISTS (
+            SELECT 1
+            FROM operativo_usuario_jerarquia hj
+            WHERE hj.usuario_id = c.solicitado_por
+              AND hj.supervisor_id = ?
+              AND hj.activo = 1
+        )";
+    $types .= 'ii';
+    $params[] = (int) $user['id'];
     $params[] = (int) $user['id'];
 }
 

@@ -24,26 +24,17 @@ $types = '';
 $params = [];
 
 if (!canViewAllCatalogRequests($user)) {
-    if (canAuthorizeCatalogRequests($user)) {
-        // Un autorizador solo ve sus propias solicitudes y las solicitudes
-        // de subordinados DIRECTOS según la jerarquía vigente.
-        $where[] = "(
-            cr.solicitado_por = ?
-            OR EXISTS (
-                SELECT 1
-                FROM operativo_usuario_jerarquia hjf
-                WHERE hjf.usuario_id = cr.solicitado_por
-                  AND hjf.supervisor_id = ?
-                  AND hjf.activo = 1
-            )
-        )";
-        $types .= 'ii';
-        $params[] = (int) $user['id'];
-        $params[] = (int) $user['id'];
+    $catalogVisibleIds = canAuthorizeCatalogRequests($user)
+        ? hierarchyDescendantIds($con, (int) $user['id'])
+        : [(int) $user['id']];
+
+    if ($catalogVisibleIds === []) {
+        $where[] = '1 = 0';
     } else {
-        $where[] = 'cr.solicitado_por = ?';
-        $types .= 'i';
-        $params[] = (int) $user['id'];
+        $placeholders = implode(',', array_fill(0, count($catalogVisibleIds), '?'));
+        $where[] = "cr.solicitado_por IN ({$placeholders})";
+        $types .= str_repeat('i', count($catalogVisibleIds));
+        $params = array_merge($params, $catalogVisibleIds);
     }
 }
 

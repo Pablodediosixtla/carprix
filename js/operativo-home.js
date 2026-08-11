@@ -62,8 +62,16 @@
     const loadDashboard = async () => {
         const response = await OP.request('op_dashboard.php');
         const summary = response.data.resumen;
+        const visibleMetrics = new Set(response.data.metricas_visibles || Object.keys(summary || {}));
         document.querySelectorAll('[data-metric]').forEach((element) => {
-            element.textContent = new Intl.NumberFormat('es-MX').format(summary[element.dataset.metric] || 0);
+            const metric = element.dataset.metric;
+            const card = element.closest('.op-metric-card');
+            const isVisible = visibleMetrics.has(metric);
+            if (card) card.hidden = !isVisible;
+            if (isVisible) {
+                const value = summary?.[metric] ?? 0;
+                element.textContent = new Intl.NumberFormat('es-MX').format(value);
+            }
         });
 
         const badge = document.getElementById('nav-approval-count');

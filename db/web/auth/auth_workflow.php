@@ -35,10 +35,13 @@ function canCreateRequirement(array $user): bool
 
 function canViewAllRequirements(array $user): bool
 {
+    // SUPER_ADMIN y ADMIN_OPERATIVO conservan visibilidad global.
+    // INVENTARIO y SOLO_LECTURA mantienen la consulta global definida para
+    // esos perfiles. Un AUTORIZADOR/Supervisor NO obtiene acceso global:
+    // su alcance se limita a él mismo y a toda su línea de subordinados.
     return hasAnyRole($user, [
         'SUPER_ADMIN',
         'ADMIN_OPERATIVO',
-        'AUTORIZADOR',
         'INVENTARIO',
         'SOLO_LECTURA',
     ]);
@@ -253,6 +256,67 @@ function hierarchyDescendantIds(mysqli $con, int $rootUserId): array
     }
 
     return array_map('intval', array_keys($visited));
+}
+
+
+/**
+ * Devuelve el alcance de usuarios cuyos requerimientos puede consultar el
+ * usuario actual.
+ *
+ * - null: acceso global.
+ * - Supervisor/AUTORIZADOR: usuario actual + todos sus descendientes.
+ * - VENTAS u otro perfil sin acceso global: únicamente el usuario actual.
+ *
+ * Importante: deliberadamente NO agrega ancestros. Así un supervisor nunca
+ * ve requerimientos de su manager o de niveles superiores.
+ */
+function requirementVisibleUserIds(mysqli $con, array $user): ?array
+{
+    if (canViewAllRequirements($user)) {
+        return null;
+    }
+
+    $userId = (int) ($user['id'] ?? 0);
+    if ($userId <= 0) {
+        return [];
+    }
+
+    if (hasAnyRole($user, ['AUTORIZADOR'])) {
+        return hierarchyDescendantIds($con, $userId);
+    }
+
+    return [$userId];
+}
+
+function canViewRequirementRecord(
+    mysqli $con,
+    array $user,
+    int $createdBy,
+    int $assignedTo
+): bool {
+    $visibleIds = requirementVisibleUserIds($con, $user);
+    if ($visibleIds === null) {
+        return true;
+    }
+
+    return in_array($createdBy, $visibleIds, true)
+        || in_array($assignedTo, $visibleIds, true);
+}
+
+function isSalesOnlyOperationalUser(array $user): bool
+{
+    $roles = array_values(array_unique(array_map(
+        static fn(mixed $role): string => strtoupper(trim((string) $role)),
+        is_array($user['roles'] ?? null) ? $user['roles'] : []
+    )));
+
+    if (!in_array('VENTAS', $roles, true)) {
+        return false;
+    }
+
+    // Si además de VENTAS tiene cualquier otro rol, se considera ese otro
+    // perfil operativo y debe ver todos los totalizadores.
+    return count($roles) === 1;
 }
 
 
@@ -511,7 +575,14 @@ function canResolveHierarchyRequest(mysqli $con, array $user, int $requesterId):
         return true;
     }
 
-    return isCurrentDirectManagerOf($con, (int) $user['id'], $requesterId);
+    $currentUserId = (int) ($user['id'] ?? 0);
+    if ($currentUserId <= 0 || $requesterId <= 0 || $currentUserId === $requesterId) {
+        return false;
+    }
+
+    // Para supervisores normales, únicamente el manager DIRECTO vigente del
+    // solicitante puede resolver. Ser ancestro indirecto no concede permiso.
+    return isCurrentDirectManagerOf($con, $currentUserId, $requesterId);
 }
 
 function isHierarchyAncestorOf(mysqli $con, int $managerId, int $subordinateId): bool
