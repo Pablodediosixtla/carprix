@@ -59,7 +59,7 @@ CREATE TABLE IF NOT EXISTS operativo_requerimiento_compra (
     forma_pago ENUM('Contado','Financiamiento','Otro')
         COLLATE utf8mb4_spanish_ci NOT NULL DEFAULT 'Contado',
     comentarios TEXT COLLATE utf8mb4_spanish_ci,
-    estatus ENUM('Solicitado','Apartado','Vendido')
+    estatus ENUM('Solicitado','Apartado','Vendido','Rechazado')
         COLLATE utf8mb4_spanish_ci NOT NULL DEFAULT 'Solicitado',
     creado_por BIGINT UNSIGNED NOT NULL,
     asignado_a BIGINT UNSIGNED NOT NULL,
@@ -144,9 +144,9 @@ CREATE TABLE IF NOT EXISTS operativo_requerimiento_historial (
         'RECHAZO',
         'ASIGNACION'
     ) COLLATE utf8mb4_spanish_ci NOT NULL,
-    estatus_anterior ENUM('Solicitado','Apartado','Vendido')
+    estatus_anterior ENUM('Solicitado','Apartado','Vendido','Rechazado')
         COLLATE utf8mb4_spanish_ci DEFAULT NULL,
-    estatus_nuevo ENUM('Solicitado','Apartado','Vendido')
+    estatus_nuevo ENUM('Solicitado','Apartado','Vendido','Rechazado')
         COLLATE utf8mb4_spanish_ci DEFAULT NULL,
     detalle VARCHAR(500) COLLATE utf8mb4_spanish_ci DEFAULT NULL,
     usuario_id BIGINT UNSIGNED NOT NULL,

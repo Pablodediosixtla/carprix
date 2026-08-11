@@ -143,12 +143,38 @@ try {
             (int) $user['id']
         );
     } else {
+        // Cuando se rechaza la primera transición comercial
+        // Solicitado -> Apartado, el requerimiento completo queda Rechazado.
+        // Esto evita que vuelva a mostrarse como Solicitado y que el usuario
+        // pueda enviar nuevamente la misma solicitud de apartado.
+        $rejectionFinalStatus = $currentStatus;
+
+        if ($currentStatus === 'Solicitado' && $requestedStatus === 'Apartado') {
+            $updateRejectedRequirement = $con->prepare(
+                "UPDATE operativo_requerimiento_compra
+                 SET estatus = 'Rechazado',
+                     fecha_actualizacion = CURRENT_TIMESTAMP
+                 WHERE id = ?"
+            );
+            if (!$updateRejectedRequirement) {
+                databaseError($con);
+            }
+            $rejectedRequirementId = (int) $change['requerimiento_id'];
+            $updateRejectedRequirement->bind_param('i', $rejectedRequirementId);
+            if (!$updateRejectedRequirement->execute()) {
+                $updateRejectedRequirement->close();
+                databaseError($con);
+            }
+            $updateRejectedRequirement->close();
+            $rejectionFinalStatus = 'Rechazado';
+        }
+
         addRequirementHistory(
             $con,
             (int) $change['requerimiento_id'],
             'RECHAZO',
             $currentStatus,
-            $requestedStatus,
+            $rejectionFinalStatus,
             $comment,
             (int) $user['id']
         );

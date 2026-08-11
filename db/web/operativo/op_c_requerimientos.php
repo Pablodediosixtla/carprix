@@ -68,7 +68,25 @@ $sql = "SELECT
             CONCAT(au.nombre, ' ', au.apellido_paterno) AS asignado_a_nombre,
             pc.id AS cambio_pendiente_id,
             pc.estatus_solicitado AS cambio_pendiente_estatus,
-            pc.fecha_solicitud AS cambio_pendiente_fecha
+            pc.fecha_solicitud AS cambio_pendiente_fecha,
+            (SELECT rc.comentario_decision
+             FROM operativo_requerimiento_cambio rc
+             WHERE rc.requerimiento_id = r.id
+               AND rc.decision = 'Rechazado'
+             ORDER BY rc.fecha_decision DESC, rc.id DESC
+             LIMIT 1) AS rechazo_motivo,
+            (SELECT rc.fecha_decision
+             FROM operativo_requerimiento_cambio rc
+             WHERE rc.requerimiento_id = r.id
+               AND rc.decision = 'Rechazado'
+             ORDER BY rc.fecha_decision DESC, rc.id DESC
+             LIMIT 1) AS rechazo_fecha,
+            (SELECT rc.estatus_solicitado
+             FROM operativo_requerimiento_cambio rc
+             WHERE rc.requerimiento_id = r.id
+               AND rc.decision = 'Rechazado'
+             ORDER BY rc.fecha_decision DESC, rc.id DESC
+             LIMIT 1) AS rechazo_estatus_solicitado
         FROM operativo_requerimiento_compra r
         INNER JOIN autos a ON a.id = r.auto_id
         INNER JOIN operativo_usuario cu ON cu.id = r.creado_por

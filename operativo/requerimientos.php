@@ -8,7 +8,7 @@ operativoPageStart('Requerimientos de compra', 'requerimientos');
 </section>
 <section class="op-filter-bar compact">
     <label class="op-search"><i class="fa-solid fa-magnifying-glass"></i><input id="requirement-search" placeholder="Folio, cliente, teléfono o auto"></label>
-    <select id="requirement-status"><option value="">Todos los estatus</option><option>Solicitado</option><option>Apartado</option><option>Vendido</option></select>
+    <select id="requirement-status"><option value="">Todos los estatus</option><option>Solicitado</option><option>Apartado</option><option>Vendido</option><option>Rechazado</option></select>
     <button class="op-secondary-button" id="requirement-refresh" type="button"><i class="fa-solid fa-rotate"></i></button>
 </section>
 <section class="op-requirement-list" id="requirement-list"><div class="op-loading">Cargando requerimientos...</div></section>

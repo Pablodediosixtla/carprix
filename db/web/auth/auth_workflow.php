@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 function requirementAllowedStatuses(): array
 {
-    return ['Solicitado', 'Apartado', 'Vendido'];
+    return ['Solicitado', 'Apartado', 'Vendido', 'Rechazado'];
 }
 
 function requirementNextStatus(string $currentStatus): ?string

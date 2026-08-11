@@ -126,12 +126,15 @@
         list.innerHTML = items.map((item) => {
             const next = nextStatus(item.estatus);
             const pending = item.cambio_pendiente_id ? `<div class="op-pending-change"><i class="fa-solid fa-hourglass-half"></i> Cambio a ${OP.escapeHtml(item.cambio_pendiente_estatus)} pendiente de autorización</div>` : '';
+            const rejection = item.estatus === 'Rechazado'
+                ? `<div class="op-rejected-change"><i class="fa-solid fa-circle-xmark"></i><div><strong>Requerimiento rechazado</strong><span>${OP.escapeHtml(item.rechazo_motivo || 'Sin motivo registrado.')}</span>${item.rechazo_fecha ? `<small>${OP.formatDate(item.rechazo_fecha)}</small>` : ''}</div></div>`
+                : '';
             const changeButton = next && state.permissions.puede_solicitar_cambio && !item.cambio_pendiente_id
                 ? `<button class="op-primary-button" data-status-change="${item.id}" data-next-status="${next}"><i class="fa-solid fa-arrow-trend-up"></i> Solicitar ${next}</button>` : '';
             return `
                 <article class="op-requirement-card">
                     <div class="op-card-copy"><span class="op-card-label">${OP.escapeHtml(item.folio)}</span><h3>${OP.escapeHtml(item.cliente_nombre)}</h3><p>${OP.escapeHtml(item.cliente_telefono)}${item.cliente_email ? ` · ${OP.escapeHtml(item.cliente_email)}` : ''}</p></div>
-                    <div class="op-card-copy"><span class="op-card-label">AUTO #${item.auto_id}</span><h3>${OP.escapeHtml(item.marca)} ${OP.escapeHtml(item.modelo)} ${item.anio}</h3><p>${OP.formatCurrency(item.precio)} · ${OP.escapeHtml(item.forma_pago)} · Responsable: ${OP.escapeHtml(item.asignado_a_nombre)}</p>${pending}</div>
+                    <div class="op-card-copy"><span class="op-card-label">AUTO #${item.auto_id}</span><h3>${OP.escapeHtml(item.marca)} ${OP.escapeHtml(item.modelo)} ${item.anio}</h3><p>${OP.formatCurrency(item.precio)} · ${OP.escapeHtml(item.forma_pago)} · Responsable: ${OP.escapeHtml(item.asignado_a_nombre)}</p>${pending}${rejection}</div>
                     <div class="op-card-copy"><span class="op-card-label">ESTATUS</span><p><span class="op-status-badge ${OP.statusClass(item.estatus)}">${OP.escapeHtml(item.estatus)}</span></p><p>Registro: ${OP.formatDate(item.fecha_solicitud)}</p></div>
                     <div class="op-card-actions">${changeButton}</div>
                 </article>`;
