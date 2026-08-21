@@ -9,6 +9,10 @@ if (in_array($origin, $allowed, true)) {
 }
 header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With, Accept");
+header('Content-Type: application/json; charset=utf-8');
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+header('Pragma: no-cache');
+header('Expires: 0');
 
 if (($_SERVER['REQUEST_METHOD'] ?? '') === 'OPTIONS') { http_response_code(204); exit; }
 
@@ -68,8 +72,21 @@ if ($id) {
     $stmt->close();
 
 } else {
-    // Consulta general para el catálogo
-    $sql = "SELECT * FROM autos ORDER BY fecha_carga DESC";
+    // Consulta general para el catálogo público.
+    // Disponibles primero y en orden aleatorio en cada carga; Apartados/Vendidos al final.
+    $sql = "SELECT *
+            FROM autos
+            WHERE estatus <> 'Oculto'
+            ORDER BY
+                CASE estatus
+                    WHEN 'Disponible' THEN 0
+                    WHEN 'Apartado' THEN 1
+                    WHEN 'Vendido' THEN 2
+                    ELSE 3
+                END ASC,
+                CASE WHEN estatus = 'Disponible' THEN RAND() ELSE NULL END,
+                fecha_carga DESC,
+                id DESC";
     $stmt = $con->prepare($sql);
     
     if ($stmt->execute()) {

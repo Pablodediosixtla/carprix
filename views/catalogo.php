@@ -12,7 +12,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../css/styles.css?v=20260803-3">
-    <link rel="stylesheet" href="../css/catalogo.css?v=20260803-3">
+    <link rel="stylesheet" href="../css/catalogo.css?v=20260821-1">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body class="bg-dark">
@@ -112,10 +112,22 @@
 
         <section class="catalogo-main">
             <div class="catalogo-top-bar">
-                <p><span id="total-results" class="green-text font-bold">0</span> autos encontrados</p>
+                <p class="catalogo-results"><span id="total-results" class="green-text font-bold">0</span> autos encontrados</p>
+
+                <label class="catalogo-search" for="catalog-search">
+                    <i class="fas fa-search" aria-hidden="true"></i>
+                    <input
+                        type="search"
+                        id="catalog-search"
+                        autocomplete="off"
+                        placeholder="Buscar por ID, marca o modelo"
+                        aria-label="Buscar autos por ID, marca o modelo"
+                    >
+                </label>
+
                 <div class="view-toggles">
-                    <button class="btn-view active" id="view-grid" title="Vista Mosaico"><i class="fas fa-th-large"></i></button>
-                    <button class="btn-view" id="view-list" title="Vista Lista"><i class="fas fa-list"></i></button>
+                    <button class="btn-view active" id="view-grid" title="Vista Mosaico" aria-label="Vista mosaico"><i class="fas fa-th-large"></i></button>
+                    <button class="btn-view" id="view-list" title="Vista Lista" aria-label="Vista lista"><i class="fas fa-list"></i></button>
                 </div>
             </div>
 
@@ -143,6 +155,6 @@
     </footer>
 
     <script src="../js/public-operativo-session.js?v=20260810-3"></script>
-    <script src="../js/catalogo.js?v=20260810-3"></script>
+    <script src="../js/catalogo.js?v=20260821-1"></script>
 </body>
 </html>

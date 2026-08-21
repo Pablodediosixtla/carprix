@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let allAutos = [];
     let filteredAutos = [];
     let currentPage = 1;
-    const itemsPerPage = 8; 
+    const itemsPerPage = 9;
     let currentView = 'grid'; 
     let isFiltering = false; 
 
@@ -19,6 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const totalResults = document.getElementById('total-results');
     const paginationContainer = document.getElementById('pagination-controls');
     const btnLimpiar = document.getElementById('btn-limpiar');
+    const searchInput = document.getElementById('catalog-search');
 
     const filterIds = ['marca', 'tipo', 'precio', 'anio', 'ubicacion', 'transmision', 'combustible', 'color', 'traccion', 'pasajeros', 'duenos'];
     const filters = {};
@@ -29,9 +30,28 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnMobileFilters = document.getElementById('btn-toggle-filters');
     const sidebar = document.getElementById('filtros-sidebar');
 
+    const normalizeSearchText = (value) => String(value ?? '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .trim();
+
+    const matchesSearch = (auto) => {
+        const term = normalizeSearchText(searchInput?.value);
+        if (!term) return true;
+
+        const searchable = normalizeSearchText([
+            auto.id,
+            auto.marca,
+            auto.modelo
+        ].filter(Boolean).join(' '));
+
+        return searchable.includes(term);
+    };
+
     const init = async () => {
         try {
-            const response = await fetch('../db/web/get_autos.php');
+            const response = await fetch('../db/web/get_autos.php', { cache: 'no-store' });
             const result = await response.json();
             
             if (result.ok) {
@@ -83,6 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const getAvailableOptionsFor = (filterIdToSkip) => {
         const precioMax = parseFloat(filters.precio.value) || Infinity;
         return allAutos.filter(auto => {
+            if (!matchesSearch(auto)) return false;
             if (parseFloat(auto.precio) > precioMax) return false;
             
             for (let id of filterIds) {
@@ -133,7 +154,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const precioMax = parseFloat(filters.precio.value) || Infinity;
 
         filteredAutos = allAutos.filter(auto => {
-            let match = true;
+            let match = matchesSearch(auto);
+            if (!match) return false;
+
             for (let id of filterIds) {
                 if (id === 'precio') {
                     if (parseFloat(auto.precio) > precioMax) match = false;
@@ -272,9 +295,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     btnLimpiar.addEventListener('click', () => {
         filterIds.forEach(id => { if(filters[id]) filters[id].value = ''; });
+        if (searchInput) searchInput.value = '';
         window.history.replaceState({}, document.title, window.location.pathname);
         applyFilters();
     });
+
+    let searchTimer = null;
+    if (searchInput) {
+        searchInput.addEventListener('input', () => {
+            window.clearTimeout(searchTimer);
+            searchTimer = window.setTimeout(applyFilters, 120);
+        });
+    }
 
     btnGrid.addEventListener('click', () => { currentView = 'grid'; btnGrid.classList.add('active'); btnList.classList.remove('active'); renderPage(); });
     btnList.addEventListener('click', () => { currentView = 'list'; btnList.classList.add('active'); btnGrid.classList.remove('active'); renderPage(); });
