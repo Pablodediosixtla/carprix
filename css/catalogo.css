@@ -1,6 +1,19 @@
 /* LAYOUT CATÁLOGO */
 .catalogo-layout { display: flex; gap: 40px; margin-top: 100px; padding-bottom: 80px; align-items: flex-start; }
 
+/*
+ * Esta vista usa un ancho mayor que el contenedor global del sitio para que
+ * el filtro y las tres tarjetas por fila tengan mejor proporción en escritorio.
+ * El resto de las vistas conserva el max-width global de 1200px.
+ */
+@media (min-width: 993px) {
+    .catalogo-layout {
+        max-width: 1500px;
+        padding-left: 28px;
+        padding-right: 28px;
+    }
+}
+
 /* SIDEBAR FILTROS (CON SCROLL INTERNO) */
 .filtros-sidebar { width: 280px; background: var(--card-bg); padding: 25px; border-radius: 15px; border: 1px solid var(--border-color); flex-shrink: 0; position: sticky; top: 100px; max-height: calc(100vh - 120px); overflow-y: auto; }
 .scroll-custom::-webkit-scrollbar { width: 6px; }
