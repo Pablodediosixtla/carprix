@@ -6,12 +6,43 @@ operativoPageStart('Dashboard', 'dashboard');
     <div>
         <span class="op-kicker">ANALÍTICA OPERATIVA</span>
         <h2>Indicadores comerciales y reconocimientos</h2>
-        <p>Consulta ventas, apartados y recompensas de tu equipo completo o de una persona dentro de tu alcance.</p>
+        <p>Analiza equipos completos, personas y períodos específicos dentro de tu alcance jerárquico.</p>
     </div>
     <div class="op-analytics-filters">
-        <label class="op-field compact"><span>Año</span><select id="analytics-year"></select></label>
-        <label class="op-field compact op-analytics-person-filter"><span>Persona</span><select id="analytics-person"><option value="0">Mi grupo completo</option></select></label>
-        <button class="op-secondary-button" id="analytics-refresh" type="button" title="Actualizar"><i class="fa-solid fa-rotate"></i></button>
+        <label class="op-field compact">
+            <span>Año</span>
+            <select id="analytics-year"></select>
+        </label>
+
+        <div class="op-field compact op-analytics-month-field">
+            <span>Mes</span>
+            <details class="op-multi-select" id="analytics-month-filter">
+                <summary id="analytics-month-summary">Todos los meses</summary>
+                <div class="op-multi-select-menu" id="analytics-month-menu">
+                    <label class="op-multi-select-option all">
+                        <input type="checkbox" id="analytics-month-all" checked>
+                        <span>Todos los meses</span>
+                    </label>
+                    <div class="op-multi-select-divider"></div>
+                    <div id="analytics-month-options"></div>
+                    <button class="op-primary-button compact" id="analytics-month-apply" type="button">Aplicar meses</button>
+                </div>
+            </details>
+        </div>
+
+        <label class="op-field compact op-analytics-team-filter">
+            <span>Equipo</span>
+            <select id="analytics-team"><option value="0">Cargando equipos...</option></select>
+        </label>
+
+        <label class="op-field compact op-analytics-person-filter">
+            <span>Persona</span>
+            <select id="analytics-person"><option value="0">Todo el equipo</option></select>
+        </label>
+
+        <button class="op-secondary-button" id="analytics-refresh" type="button" title="Actualizar" aria-label="Actualizar dashboard">
+            <i class="fa-solid fa-rotate"></i>
+        </button>
     </div>
 </section>
 
@@ -27,7 +58,7 @@ operativoPageStart('Dashboard', 'dashboard');
 <section class="op-analytics-grid">
     <article class="op-panel">
         <div class="op-panel-header">
-            <div><small>TENDENCIA DEL AÑO</small><h3>Actividad comercial por mes</h3></div>
+            <div><small>ACTIVIDAD DEL PERÍODO</small><h3>Actividad comercial por mes</h3></div>
             <span class="op-muted" id="analytics-scope-label">—</span>
         </div>
         <div class="op-chart-legend" aria-hidden="true">
@@ -35,6 +66,7 @@ operativoPageStart('Dashboard', 'dashboard');
             <span><i class="reserved"></i>Apartados</span>
             <span><i class="sold"></i>Vendidos</span>
         </div>
+        <p class="op-analytics-chart-help"><i class="fa-solid fa-arrow-pointer"></i> Haz clic en un mes para filtrar el dashboard y consultar su detalle.</p>
         <div class="op-analytics-chart" id="analytics-chart"><div class="op-loading">Cargando indicadores...</div></div>
     </article>
 
@@ -47,6 +79,39 @@ operativoPageStart('Dashboard', 'dashboard');
             <div><span>Requerimientos rechazados</span><strong id="metric-rejected">—</strong></div>
         </div>
     </article>
+</section>
+
+<section class="op-panel op-analytics-detail-panel" id="analytics-detail-panel" hidden>
+    <div class="op-panel-header op-analytics-detail-head">
+        <div>
+            <small>DETALLE DEL PERÍODO</small>
+            <h3 id="analytics-detail-title">Detalle</h3>
+        </div>
+        <div class="op-analytics-detail-actions">
+            <span class="op-muted" id="analytics-detail-count">—</span>
+            <button class="op-secondary-button compact" id="analytics-clear-months" type="button">
+                <i class="fa-solid fa-calendar-days"></i> Ver todos los meses
+            </button>
+        </div>
+    </div>
+    <div class="op-table-wrap">
+        <table class="op-table op-analytics-detail-table">
+            <thead>
+                <tr>
+                    <th>Movimiento</th>
+                    <th>Fecha</th>
+                    <th>Folio / Auto</th>
+                    <th>Cliente</th>
+                    <th>Responsable</th>
+                    <th>Monto</th>
+                    <th>Estatus actual</th>
+                </tr>
+            </thead>
+            <tbody id="analytics-detail-body">
+                <tr><td colspan="7">Selecciona uno o varios meses para consultar el detalle.</td></tr>
+            </tbody>
+        </table>
+    </div>
 </section>
 
 <section class="op-panel">

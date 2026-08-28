@@ -1032,3 +1032,134 @@ button:disabled { opacity: .55; cursor: not-allowed; transform: none !important;
     .op-analytics-metrics { grid-template-columns: repeat(2, minmax(0,1fr)); }
     .op-analytics-chart { grid-template-columns: repeat(12, 44px); }
 }
+
+/* =========================================================
+   Dashboard analítico · filtros por mes/equipo y detalle
+   ========================================================= */
+.op-analytics-month-field { min-width: 190px !important; }
+.op-analytics-team-filter { min-width: 250px !important; }
+.op-analytics-person-filter { min-width: 270px !important; }
+
+.op-multi-select { position: relative; width: 100%; }
+.op-multi-select > summary {
+    min-height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 0 13px;
+    border: 1px solid var(--op-border);
+    border-radius: 11px;
+    background: var(--op-surface-2);
+    color: var(--op-text);
+    cursor: pointer;
+    list-style: none;
+    font-size: 11px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+.op-multi-select > summary::-webkit-details-marker { display: none; }
+.op-multi-select > summary::after {
+    content: '\f078';
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+    color: var(--op-muted);
+    font-size: 9px;
+    transition: transform .18s ease;
+}
+.op-multi-select[open] > summary::after { transform: rotate(180deg); }
+.op-multi-select-menu {
+    position: absolute;
+    z-index: 40;
+    top: calc(100% + 7px);
+    left: 0;
+    width: min(260px, 82vw);
+    max-height: 390px;
+    overflow-y: auto;
+    display: grid;
+    gap: 5px;
+    padding: 10px;
+    border: 1px solid var(--op-border);
+    border-radius: 13px;
+    background: var(--op-surface);
+    box-shadow: 0 18px 45px rgba(0,0,0,.35);
+}
+.op-multi-select-option {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    min-height: 34px;
+    padding: 6px 8px;
+    border-radius: 8px;
+    color: var(--op-text);
+    cursor: pointer;
+    font-size: 11px;
+}
+.op-multi-select-option:hover { background: rgba(57,181,74,.08); }
+.op-multi-select-option.all { font-weight: 900; color: var(--op-green); }
+.op-multi-select-option input { accent-color: var(--op-green); }
+.op-multi-select-divider { height: 1px; background: var(--op-border); margin: 2px 0 4px; }
+.op-multi-select-menu .op-primary-button { width: 100%; margin-top: 6px; justify-content: center; }
+
+.op-analytics-chart-help {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    margin: -5px 0 10px;
+    color: var(--op-muted);
+    font-size: 9px;
+}
+.op-analytics-chart-help i { color: var(--op-green); }
+
+button.op-analytics-month {
+    border: 0;
+    outline: 0;
+    padding: 5px 3px 2px;
+    border-radius: 9px;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+    transition: background .16s ease, opacity .16s ease, transform .16s ease;
+}
+button.op-analytics-month:hover,
+button.op-analytics-month:focus-visible {
+    background: rgba(57,181,74,.08);
+    transform: translateY(-2px);
+}
+button.op-analytics-month.selected { background: rgba(57,181,74,.10); }
+button.op-analytics-month.filtered-out { opacity: .34; }
+button.op-analytics-month.filtered-out:hover { opacity: .75; }
+
+.op-analytics-detail-panel { margin-bottom: 18px; }
+.op-analytics-detail-head { align-items: center; }
+.op-analytics-detail-actions { display: flex; align-items: center; justify-content: flex-end; gap: 12px; flex-wrap: wrap; }
+.op-analytics-detail-main { min-width: 190px; display: grid; gap: 3px; }
+.op-analytics-detail-main span { color: var(--op-muted); font-size: 9px; white-space: normal; }
+.op-analytics-detail-table td { vertical-align: middle; }
+
+@media (max-width: 1180px) {
+    .op-analytics-team-filter { min-width: 220px !important; }
+    .op-analytics-person-filter { min-width: 230px !important; }
+}
+
+@media (max-width: 900px) {
+    .op-analytics-month-field,
+    .op-analytics-team-filter,
+    .op-analytics-person-filter { min-width: 0 !important; }
+    .op-analytics-month-field { flex: 1.2 !important; }
+    .op-analytics-team-filter { flex: 1.5 !important; }
+    .op-analytics-person-filter { flex: 1.6 !important; }
+}
+
+@media (max-width: 680px) {
+    .op-analytics-filters {
+        grid-template-columns: minmax(0,1fr) minmax(0,1fr) auto;
+    }
+    .op-analytics-month-field { grid-column: 2; }
+    .op-analytics-team-filter,
+    .op-analytics-person-filter { grid-column: 1 / -1; }
+    .op-multi-select-menu { right: 0; left: auto; }
+    .op-analytics-detail-head { align-items: stretch; flex-direction: column; }
+    .op-analytics-detail-actions { justify-content: space-between; }
+    .op-analytics-detail-actions .op-secondary-button { width: 100%; justify-content: center; }
+}
