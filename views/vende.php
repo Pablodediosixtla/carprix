@@ -14,7 +14,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
 
     <link rel="stylesheet" href="../css/styles.css?v=20260803-3">
-    <link rel="stylesheet" href="../css/vende.css?v=20260803-4">
+    <link rel="stylesheet" href="../css/vende.css?v=20260828-1">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body class="bg-dark">
@@ -182,13 +182,19 @@
                         <div class="form-grid form-grid-two">
                             <div class="form-group">
                                 <label for="v-marca">Marca <span aria-hidden="true">*</span></label>
-                                <input type="text" id="v-marca" placeholder="Ingresa marca de tu auto" required>
+                                <select id="v-marca" required>
+                                    <option value="">Selecciona marca</option>
+                                </select>
+                                <input class="catalog-other-field" type="text" id="v-marca-otro" maxlength="50" placeholder="Escribe la marca" hidden>
                                 <small class="field-error"></small>
                             </div>
 
                             <div class="form-group">
                                 <label for="v-modelo">Modelo <span aria-hidden="true">*</span></label>
-                                <input type="text" id="v-modelo" placeholder="Ingresa modelo de tu auto" required>
+                                <select id="v-modelo" required disabled>
+                                    <option value="">Selecciona primero una marca</option>
+                                </select>
+                                <input class="catalog-other-field" type="text" id="v-modelo-otro" maxlength="100" placeholder="Escribe el modelo" hidden>
                                 <small class="field-error"></small>
                             </div>
 
@@ -202,6 +208,51 @@
                                 <label for="v-anio">Año <span aria-hidden="true">*</span></label>
                                 <select id="v-anio" required>
                                     <option value="">Selecciona año</option>
+                                </select>
+                                <input class="catalog-other-field" type="number" id="v-anio-otro" min="1980" max="2100" inputmode="numeric" placeholder="Escribe el año" hidden>
+                                <small class="field-error"></small>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="v-color">Color <span aria-hidden="true">*</span></label>
+                                <select id="v-color" required>
+                                    <option value="">Selecciona color</option>
+                                </select>
+                                <input class="catalog-other-field" type="text" id="v-color-otro" maxlength="50" placeholder="Escribe el color" hidden>
+                                <small class="field-error"></small>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="v-transmision">Transmisión <span aria-hidden="true">*</span></label>
+                                <select id="v-transmision" required>
+                                    <option value="">Selecciona transmisión</option>
+                                </select>
+                                <input class="catalog-other-field" type="text" id="v-transmision-otro" maxlength="50" placeholder="Escribe la transmisión" hidden>
+                                <small class="field-error"></small>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="v-tipo-factura">Tipo de factura <span aria-hidden="true">*</span></label>
+                                <select id="v-tipo-factura" required>
+                                    <option value="">Selecciona tipo de factura</option>
+                                    <option value="Original">Original</option>
+                                    <option value="Refactura">Refactura</option>
+                                    <option value="Empresa">Empresa</option>
+                                    <option value="Otro">Otro</option>
+                                </select>
+                                <input class="catalog-other-field" type="text" id="v-tipo-factura-otro" maxlength="50" placeholder="Escribe el tipo de factura" hidden>
+                                <small class="field-error"></small>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="v-propietarios">Número de propietarios <span aria-hidden="true">*</span></label>
+                                <select id="v-propietarios" required>
+                                    <option value="">Selecciona una opción</option>
+                                    <option value="1">1</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                    <option value="4">4</option>
+                                    <option value="5 o más">5 o más</option>
                                 </select>
                                 <small class="field-error"></small>
                             </div>
@@ -386,6 +437,6 @@
     </footer>
 
     <script src="../js/public-operativo-session.js?v=20260810-3"></script>
-    <script src="../js/vende.js?v=20260810-3"></script>
+    <script src="../js/vende.js?v=20260828-1"></script>
 </body>
 </html>

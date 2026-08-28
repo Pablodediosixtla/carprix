@@ -55,11 +55,11 @@ operativoPageStart('Centro operativo', 'home');
         </button>
         <div class="op-quick-links">
             <a href="tareas.php"><i class="fa-solid fa-list-check"></i><span>Gestionar tareas</span></a>
-            <a href="personas.php" data-required-roles="SUPER_ADMIN,ADMIN_OPERATIVO,AUTORIZADOR"><i class="fa-solid fa-users-gear"></i><span>Personas</span></a>
+            <a href="personas.php" data-required-roles="SUPER_ADMIN,ADMIN_OPERATIVO,AUTORIZADOR,RH"><i class="fa-solid fa-users-gear"></i><span>Personas</span></a>
             <a href="catalogo.php" data-required-roles="SUPER_ADMIN,ADMIN_OPERATIVO,INVENTARIO"><i class="fa-solid fa-car-side"></i><span>Gestionar catálogo</span></a>
             <a href="requerimientos.php" data-required-roles="SUPER_ADMIN,ADMIN_OPERATIVO,AUTORIZADOR,INVENTARIO,VENTAS"><i class="fa-solid fa-file-circle-plus"></i><span>Requerimientos</span></a>
             <a href="autorizaciones.php" data-required-roles="SUPER_ADMIN,ADMIN_OPERATIVO,AUTORIZADOR"><i class="fa-solid fa-circle-check"></i><span>Revisar autorizaciones</span></a>
-            <a href="jerarquia.php" data-required-roles="SUPER_ADMIN,ADMIN_OPERATIVO,AUTORIZADOR,INVENTARIO,VENTAS"><i class="fa-solid fa-sitemap"></i><span>Jerarquía</span></a>
+            <a href="jerarquia.php" data-required-roles="SUPER_ADMIN,ADMIN_OPERATIVO,AUTORIZADOR,INVENTARIO,VENTAS,RH"><i class="fa-solid fa-sitemap"></i><span>Jerarquía</span></a>
         </div>
     </article>
 </section>

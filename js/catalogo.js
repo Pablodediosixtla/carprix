@@ -21,9 +21,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnLimpiar = document.getElementById('btn-limpiar');
     const searchInput = document.getElementById('catalog-search');
 
-    const filterIds = ['marca', 'tipo', 'precio', 'anio', 'ubicacion', 'transmision', 'combustible', 'color', 'traccion', 'pasajeros', 'duenos'];
+    let filterIds = ['marca', 'tipo', 'precio', 'anio', 'ubicacion', 'transmision', 'combustible', 'color', 'traccion', 'pasajeros', 'duenos'];
+    let interiorField = null;
     const filters = {};
     filterIds.forEach(id => { filters[id] = document.getElementById(`filter-${id}`); });
+    filters.interior = document.getElementById('filter-interior');
+    const interiorGroup = document.getElementById('filter-interior-group');
 
     const btnGrid = document.getElementById('view-grid');
     const btnList = document.getElementById('view-list');
@@ -49,6 +52,27 @@ document.addEventListener('DOMContentLoaded', () => {
         return searchable.includes(term);
     };
 
+    const valueForFilter = (auto, id) => {
+        if (id === 'interior') return interiorField ? auto?.[interiorField] : null;
+        return auto?.[id];
+    };
+
+    const configureInteriorFilter = () => {
+        const candidates = ['tipo_interior', 'interior', 'material_interior', 'tapiceria'];
+        interiorField = candidates.find((candidate) => allAutos.some((auto) => {
+            const value = auto?.[candidate];
+            return value !== null && value !== undefined && String(value).trim() !== '';
+        })) || null;
+
+        if (interiorField && filters.interior) {
+            if (!filterIds.includes('interior')) filterIds.push('interior');
+            if (interiorGroup) interiorGroup.hidden = false;
+        } else {
+            filterIds = filterIds.filter((id) => id !== 'interior');
+            if (interiorGroup) interiorGroup.hidden = true;
+        }
+    };
+
     const init = async () => {
         try {
             const response = await fetch('../db/web/get_autos.php', { cache: 'no-store' });
@@ -56,7 +80,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             if (result.ok) {
                 allAutos = result.data.filter(auto => auto.estatus !== 'Oculto');
-                
+                configureInteriorFilter();
                 initAllSelects();
                 
                 const urlParams = new URLSearchParams(window.location.search);
@@ -88,7 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (id === 'precio') return;
             const select = filters[id];
             
-            const uniqueValues = [...new Set(allAutos.map(a => String(a[id])))].filter(v => v !== 'null' && v !== '').sort();
+            const uniqueValues = [...new Set(allAutos.map(a => String(valueForFilter(a, id))))].filter(v => v !== 'null' && v !== '').sort();
             
             const firstOption = select.options[0].outerHTML;
             select.innerHTML = firstOption;
@@ -109,7 +133,7 @@ document.addEventListener('DOMContentLoaded', () => {
             for (let id of filterIds) {
                 if (id === 'precio' || id === filterIdToSkip) continue;
                 const val = filters[id].value;
-                if (val !== '' && auto[id] !== null && String(auto[id]) !== val) return false;
+                if (val !== '' && valueForFilter(auto, id) !== null && String(valueForFilter(auto, id)) !== val) return false;
             }
             return true;
         });
@@ -125,7 +149,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const currentSelectedValue = String(select.value); 
             
             const validAutos = getAvailableOptionsFor(id);
-            const availableValues = [...new Set(validAutos.map(a => String(a[id])))].filter(v => v !== 'null' && v !== '').sort();
+            const availableValues = [...new Set(validAutos.map(a => String(valueForFilter(a, id))))].filter(v => v !== 'null' && v !== '').sort();
 
             const firstOption = select.options[0].outerHTML;
             select.innerHTML = firstOption;
@@ -162,7 +186,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (parseFloat(auto.precio) > precioMax) match = false;
                 } else {
                     const val = filters[id].value;
-                    if (val !== '' && (auto[id] === null || String(auto[id]) !== val)) match = false;
+                    if (val !== '' && (valueForFilter(auto, id) === null || String(valueForFilter(auto, id)) !== val)) match = false;
                 }
             }
             return match;

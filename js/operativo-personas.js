@@ -44,6 +44,7 @@
         SUPERVISOR: 'Supervisor',
         RESPONSABLE_INVENTARIO: 'Responsable de inventario',
         GERENTE_OPERACIONES: 'Gerente de operaciones',
+        RH: 'Recursos Humanos',
         SUPER_ADMIN: 'Superadministrador',
         OTRO: 'Otro',
     }[level] || level || '—');
@@ -53,6 +54,7 @@
         SUPERVISOR: 'fa-people-group',
         RESPONSABLE_INVENTARIO: 'fa-warehouse',
         GERENTE_OPERACIONES: 'fa-user-gear',
+        RH: 'fa-people-roof',
         SUPER_ADMIN: 'fa-shield-halved',
     }[level] || 'fa-user');
 

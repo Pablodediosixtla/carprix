@@ -6,7 +6,7 @@ require_once __DIR__ . '/../auth/auth_bootstrap.php';
 bootstrapApi(false);
 $con = connectDatabase();
 $user = requireAuthenticated($con);
-requireAnyRole($user, ['SUPER_ADMIN', 'ADMIN_OPERATIVO']);
+requireAnyRole($user, ['SUPER_ADMIN', 'ADMIN_OPERATIVO', 'RH']);
 
 $categoriesResult = $con->query(
     "SELECT id, nombre, tipo, descripcion, activo, orden, creado_en, actualizado_en

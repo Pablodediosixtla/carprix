@@ -735,3 +735,12 @@ html[data-theme="light"] .vende-intro {
         width: 100%;
     }
 }
+
+
+/* Campos de catálogo con captura manual mediante la opción “Otro”. */
+.catalog-other-field {
+    margin-top: 9px;
+}
+.catalog-other-field[hidden] {
+    display: none !important;
+}

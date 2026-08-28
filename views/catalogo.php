@@ -94,6 +94,10 @@
                         <label>Color</label>
                         <select id="filter-color" class="filter-input"><option value="">Cualquier color</option></select>
                     </div>
+                    <div class="filtro-grupo" id="filter-interior-group" hidden>
+                        <label>Tipo de interior</label>
+                        <select id="filter-interior" class="filter-input"><option value="">Cualquier interior</option></select>
+                    </div>
                     <div class="filtro-grupo">
                         <label>Tracción</label>
                         <select id="filter-traccion" class="filter-input"><option value="">Cualquier tracción</option></select>
@@ -155,6 +159,6 @@
     </footer>
 
     <script src="../js/public-operativo-session.js?v=20260810-3"></script>
-    <script src="../js/catalogo.js?v=20260821-1"></script>
+    <script src="../js/catalogo.js?v=20260828-1"></script>
 </body>
 </html>

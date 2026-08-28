@@ -6,7 +6,7 @@ require_once __DIR__ . '/../auth/auth_bootstrap.php';
 $input = bootstrapApi(true);
 $con = connectDatabase();
 $currentUser = requireAuthenticated($con);
-requireAnyRole($currentUser, ['SUPER_ADMIN', 'ADMIN_OPERATIVO']);
+requireAnyRole($currentUser, ['SUPER_ADMIN', 'ADMIN_OPERATIVO', 'RH']);
 
 $userId = positiveInt($input['usuario_id'] ?? null, 'usuario_id');
 $target = fetchUserContext($con, $userId);
@@ -42,6 +42,11 @@ if ($userId === (int) $currentUser['id'] && $status !== 'Activo') {
 }
 
 $targetIsSuperAdmin = hasAnyRole($target, ['SUPER_ADMIN']);
+$isRhEditor = hasAnyRole($currentUser, ['RH']) && !hasAnyRole($currentUser, ['SUPER_ADMIN', 'ADMIN_OPERATIVO']);
+if ($targetIsSuperAdmin && $isRhEditor) {
+    $con->close();
+    errorResponse('RH no puede modificar la cuenta SUPER_ADMIN.', 403, 'PROTECTED_SUPER_ADMIN');
+}
 $currentLevel = operationalLevelFromRoles($target['roles'] ?? []);
 if ($targetIsSuperAdmin) {
     // Conservamos el nivel raíz para evitar retirar accidentalmente SUPER_ADMIN,
@@ -52,9 +57,11 @@ if ($targetIsSuperAdmin) {
     $allowedLevels = personLevelsAllowed($currentUser);
     if (!in_array($level, $allowedLevels, true)) {
         // Un gerente operativo puede editar otro gerente existente sin otorgar ese nivel a terceros.
-        if (!(hasAnyRole($currentUser, ['ADMIN_OPERATIVO'])
+        $managerKeepingManager = hasAnyRole($currentUser, ['ADMIN_OPERATIVO'])
             && $currentLevel === 'GERENTE_OPERACIONES'
-            && $level === 'GERENTE_OPERACIONES')) {
+            && $level === 'GERENTE_OPERACIONES';
+        $rhKeepingExistingLevel = $isRhEditor && $level === $currentLevel && $currentLevel !== 'SUPER_ADMIN';
+        if (!$managerKeepingManager && !$rhKeepingExistingLevel) {
             $con->close();
             errorResponse('No puedes asignar el nivel seleccionado.', 403, 'PERSON_LEVEL_FORBIDDEN');
         }
@@ -125,7 +132,7 @@ try {
             throw new DomainException('INVALID_PERSON_LEVEL');
         }
 
-        $managedCodes = ['VENTAS', 'AUTORIZADOR', 'INVENTARIO', 'ADMIN_OPERATIVO'];
+        $managedCodes = ['VENTAS', 'AUTORIZADOR', 'INVENTARIO', 'ADMIN_OPERATIVO', 'RH'];
         $placeholders = implode(',', array_fill(0, count($managedCodes), '?'));
         $roleLookup = $con->prepare(
             "SELECT id, codigo FROM operativo_rol

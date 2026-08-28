@@ -136,26 +136,32 @@ function userHasActiveRole(mysqli $con, int $userId, array $roleCodes): bool
 
 function canManagePeople(array $user): bool
 {
-    return hasAnyRole($user, ['SUPER_ADMIN', 'ADMIN_OPERATIVO', 'AUTORIZADOR']);
+    return hasAnyRole($user, ['SUPER_ADMIN', 'ADMIN_OPERATIVO', 'AUTORIZADOR', 'RH']);
 }
 
 function canCreatePeople(array $user): bool
 {
-    return hasAnyRole($user, ['SUPER_ADMIN', 'ADMIN_OPERATIVO']);
+    return hasAnyRole($user, ['SUPER_ADMIN', 'ADMIN_OPERATIVO', 'RH']);
 }
 
 function canFullyManagePeople(array $user): bool
 {
-    return hasAnyRole($user, ['SUPER_ADMIN', 'ADMIN_OPERATIVO']);
+    return hasAnyRole($user, ['SUPER_ADMIN', 'ADMIN_OPERATIVO', 'RH']);
 }
 
 function personLevelsAllowed(array $user): array
 {
     if (isSuperAdmin($user)) {
-        return ['VENDEDOR', 'SUPERVISOR', 'RESPONSABLE_INVENTARIO', 'GERENTE_OPERACIONES'];
+        return ['VENDEDOR', 'SUPERVISOR', 'RESPONSABLE_INVENTARIO', 'GERENTE_OPERACIONES', 'RH'];
     }
 
     if (hasAnyRole($user, ['ADMIN_OPERATIVO'])) {
+        return ['VENDEDOR', 'SUPERVISOR', 'RESPONSABLE_INVENTARIO', 'RH'];
+    }
+
+    // RH puede dar de alta perfiles operativos, pero no elevar usuarios a
+    // Gerente de Operaciones ni crear nuevos perfiles RH.
+    if (hasAnyRole($user, ['RH'])) {
         return ['VENDEDOR', 'SUPERVISOR', 'RESPONSABLE_INVENTARIO'];
     }
 
@@ -169,6 +175,7 @@ function personRoleCodes(string $level, bool $supervisorAlsoSells = false): arra
         'SUPERVISOR' => $supervisorAlsoSells ? ['AUTORIZADOR', 'VENTAS'] : ['AUTORIZADOR'],
         'RESPONSABLE_INVENTARIO' => ['INVENTARIO'],
         'GERENTE_OPERACIONES' => ['ADMIN_OPERATIVO', 'AUTORIZADOR'],
+        'RH' => ['RH'],
         default => [],
     };
 }
@@ -180,6 +187,9 @@ function operationalLevelFromRoles(array $roles): string
     }
     if (in_array('ADMIN_OPERATIVO', $roles, true)) {
         return 'GERENTE_OPERACIONES';
+    }
+    if (in_array('RH', $roles, true)) {
+        return 'RH';
     }
     if (in_array('AUTORIZADOR', $roles, true)) {
         return 'SUPERVISOR';
@@ -360,7 +370,7 @@ function hierarchyAncestorIds(mysqli $con, int $userId): array
 
 function hierarchyVisibleUserIds(mysqli $con, array $user): array
 {
-    if (hasAnyRole($user, ['SUPER_ADMIN', 'ADMIN_OPERATIVO'])) {
+    if (hasAnyRole($user, ['SUPER_ADMIN', 'ADMIN_OPERATIVO', 'RH'])) {
         return [];
     }
 
@@ -388,7 +398,20 @@ function canFullyManageTargetUser(mysqli $con, array $currentUser, int $targetUs
         return false;
     }
 
-    return fetchUserContext($con, $targetUserId) !== null;
+    $target = fetchUserContext($con, $targetUserId);
+    if (!$target) {
+        return false;
+    }
+
+    // RH administra toda la estructura de personas, excepto la cuenta raíz
+    // SUPER_ADMIN. Esto evita una escalación de privilegios desde RH.
+    if (hasAnyRole($currentUser, ['RH'])
+        && !hasAnyRole($currentUser, ['SUPER_ADMIN', 'ADMIN_OPERATIVO'])
+        && hasAnyRole($target, ['SUPER_ADMIN'])) {
+        return false;
+    }
+
+    return true;
 }
 
 function canSupervisorManageTargetUser(mysqli $con, array $currentUser, int $targetUserId): bool
@@ -760,7 +783,7 @@ function rewardsCurrentYear(): int
 
 function canManageRewardsCatalog(array $user): bool
 {
-    return hasAnyRole($user, ['SUPER_ADMIN', 'ADMIN_OPERATIVO']);
+    return hasAnyRole($user, ['SUPER_ADMIN', 'ADMIN_OPERATIVO', 'RH']);
 }
 
 function rewardAssignableUserIds(mysqli $con, array $user): array

@@ -167,12 +167,13 @@
     };
 
     const PAGE_ROLES = {
-        personas: ['SUPER_ADMIN', 'ADMIN_OPERATIVO', 'AUTORIZADOR'],
-        gestion_recompensas: ['SUPER_ADMIN', 'ADMIN_OPERATIVO'],
+        dashboard: ['SUPER_ADMIN', 'ADMIN_OPERATIVO', 'AUTORIZADOR', 'RH'],
+        personas: ['SUPER_ADMIN', 'ADMIN_OPERATIVO', 'AUTORIZADOR', 'RH'],
+        gestion_recompensas: ['SUPER_ADMIN', 'ADMIN_OPERATIVO', 'RH'],
         catalogo: ['SUPER_ADMIN', 'ADMIN_OPERATIVO', 'INVENTARIO'],
         requerimientos: ['SUPER_ADMIN', 'ADMIN_OPERATIVO', 'AUTORIZADOR', 'INVENTARIO', 'VENTAS'],
         autorizaciones: ['SUPER_ADMIN', 'ADMIN_OPERATIVO', 'AUTORIZADOR'],
-        jerarquia: ['SUPER_ADMIN', 'ADMIN_OPERATIVO', 'AUTORIZADOR', 'INVENTARIO', 'VENTAS'],
+        jerarquia: ['SUPER_ADMIN', 'ADMIN_OPERATIVO', 'AUTORIZADOR', 'INVENTARIO', 'VENTAS', 'RH'],
     };
 
     const guardCurrentPage = (user) => {

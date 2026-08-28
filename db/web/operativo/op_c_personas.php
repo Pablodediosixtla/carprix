@@ -170,6 +170,7 @@ $levelLabels = [
     'SUPERVISOR' => 'Supervisor',
     'RESPONSABLE_INVENTARIO' => 'Responsable de inventario',
     'GERENTE_OPERACIONES' => 'Gerente de operaciones',
+    'RH' => 'Recursos Humanos',
 ];
 $allowedLevels = array_map(
     static fn(string $code): array => ['codigo' => $code, 'nombre' => $levelLabels[$code] ?? $code],
@@ -188,6 +189,7 @@ okResponse([
         'es_super_admin' => isSuperAdmin($currentUser),
         'es_gerente' => hasAnyRole($currentUser, ['ADMIN_OPERATIVO']),
         'es_supervisor' => hasAnyRole($currentUser, ['AUTORIZADOR']) && !$isGlobalManager,
+        'es_rh' => hasAnyRole($currentUser, ['RH']),
     ],
     'pagination' => [
         'page' => $page,

@@ -986,3 +986,49 @@ button:disabled { opacity: .55; cursor: not-allowed; transform: none !important;
     .op-award-delivered { justify-items: start; }
     .op-award-delivered small { text-align: left; }
 }
+
+
+/* =========================================================
+   Dashboard analítico
+   ========================================================= */
+.op-analytics-head { align-items: end; }
+.op-analytics-filters { display: flex; align-items: end; justify-content: flex-end; gap: 10px; flex-wrap: wrap; }
+.op-analytics-filters .op-field { margin: 0; min-width: 112px; }
+.op-analytics-person-filter { min-width: 280px !important; }
+.op-analytics-metrics { grid-template-columns: repeat(6, minmax(0,1fr)); }
+.op-analytics-grid { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(260px, .7fr); gap: 18px; margin-bottom: 18px; }
+.op-chart-legend { display: flex; gap: 14px; flex-wrap: wrap; margin: -2px 0 14px; color: var(--op-muted); font-size: 10px; }
+.op-chart-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.op-chart-legend i { width: 10px; height: 10px; border-radius: 3px; }
+.op-chart-legend i.requests, .op-analytics-bars .requests { background: #ffc34d; }
+.op-chart-legend i.reserved, .op-analytics-bars .reserved { background: #a884ff; }
+.op-chart-legend i.sold, .op-analytics-bars .sold { background: #39b54a; }
+.op-analytics-chart { min-height: 200px; display: grid; grid-template-columns: repeat(12, minmax(44px, 1fr)); gap: 7px; align-items: end; overflow-x: auto; padding: 8px 2px 2px; }
+.op-analytics-month { min-width: 44px; display: grid; gap: 8px; justify-items: center; }
+.op-analytics-month small { color: var(--op-muted); font-size: 9px; font-weight: 800; }
+.op-analytics-bars { height: 150px; display: flex; align-items: end; justify-content: center; gap: 3px; }
+.op-analytics-bars span { position: relative; width: 11px; min-height: 2px; border-radius: 4px 4px 2px 2px; opacity: .92; }
+.op-analytics-bars span b { position: absolute; left: 50%; bottom: calc(100% + 4px); transform: translateX(-50%); color: var(--op-muted); font-size: 8px; font-weight: 800; }
+.op-reward-balance-list { display: grid; gap: 10px; }
+.op-reward-balance-list > div { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 12px 13px; border: 1px solid var(--op-border); border-radius: 12px; background: var(--op-surface-2); }
+.op-reward-balance-list span { color: var(--op-muted); font-size: 10px; }
+.op-reward-balance-list strong { font-size: 17px; }
+.op-reward-balance-list strong.positive, .op-positive-text { color: #68db77; }
+.op-reward-balance-list strong.negative, .op-negative-text { color: #ff8989; }
+
+@media (max-width: 1250px) {
+    .op-analytics-metrics { grid-template-columns: repeat(3, minmax(0,1fr)); }
+}
+@media (max-width: 900px) {
+    .op-analytics-head { align-items: stretch; }
+    .op-analytics-filters { width: 100%; justify-content: stretch; }
+    .op-analytics-filters .op-field { flex: 1; }
+    .op-analytics-person-filter { min-width: 220px !important; flex: 2 !important; }
+    .op-analytics-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 680px) {
+    .op-analytics-filters { display: grid; grid-template-columns: 1fr 1fr auto; }
+    .op-analytics-person-filter { grid-column: 1 / -1; min-width: 0 !important; }
+    .op-analytics-metrics { grid-template-columns: repeat(2, minmax(0,1fr)); }
+    .op-analytics-chart { grid-template-columns: repeat(12, 44px); }
+}

@@ -6,9 +6,9 @@ require_once __DIR__ . '/../auth/auth_bootstrap.php';
 bootstrapApi(false);
 $con = connectDatabase();
 $user = requireAuthenticated($con);
-requireAnyRole($user, ['SUPER_ADMIN', 'ADMIN_OPERATIVO', 'AUTORIZADOR', 'INVENTARIO', 'VENTAS']);
+requireAnyRole($user, ['SUPER_ADMIN', 'ADMIN_OPERATIVO', 'AUTORIZADOR', 'INVENTARIO', 'VENTAS', 'RH']);
 
-$isEditable = hasAnyRole($user, ['SUPER_ADMIN', 'ADMIN_OPERATIVO']);
+$isEditable = hasAnyRole($user, ['SUPER_ADMIN', 'ADMIN_OPERATIVO', 'RH']);
 $visibleIds = hierarchyVisibleUserIds($con, $user);
 $where = '1 = 1';
 $types = '';

@@ -24,9 +24,42 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 3. Cargar los tres autos destacados configurados en Operativo / Catálogo.
+    // 3. Cargar el catálogo real de marcas y los tres autos destacados.
+    loadIndexBrands();
     loadFeaturedCars();
 });
+
+async function loadIndexBrands() {
+    const select = document.getElementById('index-marca');
+    if (!select) return;
+
+    const currentValue = select.value;
+    try {
+        const response = await fetch(`db/web/get_catalogo_opciones.php?ts=${Date.now()}`, {
+            cache: 'no-store',
+            headers: { 'Accept': 'application/json' },
+        });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const result = await response.json();
+        const brands = Array.isArray(result?.data?.marcas) ? result.data.marcas : [];
+
+        select.innerHTML = '<option value="">Marca</option>' + brands
+            .map((brand) => `<option value="${escapeHtmlPublic(brand)}">${escapeHtmlPublic(brand)}</option>`)
+            .join('');
+        if (currentValue && brands.includes(currentValue)) select.value = currentValue;
+    } catch (error) {
+        console.error('Error al cargar las marcas del catálogo:', error);
+    }
+}
+
+function escapeHtmlPublic(value) {
+    return String(value ?? '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+}
 
 async function loadFeaturedCars() {
     const grid = document.getElementById('car-grid');

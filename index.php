@@ -73,18 +73,6 @@ $reseñas = [
                 <form action="views/catalogo.php" method="GET" class="search-form">
                     <select name="marca" id="index-marca">
                         <option value="">Marca</option>
-                        <option value="Audi">Audi</option>
-                        <option value="BMW">BMW</option>
-                        <option value="Chevrolet">Chevrolet</option>
-                        <option value="Ford">Ford</option>
-                        <option value="Honda">Honda</option>
-                        <option value="Hyundai">Hyundai</option>
-                        <option value="Kia">Kia</option>
-                        <option value="Mazda">Mazda</option>
-                        <option value="MG">MG</option>
-                        <option value="Nissan">Nissan</option>
-                        <option value="Toyota">Toyota</option>
-                        <option value="Volkswagen">Volkswagen</option>
                     </select>
                     <input type="number" name="presupuesto" placeholder="Presupuesto máx.">
                     <button type="submit" class="btn-search">BUSCAR</button>
@@ -143,6 +131,6 @@ $reseñas = [
     </footer>
 
     <script src="js/public-operativo-session.js?v=20260810-3"></script>
-    <script src="js/scripts.js?v=20260810-3"></script>
+    <script src="js/scripts.js?v=20260828-1"></script>
 </body>
 </html>

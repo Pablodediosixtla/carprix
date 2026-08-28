@@ -6,7 +6,7 @@ require_once __DIR__ . '/../auth/auth_bootstrap.php';
 $input = bootstrapApi(true);
 $con = connectDatabase();
 $user = requireAuthenticated($con);
-requireAnyRole($user, ['SUPER_ADMIN', 'ADMIN_OPERATIVO']);
+requireAnyRole($user, ['SUPER_ADMIN', 'ADMIN_OPERATIVO', 'RH']);
 
 $entity = strtoupper(cleanString($input['entidad'] ?? '', 30));
 $id = max(0, (int) ($input['id'] ?? 0));

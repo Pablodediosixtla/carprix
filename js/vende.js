@@ -17,6 +17,23 @@ document.addEventListener('DOMContentLoaded', () => {
     const wizard = document.getElementById('solicitud-venta');
 
     let currentStep = 1;
+    let vehicleCatalog = {
+        marcas: [],
+        modelos: [],
+        anios: [],
+        colores: [],
+        transmisiones: [],
+    };
+
+    const OTHER_VALUE = '__OTRO__';
+    const catalogBindings = {
+        'v-marca': 'v-marca-otro',
+        'v-modelo': 'v-modelo-otro',
+        'v-anio': 'v-anio-otro',
+        'v-color': 'v-color-otro',
+        'v-transmision': 'v-transmision-otro',
+        'v-tipo-factura': 'v-tipo-factura-otro',
+    };
 
     const mobileMenu = document.getElementById('mobile-menu');
     const navMenu = document.getElementById('nav-menu');
@@ -37,15 +54,98 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    const populateYears = () => {
+    const appendOptions = (select, values, placeholder, { includeOther = true } = {}) => {
+        if (!select) return;
+        const normalized = [...new Set((values || []).map((value) => String(value).trim()).filter(Boolean))];
+        select.innerHTML = `<option value="">${placeholder}</option>` + normalized
+            .map((value) => `<option value="${escapeHtml(value)}">${escapeHtml(value)}</option>`)
+            .join('') + (includeOther ? `<option value="${OTHER_VALUE}">Otro</option>` : '');
+    };
+
+    const populateFallbackYears = () => {
         const currentYear = new Date().getFullYear() + 1;
         const oldestYear = 1980;
+        const years = [];
+        for (let year = currentYear; year >= oldestYear; year -= 1) years.push(year);
+        appendOptions(yearSelect, years, 'Selecciona año');
+    };
 
-        for (let year = currentYear; year >= oldestYear; year -= 1) {
-            const option = document.createElement('option');
-            option.value = String(year);
-            option.textContent = String(year);
-            yearSelect.appendChild(option);
+    const resolveCatalogValue = (selectId) => {
+        const select = document.getElementById(selectId);
+        if (!select) return '';
+        if (select.value !== OTHER_VALUE) return select.value.trim();
+        const customId = catalogBindings[selectId];
+        return customId ? document.getElementById(customId)?.value.trim() || '' : '';
+    };
+
+    const toggleOtherField = (select) => {
+        const customId = catalogBindings[select.id];
+        if (!customId) return;
+        const custom = document.getElementById(customId);
+        if (!custom) return;
+        const useOther = select.value === OTHER_VALUE;
+        custom.hidden = !useOther;
+        custom.required = useOther;
+        if (!useOther) {
+            custom.value = '';
+            clearFieldError(custom);
+        }
+    };
+
+    const populateModels = () => {
+        const brandSelect = document.getElementById('v-marca');
+        const modelSelect = document.getElementById('v-modelo');
+        if (!brandSelect || !modelSelect) return;
+
+        const selectedBrand = resolveCatalogValue('v-marca');
+        let models = [];
+        if (brandSelect.value && brandSelect.value !== OTHER_VALUE) {
+            models = vehicleCatalog.modelos
+                .filter((item) => String(item.marca) === selectedBrand)
+                .map((item) => item.modelo);
+        }
+
+        appendOptions(
+            modelSelect,
+            models,
+            brandSelect.value === OTHER_VALUE ? 'Selecciona o captura modelo' : (brandSelect.value ? 'Selecciona modelo' : 'Selecciona primero una marca')
+        );
+        modelSelect.disabled = !brandSelect.value;
+        document.getElementById('v-modelo-otro').hidden = true;
+        document.getElementById('v-modelo-otro').required = false;
+    };
+
+    const loadVehicleCatalogOptions = async () => {
+        try {
+            const response = await fetch(`../db/web/get_catalogo_opciones.php?ts=${Date.now()}`, {
+                cache: 'no-store',
+                headers: { 'Accept': 'application/json' },
+            });
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            const result = await response.json();
+            if (!result.ok || !result.data) throw new Error(result.error || 'Catálogo no disponible');
+
+            vehicleCatalog = {
+                marcas: Array.isArray(result.data.marcas) ? result.data.marcas : [],
+                modelos: Array.isArray(result.data.modelos) ? result.data.modelos : [],
+                anios: Array.isArray(result.data.anios) ? result.data.anios : [],
+                colores: Array.isArray(result.data.colores) ? result.data.colores : [],
+                transmisiones: Array.isArray(result.data.transmisiones) ? result.data.transmisiones : [],
+            };
+
+            appendOptions(document.getElementById('v-marca'), vehicleCatalog.marcas, 'Selecciona marca');
+            appendOptions(yearSelect, vehicleCatalog.anios, 'Selecciona año');
+            appendOptions(document.getElementById('v-color'), vehicleCatalog.colores, 'Selecciona color');
+            appendOptions(document.getElementById('v-transmision'), vehicleCatalog.transmisiones, 'Selecciona transmisión');
+            populateModels();
+        } catch (error) {
+            console.error('No fue posible cargar opciones del catálogo:', error);
+            populateFallbackYears();
+            appendOptions(document.getElementById('v-marca'), [], 'Selecciona marca');
+            appendOptions(document.getElementById('v-color'), [], 'Selecciona color');
+            appendOptions(document.getElementById('v-transmision'), [], 'Selecciona transmisión');
+            populateModels();
+            setMessage('No pudimos cargar el catálogo de opciones. Puedes seleccionar “Otro” y capturar los datos manualmente.', 'info');
         }
     };
 
@@ -152,10 +252,10 @@ document.addEventListener('DOMContentLoaded', () => {
         ].filter(Boolean).join(' ');
 
         const vehicle = [
-            document.getElementById('v-marca').value.trim(),
-            document.getElementById('v-modelo').value.trim(),
+            resolveCatalogValue('v-marca'),
+            resolveCatalogValue('v-modelo'),
             document.getElementById('v-version').value.trim(),
-            document.getElementById('v-anio').value
+            resolveCatalogValue('v-anio')
         ].filter(Boolean).join(' ');
 
         const location = [
@@ -167,6 +267,8 @@ document.addEventListener('DOMContentLoaded', () => {
             ['Solicitante', fullName],
             ['Vehículo', vehicle],
             ['Kilometraje', `${Number(document.getElementById('v-km').value || 0).toLocaleString('es-MX')} km`],
+            ['Color', resolveCatalogValue('v-color')],
+            ['Transmisión', resolveCatalogValue('v-transmision')],
             ['Ubicación', location],
             ['Teléfono', document.getElementById('v-tel').value.trim()],
             ['Correo', document.getElementById('v-email').value.trim()]
@@ -241,6 +343,11 @@ document.addEventListener('DOMContentLoaded', () => {
     form.addEventListener('change', (event) => {
         clearFieldError(event.target);
 
+        if (event.target.matches('select') && catalogBindings[event.target.id]) {
+            toggleOtherField(event.target);
+            if (event.target.id === 'v-marca') populateModels();
+        }
+
         if (event.target.name === 'refrendo') {
             const hasDebt = event.target.value === 'Con adeudo';
             refrendoDebtWrap.hidden = !hasDebt;
@@ -290,15 +397,15 @@ document.addEventListener('DOMContentLoaded', () => {
         ].join(' | ');
 
         const payload = {
-            marca: document.getElementById('v-marca').value.trim(),
-            modelo: document.getElementById('v-modelo').value.trim(),
+            marca: resolveCatalogValue('v-marca'),
+            modelo: resolveCatalogValue('v-modelo'),
             version: document.getElementById('v-version').value.trim(),
-            anio: document.getElementById('v-anio').value,
+            anio: resolveCatalogValue('v-anio'),
             km: document.getElementById('v-km').value,
-            color: '',
-            transmision: '',
-            tipo_factura: '',
-            propietarios: '',
+            color: resolveCatalogValue('v-color'),
+            transmision: resolveCatalogValue('v-transmision'),
+            tipo_factura: resolveCatalogValue('v-tipo-factura'),
+            propietarios: document.getElementById('v-propietarios').value,
             nombre: [firstName, paternalSurname, maternalSurname].filter(Boolean).join(' '),
             tel: document.getElementById('v-tel').value.trim(),
             comentarios: comments
@@ -328,6 +435,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
             setMessage(result.mensaje || 'Solicitud registrada correctamente. Un asesor te contactará.', 'success');
             form.reset();
+            Object.values(catalogBindings).forEach((customId) => {
+                const custom = document.getElementById(customId);
+                if (custom) {
+                    custom.hidden = true;
+                    custom.required = false;
+                    custom.value = '';
+                }
+            });
+            populateModels();
             refrendoDebtWrap.hidden = true;
             refrendoDebtInput.required = false;
             showStep(1);
@@ -340,6 +456,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    populateYears();
+    loadVehicleCatalogOptions();
     showStep(1);
 });
