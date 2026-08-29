@@ -1008,8 +1008,8 @@ button:disabled { opacity: .55; cursor: not-allowed; transform: none !important;
 .op-analytics-chart-inner { position:relative; min-width:660px; }
 .op-analytics-month-grid { display:grid; grid-template-columns:repeat(12,minmax(44px,1fr)); gap:7px; align-items:end; }
 .op-analytics-goal-overlay { position:absolute; z-index:4; top:5px; left:0; width:100%; height:150px; overflow:visible; pointer-events:none; }
-.op-analytics-goal-line { fill:none; stroke:#ff6f91; stroke-width:4; stroke-linecap:round; stroke-linejoin:round; vector-effect:non-scaling-stroke; filter:drop-shadow(0 2px 3px rgba(0,0,0,.32)); }
-.op-analytics-goal-value { fill:#ff9ab0; font-size:20px; font-weight:900; paint-order:stroke; stroke:var(--op-surface); stroke-width:5px; vector-effect:non-scaling-stroke; }
+.op-analytics-goal-line { fill:none; stroke:#ff6f91; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; vector-effect:non-scaling-stroke; filter:drop-shadow(0 2px 3px rgba(0,0,0,.32)); }
+.op-analytics-goal-value { fill:#ff9ab0; font-size:12px; font-weight:900; paint-order:stroke; stroke:var(--op-surface); stroke-width:3px; vector-effect:non-scaling-stroke; }
 .op-analytics-month { min-width: 44px; display: grid; gap: 8px; justify-items: center; }
 .op-analytics-month small { color: var(--op-muted); font-size: 9px; font-weight: 800; }
 .op-analytics-bars { height: 150px; display: flex; align-items: end; justify-content: center; gap: 3px; }
