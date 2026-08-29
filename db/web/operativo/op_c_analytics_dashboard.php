@@ -94,7 +94,7 @@ function analyticsIntersectScope(array $candidateIds, ?array $allowedIds): array
 
 function analyticsPeople(mysqli $con, ?array $scopeIds): array
 {
-    $where = '';
+    $scope = '';
     $types = '';
     $params = [];
 
@@ -103,11 +103,17 @@ function analyticsPeople(mysqli $con, ?array $scopeIds): array
             return [];
         }
         $placeholders = implode(',', array_fill(0, count($scopeIds), '?'));
-        $where = "WHERE u.id IN ({$placeholders})";
+        $scope = " AND u.id IN ({$placeholders})";
         $types = str_repeat('i', count($scopeIds));
         $params = array_map('intval', $scopeIds);
     }
 
+    /*
+     * El Dashboard comercial solo muestra perfiles que participan en la
+     * operación de ventas. SUPER_ADMIN, INVENTARIO (Catálogo) y RH pueden
+     * consultar el tablero según sus permisos, pero nunca se consideran
+     * personas medibles ni forman parte de los indicadores/ranking.
+     */
     $stmt = $con->prepare(
         "SELECT
             u.id,
@@ -117,7 +123,27 @@ function analyticsPeople(mysqli $con, ?array $scopeIds): array
             u.apellido_materno,
             u.estatus
          FROM operativo_usuario u
-         {$where}
+         WHERE u.estatus = 'Activo'
+           AND EXISTS (
+                SELECT 1
+                FROM operativo_usuario_rol ur_sales
+                INNER JOIN operativo_rol r_sales
+                    ON r_sales.id = ur_sales.rol_id
+                   AND r_sales.activo = 1
+                WHERE ur_sales.usuario_id = u.id
+                  AND ur_sales.activo = 1
+                  AND r_sales.codigo IN ('VENTAS', 'AUTORIZADOR', 'ADMIN_OPERATIVO')
+           )
+           AND NOT EXISTS (
+                SELECT 1
+                FROM operativo_usuario_rol ur_excluded
+                INNER JOIN operativo_rol r_excluded
+                    ON r_excluded.id = ur_excluded.rol_id
+                   AND r_excluded.activo = 1
+                WHERE ur_excluded.usuario_id = u.id
+                  AND ur_excluded.activo = 1
+                  AND r_excluded.codigo IN ('SUPER_ADMIN', 'INVENTARIO', 'RH')
+           ){$scope}
          ORDER BY u.apellido_paterno, u.apellido_materno, u.nombre, u.id"
     );
     if (!$stmt) {
@@ -184,7 +210,17 @@ function analyticsTeams(mysqli $con, ?array $baseScopeIds): array
                AND r.codigo IN ('ADMIN_OPERATIVO', 'AUTORIZADOR')
             LEFT JOIN operativo_usuario_jerarquia j
                 ON j.supervisor_id = u.id
-            WHERE u.estatus = 'Activo'{$whereScope}
+            WHERE u.estatus = 'Activo'
+              AND NOT EXISTS (
+                    SELECT 1
+                    FROM operativo_usuario_rol ur_excluded
+                    INNER JOIN operativo_rol r_excluded
+                        ON r_excluded.id = ur_excluded.rol_id
+                       AND r_excluded.activo = 1
+                    WHERE ur_excluded.usuario_id = u.id
+                      AND ur_excluded.activo = 1
+                      AND r_excluded.codigo IN ('SUPER_ADMIN', 'INVENTARIO', 'RH')
+              ){$whereScope}
             GROUP BY
                 u.id, u.username, u.nombre, u.apellido_paterno, u.apellido_materno
             ORDER BY
@@ -251,7 +287,10 @@ if ($selectedUserId > 0 && !in_array($selectedUserId, $peopleIds, true)) {
     errorResponse('La persona seleccionada no pertenece al equipo o alcance actual.', 403, 'ANALYTICS_SCOPE_FORBIDDEN');
 }
 
-$targetIds = $selectedUserId > 0 ? [$selectedUserId] : $teamScopeIds;
+// Los indicadores comerciales se calculan únicamente con las personas
+// elegibles del tablero. Así SUPER_ADMIN, INVENTARIO/Catálogo y RH no
+// aparecen ni aportan operaciones, metas o recompensas al resumen comercial.
+$targetIds = $selectedUserId > 0 ? [$selectedUserId] : $peopleIds;
 
 function analyticsCountByDate(
     mysqli $con,
