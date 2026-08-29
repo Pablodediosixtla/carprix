@@ -231,9 +231,21 @@
     chart.addEventListener('click', async (event) => {
         const monthButton = event.target.closest('[data-month]');
         if (!monthButton) return;
-        selectSingleMonth(Number(monthButton.dataset.month));
+
+        const month = Number(monthButton.dataset.month);
+        const removeSelection = selectedMonths.size === 1 && selectedMonths.has(month);
+
+        if (removeSelection) {
+            selectAllMonths();
+        } else {
+            selectSingleMonth(month);
+        }
+
         await load();
-        detailPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+        if (!removeSelection && !detailPanel.hidden) {
+            detailPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
     });
 
     document.getElementById('analytics-clear-months').addEventListener('click', async () => {

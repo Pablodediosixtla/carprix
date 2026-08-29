@@ -214,6 +214,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const priceFmt = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(auto.precio);
             const kmFmt = new Intl.NumberFormat('es-MX').format(auto.kilometraje) + ' km';
             
+            const idBadgeHtml = `<span class="id-badge">#${Number(auto.id)}</span>`;
             const tipoBadgeHtml = auto.tipo ? `<span class="type-badge">${auto.tipo}</span>` : '';
             
             let statusOverlayHtml = '';
@@ -228,6 +229,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div class="car-img">
                         <img src="${auto.img_principal}" alt="${auto.marca}">
                         ${statusOverlayHtml}
+                        ${idBadgeHtml}
                         <span class="year-badge">${auto.anio}</span>
                         ${tipoBadgeHtml}
                     </div>

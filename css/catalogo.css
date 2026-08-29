@@ -87,6 +87,7 @@
 .car-img { position: relative; overflow: hidden; }
 .car-img img { width: 100%; display: block; }
 .year-badge { position: absolute; bottom: 10px; left: 10px; background: var(--green-accent); color: #000; padding: 5px 10px; border-radius: 5px; font-weight: 900; font-size: 14px; z-index: 10; }
+.id-badge { position: absolute; top: 10px; left: 10px; background: rgba(17, 17, 17, 0.85); color: var(--white); border: 1px solid var(--green-accent); padding: 4px 10px; border-radius: 6px; font-weight: 800; font-size: 11px; letter-spacing: .04em; backdrop-filter: blur(2px); z-index: 10; }
 .type-badge { position: absolute; top: 10px; right: 10px; background: rgba(17, 17, 17, 0.85); color: var(--white); border: 1px solid var(--green-accent); padding: 4px 10px; border-radius: 6px; font-weight: 700; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; backdrop-filter: blur(2px); z-index: 10; }
 
 /* CAPA OSCURA PARA VENDIDO / APARTADO */
@@ -162,6 +163,7 @@
     .layout-list .status-overlay { border-radius: 15px 0 0 15px; } 
     
     .layout-list .year-badge { font-size: 10px; padding: 3px 8px; bottom: 8px; left: 8px; }
+    .layout-list .id-badge { font-size: 9px; padding: 2px 6px; top: 8px; left: 8px; }
     .layout-list .type-badge { font-size: 9px; padding: 2px 6px; top: 8px; right: 8px; }
     .layout-list .status-badge { font-size: 0.8rem; padding: 5px 10px; transform: rotate(-10deg); border-width: 1px; }
     
@@ -173,7 +175,8 @@
 }
 
 /* Ajustes de contraste y contención - revisión 20260803-3 */
-html[data-theme="light"] .type-badge {
+html[data-theme="light"] .type-badge,
+html[data-theme="light"] .id-badge {
     background: #1a1a1a !important;
     color: #ffffff !important;
     border-color: var(--green-accent) !important;

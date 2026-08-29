@@ -12,7 +12,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../css/styles.css?v=20260803-3">
-    <link rel="stylesheet" href="../css/catalogo.css?v=20260821-2">
+    <link rel="stylesheet" href="../css/catalogo.css?v=20260829-1">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body class="bg-dark">
@@ -159,6 +159,6 @@
     </footer>
 
     <script src="../js/public-operativo-session.js?v=20260810-3"></script>
-    <script src="../js/catalogo.js?v=20260828-1"></script>
+    <script src="../js/catalogo.js?v=20260829-1"></script>
 </body>
 </html>

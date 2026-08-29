@@ -1098,6 +1098,27 @@ button:disabled { opacity: .55; cursor: not-allowed; transform: none !important;
 .op-multi-select-option:hover { background: rgba(57,181,74,.08); }
 .op-multi-select-option.all { font-weight: 900; color: var(--op-green); }
 .op-multi-select-option input { accent-color: var(--op-green); }
+/* Los checkboxes viven dentro de .op-field; anulamos el estilo global de inputs
+   para que el selector múltiple de meses conserve el tamaño nativo. */
+.op-analytics-month-field .op-multi-select-option input[type="checkbox"] {
+    -webkit-appearance: checkbox;
+    appearance: auto;
+    width: 16px;
+    height: 16px;
+    min-width: 16px;
+    min-height: 16px;
+    flex: 0 0 16px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 3px;
+    background: transparent;
+    box-shadow: none;
+}
+.op-analytics-month-field .op-multi-select-option > span {
+    flex: 1 1 auto;
+    min-width: 0;
+}
 .op-multi-select-divider { height: 1px; background: var(--op-border); margin: 2px 0 4px; }
 .op-multi-select-menu .op-primary-button { width: 100%; margin-top: 6px; justify-content: center; }
 
