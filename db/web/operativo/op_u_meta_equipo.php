@@ -36,7 +36,7 @@ $leaderId = (int) $resolved['lider_id'];
 $people = commercialGoalEligiblePeople($con, $resolved['scope_ids'], $leaderId);
 if ($people === []) {
     $con->close();
-    errorResponse('El equipo seleccionado no tiene personas activas con rol VENTAS para prorratear la meta.', 422, 'GOAL_TEAM_EMPTY');
+    errorResponse('El equipo seleccionado no tiene personas comerciales elegibles para prorratear la meta.', 422, 'GOAL_TEAM_EMPTY');
 }
 
 $count = count($people);

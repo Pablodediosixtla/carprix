@@ -59,18 +59,41 @@
         const requests = monthly?.solicitudes || [];
         const reserved = monthly?.apartados || [];
         const sold = monthly?.vendidos || [];
-        const max = Math.max(1, ...requests, ...reserved, ...sold);
+        const reserveGoals = monthly?.meta_apartados || [];
+        const max = Math.max(1, ...requests, ...reserved, ...sold, ...reserveGoals);
         const filtered = selectedMonths.size < 12;
-        chart.innerHTML = monthsShort.map((month, index) => {
+        const chartHeight = 150;
+        const topPad = 8;
+        const usableHeight = 132;
+        const goalY = (value) => chartHeight - topPad - ((Number(value || 0) / max) * usableHeight);
+        const goalPoints = monthsShort.map((_, index) => `${50 + (index * 100)},${goalY(reserveGoals[index]).toFixed(2)}`).join(' ');
+        const goalLabels = monthsShort.map((_, index) => {
+            const value = Number(reserveGoals[index] || 0);
+            const x = 50 + (index * 100);
+            const y = Math.max(10, goalY(value) - 7);
+            return value > 0
+                ? `<text x="${x}" y="${y.toFixed(2)}" text-anchor="middle" class="op-analytics-goal-value">${value}</text>`
+                : '';
+        }).join('');
+
+        const monthButtons = monthsShort.map((month, index) => {
             const monthNumber = index + 1;
             const r = Number(requests[index] || 0), a = Number(reserved[index] || 0), v = Number(sold[index] || 0);
             const selected = selectedMonths.has(monthNumber);
-            const height = (value) => value > 0 ? Math.max(8, Math.round((value / max) * 132)) : 2;
+            const height = (value) => value > 0 ? Math.max(8, Math.round((value / max) * usableHeight)) : 2;
             return `<button class="op-analytics-month${selected ? ' selected' : ''}${filtered && !selected ? ' filtered-out' : ''}" type="button" data-month="${monthNumber}" aria-pressed="${selected ? 'true' : 'false'}" title="Filtrar por ${monthsLong[index]}">
-                <div class="op-analytics-bars" title="${month}: ${r} solicitudes, ${a} apartados, ${v} vendidos">
+                <div class="op-analytics-bars" title="${month}: ${r} solicitudes, ${a} apartados, ${v} vendidos, meta ${Number(reserveGoals[index] || 0)}">
                     <span class="requests" style="height:${height(r)}px"><b>${r || ''}</b></span><span class="reserved" style="height:${height(a)}px"><b>${a || ''}</b></span><span class="sold" style="height:${height(v)}px"><b>${v || ''}</b></span>
                 </div><small>${month}</small></button>`;
         }).join('');
+
+        chart.innerHTML = `<div class="op-analytics-chart-inner">
+            <svg class="op-analytics-goal-overlay" viewBox="0 0 1200 ${chartHeight}" preserveAspectRatio="none" aria-hidden="true">
+                <polyline points="${goalPoints}" class="op-analytics-goal-line"></polyline>
+                ${goalLabels}
+            </svg>
+            <div class="op-analytics-month-grid">${monthButtons}</div>
+        </div>`;
     };
 
     const sortValue = (item, key) => {

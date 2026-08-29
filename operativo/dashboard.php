@@ -54,7 +54,7 @@ operativoPageStart('Dashboard', 'dashboard');
 <section class="op-analytics-grid">
     <article class="op-panel">
         <div class="op-panel-header"><div><small>ACTIVIDAD DEL PERÍODO</small><h3>Actividad comercial por mes</h3></div><span class="op-muted" id="analytics-scope-label">—</span></div>
-        <div class="op-chart-legend" aria-hidden="true"><span><i class="requests"></i>Solicitudes</span><span><i class="reserved"></i>Apartados</span><span><i class="sold"></i>Vendidos</span></div>
+        <div class="op-chart-legend" aria-hidden="true"><span><i class="requests"></i>Solicitudes</span><span><i class="reserved"></i>Apartados</span><span><i class="sold"></i>Vendidos</span><span><i class="reserve-goal-line"></i>Meta de reservas</span></div>
         <p class="op-analytics-chart-help"><i class="fa-solid fa-arrow-pointer"></i> Haz clic en un mes para filtrar el dashboard y consultar su detalle.</p>
         <div class="op-analytics-chart" id="analytics-chart"><div class="op-loading">Cargando indicadores...</div></div>
     </article>

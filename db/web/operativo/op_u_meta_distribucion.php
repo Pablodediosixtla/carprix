@@ -31,7 +31,7 @@ $eligibleSet = array_fill_keys($eligibleIds, true);
 
 if ($eligibleIds === []) {
     $con->close();
-    errorResponse('El equipo no tiene personas activas con rol VENTAS.', 422, 'GOAL_TEAM_EMPTY');
+    errorResponse('El equipo no tiene personas comerciales elegibles.', 422, 'GOAL_TEAM_EMPTY');
 }
 
 $new = [];

@@ -396,6 +396,55 @@ function analyticsMonthlyCounts(mysqli $con, string $dateColumn, int $year, arra
     return $values;
 }
 
+
+/**
+ * Meta mensual de reservas para el alcance seleccionado.
+ * Devuelve siempre los 12 meses; los meses fuera del filtro actual quedan en 0
+ * para mantener la misma escala visual que la actividad del período.
+ */
+function analyticsMonthlyReserveGoals(mysqli $con, int $year, array $months, ?array $ids): array
+{
+    $types = 'i';
+    $params = [$year];
+    $monthScope = '';
+
+    if (count($months) < 12) {
+        if ($months === []) {
+            return array_fill(0, 12, 0);
+        }
+        $placeholders = implode(',', array_fill(0, count($months), '?'));
+        $monthScope = " AND mes IN ({$placeholders})";
+        $types .= str_repeat('i', count($months));
+        array_push($params, ...array_map('intval', $months));
+    }
+
+    $userScope = analyticsScopeClause($ids, 'usuario_id', $types, $params);
+    $stmt = $con->prepare(
+        "SELECT mes, COALESCE(SUM(meta), 0) AS total
+         FROM operativo_meta_usuario
+         WHERE tipo = 'RESERVA'
+           AND anio = ?
+           AND mes BETWEEN 1 AND 12{$monthScope}{$userScope}
+         GROUP BY mes"
+    );
+    if (!$stmt) {
+        databaseError($con);
+    }
+    bindDynamicParams($stmt, $types, $params);
+    $stmt->execute();
+    $rows = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    $stmt->close();
+
+    $values = array_fill(0, 12, 0);
+    foreach ($rows as $row) {
+        $month = (int) ($row['mes'] ?? 0);
+        if ($month >= 1 && $month <= 12) {
+            $values[$month - 1] = (int) ($row['total'] ?? 0);
+        }
+    }
+    return $values;
+}
+
 function analyticsCountsByUser(
     mysqli $con,
     string $dateColumn,
@@ -694,6 +743,7 @@ $monthly = [
     'solicitudes' => analyticsMonthlyCounts($con, 'fecha_solicitud', $year, $months, $targetIds),
     'apartados' => analyticsMonthlyCounts($con, 'fecha_apartado', $year, $months, $targetIds),
     'vendidos' => analyticsMonthlyCounts($con, 'fecha_venta', $year, $months, $targetIds),
+    'meta_apartados' => analyticsMonthlyReserveGoals($con, $year, $months, $targetIds),
 ];
 
 $ranking = analyticsRanking($con, $year, $months, $targetIds);

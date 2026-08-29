@@ -44,7 +44,7 @@
 
         const people = data.personas || [];
         if (!people.length) {
-            body.innerHTML = '<tr><td colspan="3"><div class="op-empty"><div><i class="fa-solid fa-bullseye"></i>Este equipo no tiene personas activas con rol VENTAS. Sus metas permanecen en 0.</div></div></td></tr>';
+            body.innerHTML = '<tr><td colspan="3"><div class="op-empty"><div><i class="fa-solid fa-bullseye"></i>Este equipo no tiene personas comerciales elegibles. Sus metas permanecen en 0.</div></div></td></tr>';
             saveButton.disabled = true;
             return;
         }

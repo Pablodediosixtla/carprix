@@ -1042,7 +1042,15 @@ function commercialGoalResolveTeam(mysqli $con, array $user, int $teamId): array
     ];
 }
 
-/** Personas activas con rol VENTAS dentro del alcance. */
+/**
+ * Personas comerciales elegibles para metas dentro del alcance.
+ * Incluye VENTAS y GERENTE DE OPERACIONES (ADMIN_OPERATIVO).
+ * SUPER_ADMIN, INVENTARIO y RH nunca reciben metas comerciales.
+ *
+ * Cuando el líder del equipo es un Supervisor se excluye al propio líder para
+ * conservar la distribución descendente. Si el líder es Gerente Operativo se
+ * mantiene dentro del equipo porque sus indicadores también tienen meta.
+ */
 function commercialGoalEligiblePeople(mysqli $con, ?array $scopeIds, int $leaderId = 0): array
 {
     $whereScope = '';
@@ -1059,7 +1067,26 @@ function commercialGoalEligiblePeople(mysqli $con, ?array $scopeIds, int $leader
         array_push($params, ...array_map('intval', $scopeIds));
     }
 
+    $excludeLeader = false;
     if ($leaderId > 0) {
+        $stmtLeader = $con->prepare(
+            "SELECT COUNT(*) AS total
+             FROM operativo_usuario_rol ur
+             INNER JOIN operativo_rol r ON r.id = ur.rol_id AND r.activo = 1
+             WHERE ur.usuario_id = ?
+               AND ur.activo = 1
+               AND r.codigo = 'ADMIN_OPERATIVO'"
+        );
+        if (!$stmtLeader) {
+            databaseError($con);
+        }
+        $stmtLeader->bind_param('i', $leaderId);
+        $stmtLeader->execute();
+        $excludeLeader = (int) ($stmtLeader->get_result()->fetch_assoc()['total'] ?? 0) === 0;
+        $stmtLeader->close();
+    }
+
+    if ($leaderId > 0 && $excludeLeader) {
         $whereScope .= ' AND u.id <> ?';
         $types .= 'i';
         $params[] = $leaderId;
@@ -1069,9 +1096,27 @@ function commercialGoalEligiblePeople(mysqli $con, ?array $scopeIds, int $leader
         "SELECT DISTINCT
             u.id, u.username, u.nombre, u.apellido_paterno, u.apellido_materno, u.estatus
          FROM operativo_usuario u
-         INNER JOIN operativo_usuario_rol ur ON ur.usuario_id = u.id AND ur.activo = 1
-         INNER JOIN operativo_rol r ON r.id = ur.rol_id AND r.activo = 1 AND r.codigo = 'VENTAS'
-         WHERE u.estatus = 'Activo'{$whereScope}
+         WHERE u.estatus = 'Activo'
+           AND EXISTS (
+                SELECT 1
+                FROM operativo_usuario_rol ur_comercial
+                INNER JOIN operativo_rol r_comercial
+                    ON r_comercial.id = ur_comercial.rol_id
+                   AND r_comercial.activo = 1
+                WHERE ur_comercial.usuario_id = u.id
+                  AND ur_comercial.activo = 1
+                  AND r_comercial.codigo IN ('VENTAS', 'ADMIN_OPERATIVO')
+           )
+           AND NOT EXISTS (
+                SELECT 1
+                FROM operativo_usuario_rol ur_excluded
+                INNER JOIN operativo_rol r_excluded
+                    ON r_excluded.id = ur_excluded.rol_id
+                   AND r_excluded.activo = 1
+                WHERE ur_excluded.usuario_id = u.id
+                  AND ur_excluded.activo = 1
+                  AND r_excluded.codigo IN ('SUPER_ADMIN', 'INVENTARIO', 'RH')
+           ){$whereScope}
          ORDER BY u.apellido_paterno, u.apellido_materno, u.nombre, u.id"
     );
     if (!$stmt) {

@@ -27,7 +27,7 @@ operativoPageStart('Metas', 'metas');
         <div><small>PRORRATEO AUTOMÁTICO</small><h3>Meta total del equipo</h3></div>
         <span class="op-muted" id="goals-team-label">—</span>
     </div>
-    <p class="op-panel-description">La meta indicada se distribuye automáticamente, en números enteros, entre las personas activas con rol VENTAS dentro del equipo seleccionado.</p>
+    <p class="op-panel-description">La meta indicada se distribuye automáticamente, en números enteros, entre las personas comerciales elegibles del equipo seleccionado. La Gerencia Operativa también puede tener meta propia.</p>
     <div class="op-goal-total-grid">
         <div class="op-goal-total-card">
             <label class="op-field"><span>Meta de reservas del mes</span><input id="goals-prorate-reserve" type="number" min="0" step="1" value="0"></label>
