@@ -908,3 +908,284 @@ function grantAutomaticReward(
     }
     $insert->close();
 }
+
+
+/* =========================================================
+ * Metas comerciales
+ * ========================================================= */
+function canManageCommercialGoals(array $user): bool
+{
+    return hasAnyRole($user, ['SUPER_ADMIN', 'ADMIN_OPERATIVO', 'AUTORIZADOR']);
+}
+
+function canSetCommercialGoalTotals(array $user): bool
+{
+    return hasAnyRole($user, ['SUPER_ADMIN', 'ADMIN_OPERATIVO']);
+}
+
+/**
+ * Equipos jerárquicos disponibles para gestión de metas.
+ * Se incluyen aunque todavía no tengan requerimientos ni movimientos.
+ */
+function commercialGoalTeamOptions(mysqli $con, array $user): array
+{
+    $isGlobal = canSetCommercialGoalTotals($user);
+    $scopeIds = $isGlobal ? null : hierarchyDescendantIds($con, (int) ($user['id'] ?? 0));
+    $whereScope = '';
+    $types = '';
+    $params = [];
+
+    if ($scopeIds !== null) {
+        if ($scopeIds === []) {
+            return [];
+        }
+        $placeholders = implode(',', array_fill(0, count($scopeIds), '?'));
+        $whereScope = " AND u.id IN ({$placeholders})";
+        $types = str_repeat('i', count($scopeIds));
+        $params = array_map('intval', $scopeIds);
+    }
+
+    $sql = "SELECT
+                u.id,
+                u.username,
+                u.nombre,
+                u.apellido_paterno,
+                u.apellido_materno,
+                GROUP_CONCAT(DISTINCT r.codigo ORDER BY r.codigo SEPARATOR ',') AS roles,
+                COUNT(DISTINCT CASE WHEN j.activo = 1 THEN j.usuario_id END) AS subordinados_directos
+            FROM operativo_usuario u
+            INNER JOIN operativo_usuario_rol ur
+                ON ur.usuario_id = u.id
+               AND ur.activo = 1
+            INNER JOIN operativo_rol r
+                ON r.id = ur.rol_id
+               AND r.activo = 1
+               AND r.codigo IN ('ADMIN_OPERATIVO', 'AUTORIZADOR')
+            LEFT JOIN operativo_usuario_jerarquia j
+                ON j.supervisor_id = u.id
+            WHERE u.estatus = 'Activo'{$whereScope}
+            GROUP BY u.id, u.username, u.nombre, u.apellido_paterno, u.apellido_materno
+            ORDER BY
+                CASE WHEN FIND_IN_SET('ADMIN_OPERATIVO', GROUP_CONCAT(DISTINCT r.codigo)) > 0 THEN 0 ELSE 1 END,
+                u.apellido_paterno, u.apellido_materno, u.nombre, u.id";
+
+    $stmt = $con->prepare($sql);
+    if (!$stmt) {
+        databaseError($con);
+    }
+    if ($types !== '') {
+        bindDynamicParams($stmt, $types, $params);
+    }
+    $stmt->execute();
+    $rows = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    $stmt->close();
+
+    foreach ($rows as &$row) {
+        $row['id'] = (int) $row['id'];
+        $row['subordinados_directos'] = (int) $row['subordinados_directos'];
+        $roles = array_values(array_filter(array_map('trim', explode(',', (string) ($row['roles'] ?? '')))));
+        $row['roles'] = $roles;
+        $row['tipo'] = in_array('ADMIN_OPERATIVO', $roles, true) ? 'Gerencia' : 'Supervisor';
+        $row['nombre_completo'] = trim(implode(' ', array_filter([
+            $row['nombre'] ?? '',
+            $row['apellido_paterno'] ?? '',
+            $row['apellido_materno'] ?? '',
+        ])));
+        $row['etiqueta'] = $row['tipo'] . ' · ' . ($row['nombre_completo'] !== '' ? $row['nombre_completo'] : $row['username']);
+    }
+    unset($row);
+
+    return $rows;
+}
+
+/**
+ * Resuelve el alcance de un equipo. Para ADMIN/SUPER_ADMIN equipo_id=0
+ * representa toda la organización. Para un supervisor, equipo_id=0 se
+ * interpreta como su propio equipo.
+ */
+function commercialGoalResolveTeam(mysqli $con, array $user, int $teamId): array
+{
+    $currentId = (int) ($user['id'] ?? 0);
+    $isGlobal = canSetCommercialGoalTotals($user);
+
+    if ($teamId <= 0 && $isGlobal) {
+        return [
+            'equipo_id' => 0,
+            'lider_id' => 0,
+            'scope_ids' => null,
+            'etiqueta' => 'Organización completa',
+        ];
+    }
+
+    if ($teamId <= 0) {
+        $teamId = $currentId;
+    }
+
+    $options = commercialGoalTeamOptions($con, $user);
+    $selected = null;
+    foreach ($options as $option) {
+        if ((int) $option['id'] === $teamId) {
+            $selected = $option;
+            break;
+        }
+    }
+
+    if ($selected === null) {
+        errorResponse('El equipo seleccionado no pertenece a tu alcance.', 403, 'GOAL_TEAM_FORBIDDEN');
+    }
+
+    return [
+        'equipo_id' => $teamId,
+        'lider_id' => $teamId,
+        'scope_ids' => hierarchyDescendantIds($con, $teamId),
+        'etiqueta' => (string) $selected['etiqueta'],
+    ];
+}
+
+/** Personas activas con rol VENTAS dentro del alcance. */
+function commercialGoalEligiblePeople(mysqli $con, ?array $scopeIds, int $leaderId = 0): array
+{
+    $whereScope = '';
+    $types = '';
+    $params = [];
+
+    if ($scopeIds !== null) {
+        if ($scopeIds === []) {
+            return [];
+        }
+        $placeholders = implode(',', array_fill(0, count($scopeIds), '?'));
+        $whereScope .= " AND u.id IN ({$placeholders})";
+        $types .= str_repeat('i', count($scopeIds));
+        array_push($params, ...array_map('intval', $scopeIds));
+    }
+
+    if ($leaderId > 0) {
+        $whereScope .= ' AND u.id <> ?';
+        $types .= 'i';
+        $params[] = $leaderId;
+    }
+
+    $stmt = $con->prepare(
+        "SELECT DISTINCT
+            u.id, u.username, u.nombre, u.apellido_paterno, u.apellido_materno, u.estatus
+         FROM operativo_usuario u
+         INNER JOIN operativo_usuario_rol ur ON ur.usuario_id = u.id AND ur.activo = 1
+         INNER JOIN operativo_rol r ON r.id = ur.rol_id AND r.activo = 1 AND r.codigo = 'VENTAS'
+         WHERE u.estatus = 'Activo'{$whereScope}
+         ORDER BY u.apellido_paterno, u.apellido_materno, u.nombre, u.id"
+    );
+    if (!$stmt) {
+        databaseError($con);
+    }
+    if ($types !== '') {
+        bindDynamicParams($stmt, $types, $params);
+    }
+    $stmt->execute();
+    $rows = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    $stmt->close();
+
+    foreach ($rows as &$row) {
+        $row['id'] = (int) $row['id'];
+        $row['nombre_completo'] = trim(implode(' ', array_filter([
+            $row['nombre'] ?? '',
+            $row['apellido_paterno'] ?? '',
+            $row['apellido_materno'] ?? '',
+        ])));
+    }
+    unset($row);
+
+    return $rows;
+}
+
+function commercialGoalSaveValue(
+    mysqli $con,
+    int $userId,
+    string $type,
+    int $year,
+    int $month,
+    int $goal,
+    int $teamLeaderId,
+    string $origin,
+    int $actorId,
+    string $action,
+    string $comment = ''
+): void {
+    $type = strtoupper($type);
+    if (!in_array($type, ['RESERVA', 'VENTA'], true)) {
+        throw new InvalidArgumentException('Tipo de meta no válido.');
+    }
+    $month = $type === 'VENTA' ? 0 : $month;
+    $goal = max(0, $goal);
+
+    $previous = 0;
+    $check = $con->prepare(
+        "SELECT meta
+         FROM operativo_meta_usuario
+         WHERE usuario_id = ? AND tipo = ? AND anio = ? AND mes = ?
+         LIMIT 1"
+    );
+    if (!$check) {
+        databaseError($con);
+    }
+    $check->bind_param('isii', $userId, $type, $year, $month);
+    $check->execute();
+    $row = $check->get_result()->fetch_assoc();
+    $check->close();
+    if ($row) {
+        $previous = (int) $row['meta'];
+    }
+
+    $stmt = $con->prepare(
+        "INSERT INTO operativo_meta_usuario
+            (usuario_id, tipo, anio, mes, meta, equipo_lider_id, origen, asignada_por)
+         VALUES (?, ?, ?, ?, ?, NULLIF(?, 0), ?, ?)
+         ON DUPLICATE KEY UPDATE
+            meta = VALUES(meta),
+            equipo_lider_id = VALUES(equipo_lider_id),
+            origen = VALUES(origen),
+            asignada_por = VALUES(asignada_por),
+            actualizado_en = CURRENT_TIMESTAMP"
+    );
+    if (!$stmt) {
+        databaseError($con);
+    }
+    $stmt->bind_param('isiiiisi', $userId, $type, $year, $month, $goal, $teamLeaderId, $origin, $actorId);
+    if (!$stmt->execute()) {
+        $stmt->close();
+        databaseError($con);
+    }
+    $stmt->close();
+
+    if ($previous === $goal) {
+        return;
+    }
+
+    $comment = cleanString($comment, 500);
+    $history = $con->prepare(
+        "INSERT INTO operativo_meta_historial
+            (usuario_id, tipo, anio, mes, meta_anterior, meta_nueva,
+             equipo_lider_id, accion, ejecutado_por, comentario)
+         VALUES (?, ?, ?, ?, ?, ?, NULLIF(?, 0), ?, ?, NULLIF(?, ''))"
+    );
+    if (!$history) {
+        databaseError($con);
+    }
+    $history->bind_param(
+        'isiiiiisis',
+        $userId,
+        $type,
+        $year,
+        $month,
+        $previous,
+        $goal,
+        $teamLeaderId,
+        $action,
+        $actorId,
+        $comment
+    );
+    if (!$history->execute()) {
+        $history->close();
+        databaseError($con);
+    }
+    $history->close();
+}

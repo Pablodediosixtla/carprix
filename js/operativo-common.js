@@ -168,6 +168,7 @@
 
     const PAGE_ROLES = {
         dashboard: ['SUPER_ADMIN', 'ADMIN_OPERATIVO', 'AUTORIZADOR', 'RH'],
+        metas: ['SUPER_ADMIN', 'ADMIN_OPERATIVO', 'AUTORIZADOR'],
         personas: ['SUPER_ADMIN', 'ADMIN_OPERATIVO', 'AUTORIZADOR', 'RH'],
         gestion_recompensas: ['SUPER_ADMIN', 'ADMIN_OPERATIVO', 'RH'],
         catalogo: ['SUPER_ADMIN', 'ADMIN_OPERATIVO', 'INVENTARIO'],

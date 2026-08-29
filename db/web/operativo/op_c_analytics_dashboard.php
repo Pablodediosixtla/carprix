@@ -146,8 +146,9 @@ function analyticsPeople(mysqli $con, ?array $scopeIds): array
 /**
  * Equipos disponibles para el dashboard.
  * Un equipo es una rama jerárquica encabezada por un Gerente de Operaciones
- * o un Supervisor que tenga al menos un subordinado directo activo en la
- * estructura jerárquica.
+ * o un Supervisor activo dentro del alcance. Se incluyen aunque todavía no
+ * tengan subordinados, requerimientos o movimientos para que el tablero pueda
+ * mostrar sus indicadores en 0.
  */
 function analyticsTeams(mysqli $con, ?array $baseScopeIds): array
 {
@@ -172,7 +173,7 @@ function analyticsTeams(mysqli $con, ?array $baseScopeIds): array
                 u.apellido_paterno,
                 u.apellido_materno,
                 GROUP_CONCAT(DISTINCT r.codigo ORDER BY r.codigo SEPARATOR ',') AS roles,
-                COUNT(DISTINCT j.usuario_id) AS subordinados_directos
+                COUNT(DISTINCT CASE WHEN j.activo = 1 THEN j.usuario_id END) AS subordinados_directos
             FROM operativo_usuario u
             INNER JOIN operativo_usuario_rol ur
                 ON ur.usuario_id = u.id
@@ -181,13 +182,11 @@ function analyticsTeams(mysqli $con, ?array $baseScopeIds): array
                 ON r.id = ur.rol_id
                AND r.activo = 1
                AND r.codigo IN ('ADMIN_OPERATIVO', 'AUTORIZADOR')
-            INNER JOIN operativo_usuario_jerarquia j
+            LEFT JOIN operativo_usuario_jerarquia j
                 ON j.supervisor_id = u.id
-               AND j.activo = 1
             WHERE u.estatus = 'Activo'{$whereScope}
             GROUP BY
                 u.id, u.username, u.nombre, u.apellido_paterno, u.apellido_materno
-            HAVING subordinados_directos > 0
             ORDER BY
                 CASE WHEN FIND_IN_SET('ADMIN_OPERATIVO', roles) > 0 THEN 0 ELSE 1 END,
                 u.apellido_paterno, u.apellido_materno, u.nombre, u.id";
@@ -431,6 +430,54 @@ function analyticsRewardsByUser(mysqli $con, int $year, array $months, ?array $i
     return $map;
 }
 
+function analyticsGoalsByUser(mysqli $con, int $year, array $months, ?array $ids): array
+{
+    $reserve = [];
+    $sale = [];
+
+    $types = 'i';
+    $params = [$year];
+    $monthScope = '';
+    if (count($months) < 12) {
+        $placeholders = implode(',', array_fill(0, count($months), '?'));
+        $monthScope = " AND mes IN ({$placeholders})";
+        $types .= str_repeat('i', count($months));
+        array_push($params, ...array_map('intval', $months));
+    }
+    $userScope = analyticsScopeClause($ids, 'usuario_id', $types, $params);
+    $stmt = $con->prepare(
+        "SELECT usuario_id, COALESCE(SUM(meta),0) AS meta
+         FROM operativo_meta_usuario
+         WHERE tipo = 'RESERVA' AND anio = ?{$monthScope}{$userScope}
+         GROUP BY usuario_id"
+    );
+    if (!$stmt) databaseError($con);
+    bindDynamicParams($stmt, $types, $params);
+    $stmt->execute();
+    foreach ($stmt->get_result()->fetch_all(MYSQLI_ASSOC) as $row) {
+        $reserve[(int) $row['usuario_id']] = (int) $row['meta'];
+    }
+    $stmt->close();
+
+    $types = 'i';
+    $params = [$year];
+    $userScope = analyticsScopeClause($ids, 'usuario_id', $types, $params);
+    $stmt = $con->prepare(
+        "SELECT usuario_id, meta
+         FROM operativo_meta_usuario
+         WHERE tipo = 'VENTA' AND anio = ? AND mes = 0{$userScope}"
+    );
+    if (!$stmt) databaseError($con);
+    bindDynamicParams($stmt, $types, $params);
+    $stmt->execute();
+    foreach ($stmt->get_result()->fetch_all(MYSQLI_ASSOC) as $row) {
+        $sale[(int) $row['usuario_id']] = (int) $row['meta'];
+    }
+    $stmt->close();
+
+    return ['reserva' => $reserve, 'venta' => $sale];
+}
+
 function analyticsRanking(mysqli $con, int $year, array $months, ?array $ids): array
 {
     $people = analyticsPeople($con, $ids);
@@ -441,13 +488,24 @@ function analyticsRanking(mysqli $con, int $year, array $months, ?array $ids): a
     $requests = analyticsCountsByUser($con, 'fecha_solicitud', $year, $months, $ids);
     $reserved = analyticsCountsByUser($con, 'fecha_apartado', $year, $months, $ids);
     $sold = analyticsCountsByUser($con, 'fecha_venta', $year, $months, $ids);
+    $soldYear = analyticsCountsByUser($con, 'fecha_venta', $year, range(1, 12), $ids);
     $rewards = analyticsRewardsByUser($con, $year, $months, $ids);
+    $goals = analyticsGoalsByUser($con, $year, $months, $ids);
 
     foreach ($people as &$person) {
         $id = (int) $person['id'];
         $person['solicitudes'] = (int) ($requests[$id] ?? 0);
         $person['apartados'] = (int) ($reserved[$id] ?? 0);
         $person['vendidos'] = (int) ($sold[$id] ?? 0);
+        $person['vendidos_anio'] = (int) ($soldYear[$id] ?? 0);
+        $person['meta_apartados'] = (int) ($goals['reserva'][$id] ?? 0);
+        $person['meta_ventas'] = (int) ($goals['venta'][$id] ?? 0);
+        $person['cumplimiento_apartados'] = $person['meta_apartados'] > 0
+            ? round(($person['apartados'] / $person['meta_apartados']) * 100, 1)
+            : 0.0;
+        $person['cumplimiento_ventas'] = $person['meta_ventas'] > 0
+            ? round(($person['vendidos_anio'] / $person['meta_ventas']) * 100, 1)
+            : 0.0;
         $person['puntos'] = (int) ($rewards[$id]['puntos'] ?? 0);
         $person['reconocimientos'] = (int) ($rewards[$id]['reconocimientos'] ?? 0);
         $person['conversion'] = $person['solicitudes'] > 0
@@ -459,9 +517,7 @@ function analyticsRanking(mysqli $con, int $year, array $months, ?array $ids): a
     usort($people, static function (array $a, array $b): int {
         foreach (['vendidos', 'apartados', 'solicitudes', 'puntos'] as $field) {
             $comparison = ((int) $b[$field]) <=> ((int) $a[$field]);
-            if ($comparison !== 0) {
-                return $comparison;
-            }
+            if ($comparison !== 0) return $comparison;
         }
         return strcasecmp((string) $a['nombre_completo'], (string) $b['nombre_completo']);
     });
@@ -588,6 +644,12 @@ $rejected = analyticsCountByDate(
 );
 $reward = analyticsRewardSummary($con, $year, $months, $targetIds);
 $conversion = $requests > 0 ? round(($sold / $requests) * 100, 1) : 0.0;
+$goalMaps = analyticsGoalsByUser($con, $year, $months, $targetIds);
+$reserveGoal = array_sum($goalMaps['reserva']);
+$saleGoal = array_sum($goalMaps['venta']);
+$soldYear = analyticsCountByDate($con, 'fecha_venta', $year, range(1, 12), $targetIds);
+$reserveGoalProgress = $reserveGoal > 0 ? round(($reserved / $reserveGoal) * 100, 1) : 0.0;
+$saleGoalProgress = $saleGoal > 0 ? round(($soldYear / $saleGoal) * 100, 1) : 0.0;
 
 $monthly = [
     'solicitudes' => analyticsMonthlyCounts($con, 'fecha_solicitud', $year, $months, $targetIds),
@@ -608,6 +670,8 @@ $yearResult = $con->query(
         SELECT YEAR(fecha_venta) AS anio FROM operativo_requerimiento_compra WHERE fecha_venta IS NOT NULL
         UNION
         SELECT anio FROM operativo_recompensa_movimiento
+        UNION
+        SELECT anio FROM operativo_meta_usuario
      ) x WHERE anio IS NOT NULL ORDER BY anio DESC"
 );
 if ($yearResult) {
@@ -661,6 +725,11 @@ okResponse([
         'puntos_positivos' => $reward['positivos'],
         'puntos_negativos' => $reward['negativos'],
         'movimientos_recompensa' => $reward['movimientos'],
+        'meta_apartados' => $reserveGoal,
+        'cumplimiento_meta_apartados' => $reserveGoalProgress,
+        'meta_ventas' => $saleGoal,
+        'vendidos_anio' => $soldYear,
+        'cumplimiento_meta_ventas' => $saleGoalProgress,
     ],
     'mensual' => $monthly,
     'detalle' => $detail,
