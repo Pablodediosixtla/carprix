@@ -85,7 +85,6 @@
             <div class="container">
                 <h2 class="section-title">Preguntas Frecuentes</h2>
                 <div class="faq-accordion">
-                    
                     <div class="faq-item">
                         <button class="faq-question">¿Qué tipo de autos seminuevos ofrecen? <i class="fas fa-plus"></i></button>
                         <div class="faq-answer">
@@ -94,7 +93,7 @@
                     </div>
 
                     <div class="faq-item">
-                        <button class="faq-question">¿Cuál es el proceso para solicitar financiamiento? <i class="fas fa-plus"></i></button>
+                        <button class="faq-question">¿Cuál es el proceso para solicitar para adquirir auto? <i class="fas fa-plus"></i></button>
                         <div class="faq-answer">
                             <p>El proceso es sencillo: elige el auto que te interesa, llena el formulario de solicitud en cualquiera de nuestras sucursales y un asesor te guiará en los pasos a seguir.</p>
                         </div>
@@ -117,12 +116,12 @@
                     <div class="faq-item">
                         <button class="faq-question">¿Hay penalización por pagos anticipados? <i class="fas fa-plus"></i></button>
                         <div class="faq-answer">
-                            <p>No, en CARPRIX puedes realizar pagos anticipados sin ninguna penalización para reducir el costo de tu financiamiento.</p>
+                            <p>No. En Carprix puedes realizar pagos anticipados sin ninguna penalización para reducir el costo de tu financiamiento.</p>
                         </div>
                     </div>
 
                     <div class="faq-item">
-                        <button class="faq-question">¿Puedo solicitar crédito con historial negativo? <i class="fas fa-plus"></i></button>
+                        <button class="faq-question">¿Puedo acceder al plan con historial negativo? <i class="fas fa-plus"></i></button>
                         <div class="faq-answer">
                             <p>Evaluamos cada caso de manera individual. Incluso con historial negativo, podrías ser elegible bajo ciertas condiciones.</p>
                         </div>
@@ -138,14 +137,35 @@
                     <div class="faq-item">
                         <button class="faq-question">¿A qué cuentas debo realizar mis mensualidades? <i class="fas fa-plus"></i></button>
                         <div class="faq-answer">
-                            <p>Los pagos se realizan únicamente a las cuentas oficiales de CARPRIX, nunca a cuentas particulares. Solicita las cuentas oficiales a tu asesor.</p>
+                            <p>Los pagos se realizan únicamente a las cuentas oficiales de Carprix, nunca a cuentas particulares. Solicita las cuentas oficiales a tu asesor.</p>
                         </div>
                     </div>
 
                     <div class="faq-item">
                         <button class="faq-question">¿Cómo me protejo de fraudes? <i class="fas fa-plus"></i></button>
                         <div class="faq-answer">
-                            <p>Nunca hagas clic en enlaces sospechosos. CARPRIX nunca te pedirá contraseñas por correo. Verifica siempre que la comunicación venga de nuestros canales oficiales: **3333333333** o **atcontacto@carprix.com.mx**.</p>
+                            <p>Nunca hagas clic en enlaces sospechosos. Carprix nunca te pedirá contraseñas por correo. Verifica siempre que la comunicación venga de nuestros canales oficiales.</p>
+                        </div>
+                    </div>
+
+                    <div class="faq-item">
+                        <button class="faq-question">¿Qué hago si creo que estoy siendo víctima de fraude o si alguien se hace pasar por un asesor de Carprix Motors? <i class="fas fa-plus"></i></button>
+                        <div class="faq-answer">
+                            <p>Si sospechas que alguien se está haciendo pasar por un asesor, o si recibes una solicitud sospechosa, repórtalo inmediatamente a nuestras líneas de atención al cliente. Nunca compartas información personal ni realices depósitos sin confirmar que provienen de un canal oficial.</p>
+                        </div>
+                    </div>
+
+                    <div class="faq-item">
+                        <button class="faq-question">¿Es Carprix Motors una empresa confiable? <i class="fas fa-plus"></i></button>
+                        <div class="faq-answer">
+                            <p>Sí, somos una empresa con todos nuestros registros actualizados y en orden, operamos bajo estrictas normativas legales y regulatorias. Nuestro objetivo es brindarte seguridad y confianza en cada paso de tu proceso de financiamiento y compra.</p>
+                        </div>
+                    </div>
+
+                    <div class="faq-item">
+                        <button class="faq-question">¿Cuándo puedo obtener la factura del vehículo? <i class="fas fa-plus"></i></button>
+                        <div class="faq-answer">
+                            <p>Puedes obtener la factura una vez que hayas liquidado el financiamiento por completo.</p>
                         </div>
                     </div>
 
@@ -160,7 +180,7 @@
     <footer class="main-footer">
         <div class="container footer-grid">
             <div class="footer-col"><h4 class="footer-title title-green">Conoce más</h4><ul><li><a href="#">¿Quiénes Somos?</a></li><li><a href="vende.php">Vende tu auto</a></li></ul></div>
-            <div class="footer-col"><h4 class="footer-title title-white">Legales</h4><ul><li><a href="#">Aviso de privacidad</a></li></ul></div>
+            <div class="footer-col"><h4 class="footer-title title-white">Legales</h4><ul><li><a href="aviso-privacidad.php">Aviso de privacidad</a></li></ul></div>
             <div class="footer-col"><h4 class="footer-title title-grey">Ayuda</h4><ul><li><a href="contacto.php">Contacto</a></li><li><a href="nosotros.php">Preguntas frecuentes</a></li></ul></div>
             <div class="footer-col footer-right"><a href="#" class="back-to-home">Regresa al inicio <i class="fas fa-chevron-up"></i></a></div>
         </div>

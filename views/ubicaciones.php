@@ -120,7 +120,7 @@
     <footer class="main-footer">
         <div class="container footer-grid">
             <div class="footer-col"><h4 class="footer-title title-green">Conoce más</h4><ul><li><a href="nosotros.php">¿Quiénes Somos?</a></li><li><a href="vende.php">Vende tu auto</a></li></ul></div>
-            <div class="footer-col"><h4 class="footer-title title-white">Legales</h4><ul><li><a href="#">Aviso de privacidad</a></li></ul></div>
+            <div class="footer-col"><h4 class="footer-title title-white">Legales</h4><ul><li><a href="aviso-privacidad.php">Aviso de privacidad</a></li></ul></div>
             <div class="footer-col"><h4 class="footer-title title-grey">Ayuda</h4><ul><li><a href="contacto.php">Contacto</a></li><li><a href="ubicaciones.php">Sucursales</a></li></ul></div>
             <div class="footer-col footer-right"><a href="../index.php" class="back-to-home">Regresa al inicio <i class="fas fa-chevron-up"></i></a></div>
         </div>

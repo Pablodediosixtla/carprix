@@ -14,7 +14,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
 
     <link rel="stylesheet" href="../css/styles.css?v=20260803-3">
-    <link rel="stylesheet" href="../css/vende.css?v=20260828-1">
+    <link rel="stylesheet" href="../css/vende.css?v=20260904-1">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body class="bg-dark">
@@ -384,8 +384,8 @@
                             <input type="checkbox" id="v-terminos" required>
                             <span>
                                 Confirmo que he leído y acepto los términos y condiciones generales de uso,
-                                incluyendo el aviso de privacidad, y autorizo a CARPRIX a utilizar mis datos
-                                únicamente para dar seguimiento a esta solicitud.
+                                incluyendo el <a href="aviso-privacidad.php" class="terms-link" target="_blank" rel="noopener">aviso de privacidad</a>,
+                                y autorizo a CARPRIX a utilizar mis datos únicamente para dar seguimiento a esta solicitud.
                             </span>
                         </label>
                         <small class="field-error terms-error" id="terms-error"></small>
@@ -415,7 +415,7 @@
             </div>
             <div class="footer-col">
                 <h4 class="footer-title title-white">Legales</h4>
-                <ul><li><a href="#">Aviso de privacidad</a></li></ul>
+                <ul><li><a href="aviso-privacidad.php">Aviso de privacidad</a></li></ul>
             </div>
             <div class="footer-col">
                 <h4 class="footer-title title-grey">Ayuda</h4>

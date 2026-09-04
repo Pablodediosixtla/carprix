@@ -58,7 +58,7 @@
                     <i class="fas fa-phone-alt"></i>
                     <div>
                         <h4>Llámanos o WhatsApp</h4>
-                        <p><a href="tel:3333333333" class="link-info">33 3333 3333</a></p>
+                        <p><a href="tel:+523336998268" class="link-info">33 3699 8268</a></p>
                     </div>
                 </div>
 
@@ -66,7 +66,7 @@
                     <i class="fas fa-envelope"></i>
                     <div>
                         <h4>Correo Electrónico</h4>
-                        <p><a href="mailto:atcontacto@carprix.com.mx" class="link-info">atcontacto@carprix.com.mx</a></p>
+                        <p><a href="mailto:asistencia@carprix.com.mx" class="link-info">asistencia@carprix.com.mx</a></p>
                     </div>
                 </div>
 
@@ -117,7 +117,7 @@
     <footer class="main-footer">
         <div class="container footer-grid">
             <div class="footer-col"><h4 class="footer-title title-green">Conoce más</h4><ul><li><a href="#">¿Quiénes Somos?</a></li><li><a href="vende.php">Vende tu auto</a></li></ul></div>
-            <div class="footer-col"><h4 class="footer-title title-white">Legales</h4><ul><li><a href="#">Aviso de privacidad</a></li></ul></div>
+            <div class="footer-col"><h4 class="footer-title title-white">Legales</h4><ul><li><a href="aviso-privacidad.php">Aviso de privacidad</a></li></ul></div>
             <div class="footer-col"><h4 class="footer-title title-grey">Ayuda</h4><ul><li><a href="contacto.php">Contacto</a></li><li><a href="nosotros.php">Preguntas frecuentes</a></li></ul></div>
             <div class="footer-col footer-right"><a href="#" class="back-to-home">Regresa al inicio <i class="fas fa-chevron-up"></i></a></div>
         </div>

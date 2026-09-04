@@ -744,3 +744,12 @@ html[data-theme="light"] .vende-intro {
 .catalog-other-field[hidden] {
     display: none !important;
 }
+
+/* Aviso de privacidad dentro del consentimiento */
+.terms-check .terms-link {
+    color: var(--green-accent);
+    font-weight: 700;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+.terms-check .terms-link:hover { opacity: .85; }
