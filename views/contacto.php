@@ -74,7 +74,7 @@
                     <i class="fas fa-map-marker-alt"></i>
                     <div>
                         <h4>Visítanos</h4>
-                        <p>Av. Principal #123, Guadalajara, Jalisco.</p>
+                        <p>Av. Moctezuma 1437, Jardines del Sol. C.P. 45050 Zapopan, Jalisco. México.</p>
                     </div>
                 </div>
 
