@@ -93,7 +93,7 @@
                     </div>
 
                     <div class="faq-item">
-                        <button class="faq-question">¿Cuál es el proceso para adquirir un auto? <i class="fas fa-plus"></i></button>
+                        <button class="faq-question">¿Cuál es el proceso para adquirir auto? <i class="fas fa-plus"></i></button>
                         <div class="faq-answer">
                             <p>El proceso es sencillo: elige el auto que te interesa, llena el formulario de solicitud en cualquiera de nuestras sucursales y un asesor te guiará en los pasos a seguir.</p>
                         </div>
