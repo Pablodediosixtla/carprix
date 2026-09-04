@@ -1245,3 +1245,71 @@ button.op-analytics-month.filtered-out:hover { opacity: .75; }
     .op-goals-distribution-head { align-items:stretch; flex-direction:column; }
     .op-goals-distribution-head .op-primary-button { width:100%; justify-content:center; }
 }
+
+/* =========================================================
+   Catálogo: lista de autos destacados por visitas
+   ========================================================= */
+.op-featured-summary {
+    flex: 0 0 auto;
+    min-width: 160px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border: 1px solid var(--op-border);
+    border-radius: 13px;
+    background: var(--op-surface-2);
+}
+.op-featured-summary-icon {
+    width: 36px;
+    height: 36px;
+    display: grid;
+    place-items: center;
+    border-radius: 10px;
+    background: rgba(255, 195, 77, .13);
+    color: #ffc34d;
+}
+.op-featured-summary small,
+.op-featured-summary strong { display: block; }
+.op-featured-summary small { color: var(--op-muted); font-size: 8px; font-weight: 900; letter-spacing: .08em; }
+.op-featured-summary strong { margin-top: 2px; font-size: 15px; }
+.op-featured-filter { margin: 18px 0 12px; grid-template-columns: minmax(260px, 1fr) auto; }
+.op-featured-table-wrap { border: 1px solid var(--op-border); border-radius: 14px; background: var(--op-surface-2); }
+.op-featured-table { min-width: 980px; }
+.op-featured-table th:last-child,
+.op-featured-table td:last-child { text-align: center; }
+.op-featured-thumb {
+    width: 88px;
+    height: 58px;
+    display: block;
+    object-fit: cover;
+    border-radius: 9px;
+    border: 1px solid var(--op-border);
+    background: #151815;
+}
+.op-featured-vehicle-name,
+.op-featured-vehicle-meta { display: block; }
+.op-featured-vehicle-meta { margin-top: 3px; color: var(--op-muted); font-size: 9px; }
+.op-featured-visits { display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; }
+.op-featured-visits i { color: var(--op-green); }
+.op-featured-star {
+    width: 38px;
+    height: 38px;
+    display: inline-grid;
+    place-items: center;
+    border: 1px solid var(--op-border);
+    border-radius: 10px;
+    background: var(--op-surface);
+    color: var(--op-muted);
+    cursor: pointer;
+    font-size: 16px;
+    transition: transform .18s ease, border-color .18s ease, color .18s ease, background .18s ease;
+}
+.op-featured-star:hover:not(:disabled) { transform: translateY(-1px); border-color: #ffc34d; color: #ffc34d; }
+.op-featured-star.active { border-color: rgba(255,195,77,.5); background: rgba(255,195,77,.12); color: #ffc34d; }
+.op-featured-star:disabled { opacity: .35; cursor: not-allowed; }
+
+@media (max-width: 700px) {
+    .op-featured-summary { width: 100%; }
+    .op-featured-filter { grid-template-columns: minmax(0, 1fr) auto; }
+}

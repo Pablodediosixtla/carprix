@@ -27,6 +27,7 @@ function normalizeFeaturedAuto(array $row): array
     $row['anio'] = (int) $row['anio'];
     $row['precio'] = (float) $row['precio'];
     $row['kilometraje'] = (int) $row['kilometraje'];
+    $row['total_visitas'] = (int) ($row['total_visitas'] ?? 0);
     $row['img_principal'] = featuredPublicImagePath($row['img_principal'] ?? '');
     unset($row['posicion']);
     return $row;
@@ -40,58 +41,37 @@ if (!$con instanceof mysqli) {
 }
 $con->set_charset('utf8mb4');
 
-$slots = [1 => null, 2 => null, 3 => null];
-$usedIds = [];
-
 $sql = "SELECT
             d.posicion,
             a.id, a.marca, a.modelo, a.tipo, a.anio, a.precio,
             a.mensualidad, a.ubicacion, a.kilometraje, a.transmision,
             a.color, a.motor, a.combustible, a.pasajeros, a.traccion,
-            a.duenos, a.img_principal, a.estatus
+            a.duenos, a.img_principal, a.estatus,
+            COALESCE(v.total_visitas, 0) AS total_visitas
         FROM operativo_auto_destacado d
-        INNER JOIN autos a ON a.id = d.auto_id
+        INNER JOIN autos a
+            ON a.id = d.auto_id
+        LEFT JOIN auto_detalle_visita v
+            ON v.auto_id = a.id
         WHERE d.posicion BETWEEN 1 AND 3
           AND a.estatus = 'Disponible'
-        ORDER BY d.posicion";
+        ORDER BY
+            COALESCE(v.total_visitas, 0) DESC,
+            d.actualizado_en DESC,
+            d.posicion ASC
+        LIMIT 3";
 
 $result = $con->query($sql);
+$data = [];
 if ($result instanceof mysqli_result) {
     while ($row = $result->fetch_assoc()) {
-        $position = (int) $row['posicion'];
-        if ($position < 1 || $position > 3) continue;
-        $slots[$position] = normalizeFeaturedAuto($row);
-        $usedIds[] = (int) $slots[$position]['id'];
+        $data[] = normalizeFeaturedAuto($row);
     }
     $result->free();
 }
 
-$emptyPositions = array_keys(array_filter($slots, static fn($item) => $item === null));
-if ($emptyPositions !== []) {
-    $whereNotIn = '';
-    if ($usedIds !== []) {
-        $whereNotIn = ' AND id NOT IN (' . implode(',', array_map('intval', $usedIds)) . ')';
-    }
-
-    $fallbackSql = "SELECT *
-                    FROM autos
-                    WHERE estatus = 'Disponible' {$whereNotIn}
-                    ORDER BY fecha_carga DESC, id DESC
-                    LIMIT " . count($emptyPositions);
-    $fallbackResult = $con->query($fallbackSql);
-    if ($fallbackResult instanceof mysqli_result) {
-        foreach ($emptyPositions as $position) {
-            $row = $fallbackResult->fetch_assoc();
-            if (!$row) break;
-            $slots[$position] = normalizeFeaturedAuto($row);
-        }
-        $fallbackResult->free();
-    }
-}
-
 $con->close();
 
-$data = array_values(array_filter($slots, static fn($item) => is_array($item)));
 echo json_encode([
     'ok' => true,
     'data' => $data,

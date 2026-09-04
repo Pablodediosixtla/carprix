@@ -32,6 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentImageIndex = 0;
     let vehicleNameForAlt = 'vehículo';
     let currentAuto = null;
+    let visitRegisteredFor = null;
     let operativoSession = { authenticated: false, usuario: null };
 
     const operativoBridge = window.CARPRIX_PUBLIC_OPERATIVO;
@@ -117,6 +118,7 @@ document.addEventListener('DOMContentLoaded', () => {
         renderBadges(auto);
         renderGallery(auto);
         renderSpecifications(auto, kmFmt);
+        registerDetailVisit(auto.id);
 
         loadingState.style.display = 'none';
         detailContent.style.display = 'grid';
@@ -178,6 +180,27 @@ document.addEventListener('DOMContentLoaded', () => {
         window.location.href = `../operativo/requerimientos.php?auto_id=${encodeURIComponent(currentAuto.id)}`;
     });
 
+    async function registerDetailVisit(autoId) {
+        const normalizedId = Number(autoId || 0);
+        if (normalizedId <= 0 || visitRegisteredFor === normalizedId) return;
+        visitRegisteredFor = normalizedId;
+
+        try {
+            await fetch('../db/web/registrar_auto_visita.php', {
+                method: 'POST',
+                cache: 'no-store',
+                keepalive: true,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({ auto_id: normalizedId })
+            });
+        } catch (error) {
+            console.warn('No fue posible registrar la visita del vehículo:', error);
+        }
+    }
+
     function renderOwnership(auto) {
         const ownersElement = document.getElementById('det-duenos');
         if (!ownersElement) return;
@@ -189,6 +212,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderBadges(auto) {
+        const idBadge = document.getElementById('badge-id');
+        if (idBadge) idBadge.textContent = auto.id ? `#${auto.id}` : '';
         document.getElementById('badge-year').textContent = auto.anio || '';
         const typeBadge = document.getElementById('badge-tipo');
 

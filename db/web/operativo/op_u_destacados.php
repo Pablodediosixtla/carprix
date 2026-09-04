@@ -12,96 +12,130 @@ if (!canManageCatalog($user)) {
     errorResponse('No tienes permisos para administrar los autos destacados.', 403, 'FORBIDDEN');
 }
 
-$rawIds = $input['auto_ids'] ?? null;
-if (!is_array($rawIds) || count($rawIds) !== 3) {
+$autoId = positiveInt($input['auto_id'] ?? null, 'auto_id');
+$highlighted = filter_var($input['destacado'] ?? null, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+if ($highlighted === null) {
     $con->close();
-    errorResponse('Debes seleccionar exactamente tres autos destacados.', 422, 'VALIDATION_ERROR');
-}
-
-$autoIds = [];
-foreach ($rawIds as $index => $value) {
-    $autoIds[] = positiveInt($value, 'auto_ids[' . $index . ']');
-}
-
-if (count(array_unique($autoIds)) !== 3) {
-    $con->close();
-    errorResponse('Los tres autos destacados deben ser diferentes.', 422, 'DUPLICATE_FEATURED_AUTO');
+    errorResponse('El valor destacado es obligatorio.', 422, 'VALIDATION_ERROR');
 }
 
 $con->begin_transaction();
 try {
-    $placeholders = implode(',', array_fill(0, 3, '?'));
-    $stmt = $con->prepare(
-        "SELECT id, estatus
-         FROM autos
-         WHERE id IN ({$placeholders})
-         FOR UPDATE"
+    $autoStmt = $con->prepare(
+        'SELECT id, estatus FROM autos WHERE id = ? FOR UPDATE'
     );
-    if (!$stmt) {
+    if (!$autoStmt) {
         databaseError($con);
     }
-    $params = $autoIds;
-    bindDynamicParams($stmt, 'iii', $params);
-    $stmt->execute();
-    $rows = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
-    $stmt->close();
+    $autoStmt->bind_param('i', $autoId);
+    $autoStmt->execute();
+    $auto = $autoStmt->get_result()->fetch_assoc();
+    $autoStmt->close();
 
-    if (count($rows) !== 3) {
+    if (!$auto) {
         throw new DomainException('AUTO_NOT_FOUND');
     }
 
-    foreach ($rows as $row) {
-        if ((string) $row['estatus'] !== 'Disponible') {
-            throw new DomainException('FEATURED_AUTO_NOT_AVAILABLE:' . (int) $row['id'] . ':' . (string) $row['estatus']);
+    $featuredStmt = $con->prepare(
+        'SELECT posicion, auto_id
+         FROM operativo_auto_destacado
+         WHERE posicion BETWEEN 1 AND 3
+         ORDER BY posicion
+         FOR UPDATE'
+    );
+    if (!$featuredStmt) {
+        databaseError($con);
+    }
+    $featuredStmt->execute();
+    $currentRows = $featuredStmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    $featuredStmt->close();
+
+    $currentIds = array_values(array_map(
+        static fn(array $row): int => (int) $row['auto_id'],
+        $currentRows
+    ));
+    $alreadyFeatured = in_array($autoId, $currentIds, true);
+
+    if ($highlighted) {
+        if ((string) $auto['estatus'] !== 'Disponible') {
+            throw new DomainException('FEATURED_AUTO_NOT_AVAILABLE');
         }
+        if (!$alreadyFeatured) {
+            if (count($currentIds) >= 3) {
+                throw new DomainException('FEATURED_LIMIT_REACHED');
+            }
+            $currentIds[] = $autoId;
+        }
+    } else {
+        $currentIds = array_values(array_filter(
+            $currentIds,
+            static fn(int $id): bool => $id !== $autoId
+        ));
     }
 
     if (!$con->query('DELETE FROM operativo_auto_destacado WHERE posicion BETWEEN 1 AND 3')) {
         databaseError($con);
     }
 
-    $insert = $con->prepare(
-        'INSERT INTO operativo_auto_destacado (posicion, auto_id, actualizado_por)
-         VALUES (?, ?, ?)'
-    );
-    if (!$insert) {
-        databaseError($con);
-    }
-
-    $userId = (int) $user['id'];
-    foreach ($autoIds as $offset => $autoId) {
-        $position = $offset + 1;
-        $insert->bind_param('iii', $position, $autoId, $userId);
-        if (!$insert->execute()) {
-            $insert->close();
+    if ($currentIds !== []) {
+        $insert = $con->prepare(
+            'INSERT INTO operativo_auto_destacado (posicion, auto_id, actualizado_por)
+             VALUES (?, ?, ?)'
+        );
+        if (!$insert) {
             databaseError($con);
         }
+
+        $userId = (int) $user['id'];
+        foreach ($currentIds as $index => $selectedAutoId) {
+            $position = $index + 1;
+            $insert->bind_param('iii', $position, $selectedAutoId, $userId);
+            if (!$insert->execute()) {
+                $insert->close();
+                databaseError($con);
+            }
+        }
+        $insert->close();
     }
-    $insert->close();
 
     $con->commit();
     $con->close();
-    okResponse(['auto_ids' => $autoIds], 'Autos destacados actualizados correctamente.');
+
+    okResponse([
+        'auto_id' => $autoId,
+        'destacado' => $highlighted,
+        'auto_ids' => $currentIds,
+        'seleccionados' => count($currentIds),
+        'maximo' => 3,
+    ], $highlighted
+        ? 'Auto agregado a destacados correctamente.'
+        : 'Auto retirado de destacados correctamente.');
 } catch (DomainException $e) {
     $con->rollback();
     $code = $e->getMessage();
     $con->close();
 
     if ($code === 'AUTO_NOT_FOUND') {
-        errorResponse('Uno o más autos seleccionados no existen.', 404, $code);
+        errorResponse('El auto seleccionado no existe.', 404, $code);
     }
-
-    if (str_starts_with($code, 'FEATURED_AUTO_NOT_AVAILABLE:')) {
-        [, $autoId, $status] = array_pad(explode(':', $code, 3), 3, '');
+    if ($code === 'FEATURED_AUTO_NOT_AVAILABLE') {
         errorResponse(
-            'Solo los autos con estatus Disponible pueden mostrarse como destacados.',
+            'Solo los autos con estatus Disponible pueden agregarse a destacados.',
             409,
-            'FEATURED_AUTO_NOT_AVAILABLE',
-            ['auto_id' => (int) $autoId, 'estatus' => $status]
+            $code,
+            ['auto_id' => $autoId, 'estatus' => (string) ($auto['estatus'] ?? '')]
+        );
+    }
+    if ($code === 'FEATURED_LIMIT_REACHED') {
+        errorResponse(
+            'Ya existen tres autos destacados. Retira una estrella antes de seleccionar otro.',
+            409,
+            $code,
+            ['maximo' => 3]
         );
     }
 
-    errorResponse('No fue posible actualizar los autos destacados.', 400, $code);
+    errorResponse('No fue posible actualizar el auto destacado.', 400, $code);
 } catch (Throwable $e) {
     $con->rollback();
     databaseError($con, $e);

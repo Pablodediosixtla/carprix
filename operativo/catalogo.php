@@ -66,36 +66,50 @@ operativoPageStart('Gestión de catálogo', 'catalogo');
         <div class="op-panel-head">
             <div>
                 <span class="op-kicker">INDEX / AUTOS DESTACADOS</span>
-                <h3>Selecciona los tres autos del inicio</h3>
-                <p>Solo puedes destacar autos con estatus Disponible. El orden 1, 2 y 3 corresponde al orden mostrado en el index.</p>
+                <h3>Gestiona los autos destacados desde la lista</h3>
+                <p>La lista se ordena por visitas a la vista de detalle, de mayor a menor. Puedes mantener hasta tres autos destacados al mismo tiempo.</p>
             </div>
-            <button class="op-primary-button" id="featured-save-button" type="button">
-                <i class="fa-solid fa-floppy-disk"></i> Guardar destacados
-            </button>
+            <div class="op-featured-summary" aria-live="polite">
+                <span class="op-featured-summary-icon"><i class="fa-solid fa-star"></i></span>
+                <div>
+                    <small>DESTACADOS ACTIVOS</small>
+                    <strong id="featured-count">0 / 3</strong>
+                </div>
+            </div>
         </div>
+
         <div class="op-form-message" id="featured-message" hidden></div>
-        <div class="op-featured-grid">
-            <?php for ($slot = 1; $slot <= 3; $slot++): ?>
-            <article class="op-featured-slot" data-featured-slot="<?= $slot ?>">
-                <div class="op-featured-slot-head">
-                    <span class="op-featured-position">POSICIÓN <?= $slot ?></span>
-                    <span class="op-status-badge disponible">Disponible</span>
-                </div>
-                <div class="op-featured-preview" id="featured-preview-<?= $slot ?>">
-                    <div class="op-image-empty"><i class="fa-regular fa-star"></i><span>Selecciona un auto disponible.</span></div>
-                </div>
-                <div class="op-field">
-                    <span>Buscar auto</span>
-                    <div class="op-auto-search-box">
-                        <i class="fa-solid fa-magnifying-glass"></i>
-                        <input id="featured-search-<?= $slot ?>" type="search" autocomplete="off" placeholder="ID, marca o modelo...">
-                        <input id="featured-auto-<?= $slot ?>" type="hidden">
-                    </div>
-                    <div class="op-autocomplete-results" id="featured-results-<?= $slot ?>" hidden></div>
-                </div>
-            </article>
-            <?php endfor; ?>
+
+        <section class="op-filter-bar compact op-featured-filter">
+            <label class="op-search">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input id="featured-search" type="search" autocomplete="off" placeholder="Buscar por ID, marca o modelo">
+            </label>
+            <button class="op-secondary-button" id="featured-refresh" type="button" title="Actualizar lista">
+                <i class="fa-solid fa-rotate"></i>
+            </button>
+        </section>
+
+        <div class="op-table-wrap op-featured-table-wrap">
+            <table class="op-table op-featured-table">
+                <thead>
+                    <tr>
+                        <th>Foto</th>
+                        <th>ID</th>
+                        <th>Vehículo</th>
+                        <th>Marca</th>
+                        <th>Modelo</th>
+                        <th>Estatus</th>
+                        <th>Visitas</th>
+                        <th>Destacado</th>
+                    </tr>
+                </thead>
+                <tbody id="featured-list">
+                    <tr><td colspan="8"><div class="op-loading">Cargando autos destacados...</div></td></tr>
+                </tbody>
+            </table>
         </div>
+        <div class="op-pagination" id="featured-pagination"></div>
     </section>
 </section>
 

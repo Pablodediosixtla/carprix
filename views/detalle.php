@@ -12,7 +12,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../css/styles.css?v=20260803-3">
-    <link rel="stylesheet" href="../css/detalle.css?v=20260803-3">
+    <link rel="stylesheet" href="../css/detalle.css?v=20260904-1">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body class="bg-dark">
@@ -72,6 +72,7 @@
                                 <i class="fas fa-expand" aria-hidden="true"></i>
                             </button>
 
+                            <span id="badge-id" class="detail-id-badge"></span>
                             <span id="badge-year" class="year-badge"></span>
                             <span id="badge-tipo" class="type-badge" style="display:none;"></span>
                         </div>
@@ -182,6 +183,6 @@
     </footer>
 
     <script src="../js/public-operativo-session.js?v=20260810-3"></script>
-    <script src="../js/detalle.js?v=20260810-3"></script>
+    <script src="../js/detalle.js?v=20260904-1"></script>
 </body>
 </html>
